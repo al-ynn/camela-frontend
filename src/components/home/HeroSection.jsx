@@ -50,7 +50,7 @@ const HeroSection = () => {
         className="absolute right-[8%] bottom-[30%] hidden xl:block w-16 h-16 rounded-full bg-brand-500/20 backdrop-blur-sm"
       />
 
-      <div className="container relative z-10 py-20">
+      <div className="container relative z-10 pt-20 pb-44 md:pb-28">
         <div className="max-w-2xl">
           {/* Pill label */}
           <motion.div {...fadeUp(0)} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium mb-6">
