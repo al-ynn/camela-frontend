@@ -4,7 +4,7 @@ export const APP_CONFIG = {
   name: 'Camela Group',
   tagline: 'Science-Backed Wellness for Every Family',
   description: 'Bioactive peptide nutrition & functional health foods — improving lives through scientifically proven wellness solutions across Southeast Asia.',
-  email: 'dawn@camela.com',
+  email: 'info@camela.com',
   phone: '+65-80641997',
   address: 'Singapore',
   social: {

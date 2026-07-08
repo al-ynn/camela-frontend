@@ -17,7 +17,7 @@ const fadeUp = (delay = 0) => ({
 })
 
 const About = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const PRODUCT_BENEFITS = [
     { icon: Brain,        text: t('about.benefits.brain') },
@@ -52,7 +52,7 @@ const About = () => {
   ]
 
   const CONTACT = [
-    { icon: Mail,    label: t('about.contact.email'),    value: 'dawn@camela.com',  href: 'mailto:dawn@camela.com' },
+    { icon: Mail,    label: t('about.contact.email'),    value: 'info@camela.com',  href: 'mailto:info@camela.com' },
     { icon: Phone,   label: t('about.contact.phone'),    value: '+65-80641997',     href: 'tel:+6580641997' },
     { icon: MapPin,  label: t('about.contact.location'), value: t('about.markets.singapore'), href: '#' },
   ]
@@ -104,7 +104,7 @@ const About = () => {
           className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black"
         >
           <video
-            src="/camela-marketing.mp4"
+            src={i18n.language.startsWith('zh') ? '/camela-marketing-zh.mp4' : '/camela-marketing.mp4'}
             controls
             playsInline
             preload="metadata"
@@ -308,7 +308,7 @@ const About = () => {
             {t('about.partner.description')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="mailto:dawn@camela.com" className="btn-brand btn-lg gap-2">
+            <a href="mailto:info@camela.com" className="btn-brand btn-lg gap-2">
               <Mail size={18} /> {t('about.partner.getInTouch')}
             </a>
             <Link to={ROUTES.SHOP} className="btn bg-white/10 border border-white/20 text-white hover:bg-white/20 btn-lg gap-2">

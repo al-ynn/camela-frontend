@@ -32,7 +32,7 @@ const HydrogenSection = () => {
 
         {/* Header */}
         <motion.div {...fadeUp(0)} className="text-center mb-8 md:mb-12">
-          <span className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 md:mb-5">
+          <span className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] md:text-xs font-bold tracking-widest mb-4 md:mb-5">
             <Droplets size={10} md:size={12} />
             {t('about.hydrogen.tag')}
           </span>

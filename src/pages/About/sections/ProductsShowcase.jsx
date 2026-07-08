@@ -45,7 +45,7 @@ const ProductsShowcase = () => {
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 md:mb-5">
                 <Droplets size={24} md:size={28} className="text-blue-400" />
               </div>
-              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">
+              <p className="text-[9px] md:text-[10px] font-bold tracking-widest text-blue-400 mb-1">
                 {t('about.products.hydrogen.tag')}
               </p>
               <h3 className="text-xl md:text-2xl font-display font-extrabold text-white mb-2 md:mb-3">
