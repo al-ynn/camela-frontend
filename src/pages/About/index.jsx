@@ -216,13 +216,28 @@ const About = () => {
             </motion.div>
           ))}
         </div>
-        <motion.div {...fadeUp(0.5)} className="p-6 rounded-2xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 text-center">
+        <motion.div {...fadeUp(0.5)} className="p-6 rounded-2xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 text-center mb-8">
           <p className="text-sm text-brand-800 dark:text-brand-300 leading-relaxed">
             <strong>{t('about.product.natural')}</strong>
             <span className="block mt-1 text-brand-700 dark:text-brand-400 font-normal">
               {t('about.product.manufacturer')}
             </span>
           </p>
+        </motion.div>
+        <motion.div
+          {...fadeUp(0.6)}
+          className="relative rounded-3xl overflow-hidden border border-brand-200 dark:border-brand-800 shadow-2xl bg-black flex justify-center"
+        >
+          <video
+            src="/peptide-video.mp4"
+            controls
+            playsInline
+            preload="metadata"
+            controlsList="nodownload"
+            onContextMenu={(e) => e.preventDefault()}
+            className="max-h-[600px] w-auto object-contain"
+            aria-label="Camela Group Walnut Peptide video"
+          />
         </motion.div>
       </div>
     </section>
