@@ -52,7 +52,7 @@ const About = () => {
   ]
 
   const CONTACT = [
-    { icon: Mail,    label: t('about.contact.email'),    value: 'info@camela.com',  href: 'mailto:info@camela.com' },
+    { icon: Mail,    label: t('about.contact.email'),    value: 'info@camela.com.sg',  href: 'mailto:info@camela.com.sg' },
     { icon: Phone,   label: t('about.contact.phone'),    value: '+65-80641997',     href: 'tel:+6580641997' },
     { icon: MapPin,  label: t('about.contact.location'), value: t('about.markets.singapore'), href: '#' },
   ]
@@ -323,7 +323,7 @@ const About = () => {
             {t('about.partner.description')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="mailto:info@camela.com" className="btn-brand btn-lg gap-2">
+            <a href="mailto:info@camela.com.sg" className="btn-brand btn-lg gap-2">
               <Mail size={18} /> {t('about.partner.getInTouch')}
             </a>
             <Link to={ROUTES.SHOP} className="btn bg-white/10 border border-white/20 text-white hover:bg-white/20 btn-lg gap-2">

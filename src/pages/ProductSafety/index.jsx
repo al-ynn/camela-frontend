@@ -116,8 +116,8 @@ const ProductSafety = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail size={18} className="text-brand-500 flex-shrink-0" />
-                    <a href="mailto:info@camela.com" className="text-gray-600 dark:text-gray-400 hover:text-brand-500 transition-colors">
-                      info@camela.com
+                    <a href="mailto:info@camela.com.sg" className="text-gray-600 dark:text-gray-400 hover:text-brand-500 transition-colors">
+                      info@camela.com.sg
                     </a>
                   </div>
                   <div className="flex items-center gap-3">
