@@ -63,11 +63,12 @@ const HeroSection = () => {
             {...fadeUp(0.1)}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-[1.1] mb-6"
           >
-            {t('home.hero.title1')}{' '}
+            {t('home.hero.title1')}
+            <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-emerald-300">
               {t('home.hero.title2')}
             </span>
-            <br />{t('home.hero.title3')}
+            {t('home.hero.title3')}
           </motion.h1>
 
           {/* Subtitle */}
