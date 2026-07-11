@@ -101,7 +101,7 @@ const About = () => {
         </motion.div>
         <motion.div
           {...fadeUp(0.15)}
-          className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black"
+          className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black flex justify-center"
         >
           <video
             src={i18n.language.startsWith('zh') ? '/camela-marketing-zh.mp4' : '/camela-marketing.mp4'}
@@ -110,7 +110,7 @@ const About = () => {
             preload="metadata"
             controlsList="nodownload"
             onContextMenu={(e) => e.preventDefault()}
-            className="w-full aspect-video object-cover"
+            className="max-h-[600px] w-auto object-contain"
             aria-label="Camela Group marketing video"
           />
         </motion.div>
@@ -229,7 +229,7 @@ const About = () => {
           className="relative rounded-3xl overflow-hidden border border-brand-200 dark:border-brand-800 shadow-2xl bg-black flex justify-center"
         >
           <video
-            src="/peptide-video.mp4"
+            src={i18n.language.startsWith('zh') ? '/peptide-video-zh.mp4' : '/peptide-video.mp4'}
             controls
             playsInline
             preload="metadata"
