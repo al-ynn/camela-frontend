@@ -37,12 +37,12 @@ const DashboardLayout = () => {
               <div className="flex items-center gap-4 pb-5 mb-5 border-b border-gray-100 dark:border-gray-800">
                 <img
                   src={user?.avatar}
-                  alt={user?.name?.firstname}
+            alt={user?.name}
                   className="w-12 h-12 rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900"
                 />
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 dark:text-white truncate">
-                    {user?.name?.firstname} {user?.name?.lastname}
+            {user?.name}
                   </p>
                   <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                 </div>

@@ -47,6 +47,8 @@ const Testimonials = () => {
   const { t } = useTranslation()
   const { ref, hasIntersected } = useIntersectionObserver({ once: true })
 
+  if (!TESTIMONIALS.length) return null
+
   return (
     <section className="py-20 bg-surface-secondary dark:bg-surface-dark-secondary">
       <div className="container">

@@ -26,8 +26,8 @@ import Tabs from '../../components/ui/Tabs'
 import Accordion from '../../components/ui/Accordion'
 import ProductCard from '../../components/product/ProductCard'
 import Breadcrumb from '../../components/layout/Breadcrumb'
-import { formatPrice, getOriginalPrice } from '../../utils/formatters'
-import { getSizes, getColors, getRelatedProducts } from '../../utils/helpers'
+import { formatPrice } from '../../utils/formatters'
+import { getRelatedProducts } from '../../utils/helpers'
 import { cn } from '../../utils/helpers'
 import toast from 'react-hot-toast'
 
@@ -67,10 +67,12 @@ const ProductDetail = () => {
     </div>
   )
 
-  const originalPrice = getOriginalPrice(product.price)
-  const discountPercent = Math.round(((originalPrice - product.price) / originalPrice) * 100)
-  const sizes = getSizes(product.category)
-  const colors = getColors(product.category)
+  const originalPrice = product.compare_price
+  const discountPercent = Number(originalPrice) > Number(product.price)
+    ? Math.round(((originalPrice - product.price) / originalPrice) * 100)
+    : 0
+  const sizes = []
+  const colors = []
   const related = getRelatedProducts(allProducts, product, 4)
 
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image]
@@ -95,14 +97,6 @@ const ProductDetail = () => {
       content: (
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{product.description}</p>
-          <ul className="mt-5 space-y-2">
-            {['Premium quality materials', 'Ethically sourced and produced', 'Designed for durability and comfort', 'Available in multiple variants'].map((feat) => (
-              <li key={feat} className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0" />
-                {feat}
-              </li>
-            ))}
-          </ul>
         </div>
       ),
     },
@@ -114,9 +108,9 @@ const ProductDetail = () => {
           {[
             { label: 'Category', value: product.category },
             { label: 'Product ID', value: `#${product.id}` },
-            { label: 'Rating', value: `${product.rating?.rate}/5 (${product.rating?.count} reviews)` },
-            { label: 'Availability', value: 'In Stock' },
-            { label: 'SKU', value: `CAM-${product.id.toString().padStart(5, '0')}` },
+            ...(product.rating ? [{ label: 'Rating', value: `${product.rating.rate}/5 (${product.rating.count} reviews)` }] : []),
+            { label: 'Availability', value: product.stock > 0 ? 'In Stock' : 'Out of Stock' },
+            { label: 'SKU', value: product.sku },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-800 last:border-0 text-sm">
               <span className="text-gray-500 dark:text-gray-400">{label}</span>
@@ -126,41 +120,43 @@ const ProductDetail = () => {
         </div>
       ),
     },
-    {
-      id: 'reviews',
-      label: t('product.reviews'),
-      badge: product.rating?.count,
-      content: (
-        <div className="space-y-5">
-          <div className="flex items-center gap-6 p-5 bg-surface-secondary dark:bg-surface-dark-secondary rounded-2xl">
-            <div className="text-center">
-              <p className="text-5xl font-display font-bold text-gray-900 dark:text-white">
-                {product.rating?.rate}
-              </p>
-              <Rating rating={product.rating?.rate} showCount={false} size="sm" className="justify-center mt-1" />
-              <p className="text-xs text-gray-400 mt-1">{product.rating?.count} {t('product.reviews')}</p>
-            </div>
-            <div className="flex-1 space-y-2">
-              {[5, 4, 3, 2, 1].map((star) => {
-                const pct = star === 5 ? 60 : star === 4 ? 25 : star === 3 ? 10 : star === 2 ? 3 : 2
-                return (
-                  <div key={star} className="flex items-center gap-2 text-xs">
-                    <span className="text-amber-400 w-3">{star}★</span>
-                    <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
+    ...(product.rating
+      ? [{
+        id: 'reviews',
+        label: t('product.reviews'),
+        badge: product.rating.count,
+        content: (
+          <div className="space-y-5">
+            <div className="flex items-center gap-6 p-5 bg-surface-secondary dark:bg-surface-dark-secondary rounded-2xl">
+              <div className="text-center">
+                <p className="text-5xl font-display font-bold text-gray-900 dark:text-white">
+                  {product.rating.rate}
+                </p>
+                <Rating rating={product.rating.rate} showCount={false} size="sm" className="justify-center mt-1" />
+                <p className="text-xs text-gray-400 mt-1">{product.rating.count} {t('product.reviews')}</p>
+              </div>
+              <div className="flex-1 space-y-2">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const pct = star === 5 ? 60 : star === 4 ? 25 : star === 3 ? 10 : star === 2 ? 3 : 2
+                  return (
+                    <div key={star} className="flex items-center gap-2 text-xs">
+                      <span className="text-amber-400 w-3">{star}★</span>
+                      <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-gray-400 w-7">{pct}%</span>
                     </div>
-                    <span className="text-gray-400 w-7">{pct}%</span>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              {t('product.verifiedReviews')}
+            </p>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-            {t('product.verifiedReviews')}
-          </p>
-        </div>
-      ),
-    },
+        ),
+      }]
+      : []),
   ]
 
   return (
@@ -170,7 +166,7 @@ const ProductDetail = () => {
         <Breadcrumb
           items={[
             { label: 'Shop', href: '/shop' },
-            { label: product.category, href: `/shop/${product.category}` },
+            { label: product.category, href: product.category_landing_page || '/shop' },
             { label: product.title },
           ]}
         />
@@ -396,7 +392,7 @@ const ProductDetail = () => {
                 {t('product.relatedProducts')}
               </h2>
               <Link
-                to={`/shop/${product.category}`}
+                to={product.category_landing_page || '/shop'}
                 className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1"
               >
                 {t('common.viewAll')} <ChevronLeft size={14} className="rotate-180" />

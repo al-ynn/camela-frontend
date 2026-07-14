@@ -5,14 +5,11 @@ import { motion } from 'framer-motion'
 import { CheckCircle, Package, ArrowRight, Home, ShoppingBag } from 'lucide-react'
 import { selectCurrentOrder } from '../../features/orders/ordersSlice'
 import { formatPrice } from '../../utils/formatters'
-import { generateOrderNumber } from '../../utils/helpers'
 import { ROUTES } from '../../constants/routes'
-import { useMemo } from 'react'
 
 const OrderConfirmation = () => {
   const { t } = useTranslation()
   const order = useSelector(selectCurrentOrder)
-  const orderNumber = useMemo(() => generateOrderNumber(), [])
 
   return (
     <div className="min-h-screen bg-surface-secondary dark:bg-surface-dark flex items-center justify-center px-4 py-16">
@@ -56,7 +53,7 @@ const OrderConfirmation = () => {
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
             <div>
               <p className="text-xs text-gray-400 mb-1">{t('orderConfirmation.orderNumber')}</p>
-              <p className="font-mono font-bold text-gray-900 dark:text-white text-lg">{orderNumber}</p>
+              <p className="font-mono font-bold text-gray-900 dark:text-white text-lg">{order?.id}</p>
             </div>
             <div className="w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-xl flex items-center justify-center">
               <Package size={20} className="text-brand-600 dark:text-brand-400" />

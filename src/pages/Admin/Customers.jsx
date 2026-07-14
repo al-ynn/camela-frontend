@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Mail, Eye, Ban, ChevronUp, ChevronDown, Phone, MapPin } from 'lucide-react'
-import { MOCK_CUSTOMERS } from '../../data/adminData'
 import { formatPrice, formatDateShort } from '../../utils/formatters'
 import Modal from '../../components/ui/Modal'
 import toast from 'react-hot-toast'
@@ -15,7 +14,7 @@ const AdminCustomers = () => {
   const [sortDir, setSortDir] = useState('desc')
   const [viewCustomer, setViewCustomer] = useState(null)
   const [page, setPage] = useState(1)
-  const [customers, setCustomers] = useState(MOCK_CUSTOMERS)
+  const [customers, setCustomers] = useState([])
 
   const PER_PAGE = 8
 

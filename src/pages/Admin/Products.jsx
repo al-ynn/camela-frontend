@@ -1,23 +1,24 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import {
   Search, Plus, Pencil, Trash2, X, Check,
   ChevronUp, ChevronDown, ToggleLeft, ToggleRight, ImagePlus, Upload,
 } from 'lucide-react'
-import {
-  selectAllProducts, addProduct, updateProduct, removeProduct, setProductActive,
-} from '../../features/catalog/catalogSlice'
 import { formatPrice } from '../../utils/formatters'
 import Rating from '../../components/ui/Rating'
 import Modal from '../../components/ui/Modal'
 import toast from 'react-hot-toast'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
+import { useGetCategoriesQuery } from '../../services/productsApi'
 
-const EMPTY_FORM = { title: '', price: '', category: '', description: '', image: '', stock: '', imagePreview: '', images: [] }
+const EMPTY_FORM = { title: '', sku: '', price: '', category_id: '', description: '', image: '', stock: '', imagePreview: '', images: [], files: [] }
 
 const AdminProducts = () => {
-  const dispatch = useDispatch()
-  const products = useSelector(selectAllProducts)
+  const token = useSelector(selectAuth).token
+  const { data: categories = [] } = useGetCategoriesQuery()
+  const [products, setProducts] = useState([])
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [sortField, setSortField] = useState('id')
@@ -31,7 +32,14 @@ const AdminProducts = () => {
 
   const PER_PAGE = 8
 
-  const allCategories = [...new Set(products.map((p) => p.category).filter(Boolean))]
+  const allCategories = categories.map((category) => category.name)
+
+  const loadProducts = async () => {
+    if (!token) return
+    try { setProducts(await commerceService.getAdminProducts(token)) } catch { toast.error('Unable to load products') }
+  }
+
+  useEffect(() => { loadProducts() }, [token])
 
   const filtered = products
     .filter((p) => {
@@ -65,12 +73,14 @@ const AdminProducts = () => {
     setForm({
       title: product.title || '',
       price: String(product.price || ''),
-      category: product.category || '',
+      category_id: String(product.category_id || ''),
+      sku: product.sku || '',
       description: product.description || '',
       image: product.image || '',
       stock: String(product.stock || ''),
       imagePreview: product.image || '',
       images: product.images || (product.image ? [product.image] : []),
+      files: [],
     })
     setEditProduct(product)
   }
@@ -79,34 +89,30 @@ const AdminProducts = () => {
     const files = e.target.files
     if (!files || files.length === 0) return
     Array.from(files).forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        setForm((f) => ({
-          ...f,
-          images: [...f.images, ev.target.result],
-          image: ev.target.result,
-          imagePreview: ev.target.result,
-        }))
-      }
-      reader.readAsDataURL(file)
+      const preview = URL.createObjectURL(file)
+      setForm((f) => ({
+        ...f,
+        files: [...f.files, { file, preview }],
+        images: [...f.images, preview],
+        image: preview,
+        imagePreview: preview,
+      }))
     })
   }
 
   const handleImageUrl = (url) => {
-    setForm((f) => ({
-      ...f,
-      images: [...f.images, url],
-      image: url,
-      imagePreview: url,
-    }))
+    if (url) toast.error('Use Upload from Device to add product images')
   }
 
   const handleRemoveImage = (index) => {
     setForm((f) => {
       const newImages = f.images.filter((_, i) => i !== index)
+      const removedImage = f.images[index]
+      const fileIndex = f.files.findIndex((item) => item.preview === removedImage)
       return {
         ...f,
         images: newImages,
+        files: fileIndex === -1 ? f.files : f.files.filter((_, i) => i !== fileIndex),
         image: newImages[0] || '',
         imagePreview: newImages[0] || '',
       }
@@ -116,42 +122,61 @@ const AdminProducts = () => {
   const validateForm = () => {
     if (!form.title.trim()) { toast.error('Product title is required'); return false }
     if (!form.price || isNaN(parseFloat(form.price)) || parseFloat(form.price) < 0) { toast.error('Valid price is required'); return false }
-    if (!form.category.trim()) { toast.error('Category is required'); return false }
+    if (!form.category_id) { toast.error('Category is required'); return false }
+    if (!form.sku.trim()) { toast.error('SKU is required'); return false }
     return true
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) return
     const payload = {
       title: form.title.trim(),
       price: parseFloat(form.price),
-      category: form.category.trim(),
-      description: form.description.trim(),
-      image: form.image || '',
-      images: form.images.length > 0 ? form.images : (form.image ? [form.image] : []),
+      category_id: Number(form.category_id),
+      sku: form.sku.trim(),
+      description: form.description.trim() || form.title.trim(),
+      short_description: form.description.trim() || null,
+      status: 'ACTIVE',
       stock: parseInt(form.stock, 10) || 0,
     }
-    if (editProduct) {
-      dispatch(updateProduct({ id: editProduct.id, ...payload }))
-      toast.success('Product updated!')
-    } else {
-      dispatch(addProduct(payload))
-      toast.success('Product added!')
+    try {
+      const savedProduct = editProduct
+        ? await commerceService.updateAdminProduct(token, editProduct.id, payload)
+        : await commerceService.createAdminProduct(token, payload)
+      if (form.files.length) await commerceService.uploadProductImages(token, savedProduct.id, form.files)
+      if (editProduct) {
+        toast.success('Product updated!')
+      } else {
+        toast.success('Product added!')
+      }
+      await loadProducts()
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to save product')
+      return
     }
     setEditProduct(null)
     setShowAdd(false)
     setForm(EMPTY_FORM)
   }
 
-  const handleToggleActive = (product) => {
-    dispatch(setProductActive({ id: product.id, active: !product.active }))
-    toast.success(product.active ? 'Product deactivated' : 'Product activated')
+  const handleToggleActive = async (product) => {
+    try {
+      await commerceService.updateAdminProduct(token, product.id, {
+        category_id: product.category_id,
+        status: product.active ? 'ARCHIVED' : 'ACTIVE',
+      })
+      await loadProducts()
+      toast.success(product.active ? 'Product deactivated' : 'Product activated')
+    } catch { toast.error('Unable to update product status') }
   }
 
-  const handleDelete = () => {
-    dispatch(removeProduct(deleteId))
-    setDeleteId(null)
-    toast.success('Product deleted')
+  const handleDelete = async () => {
+    try {
+      await commerceService.deleteAdminProduct(token, deleteId)
+      await loadProducts()
+      setDeleteId(null)
+      toast.success('Product deleted')
+    } catch { toast.error('Unable to delete product') }
   }
 
   const closeModal = () => {
@@ -388,6 +413,16 @@ const AdminProducts = () => {
             />
           </div>
 
+          <div>
+            <label className="label-base">SKU <span className="text-brand-500">*</span></label>
+            <input
+              value={form.sku}
+              onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
+              className="input-base"
+              placeholder="e.g. CAM-001"
+            />
+          </div>
+
           {/* Price + Stock */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -421,18 +456,14 @@ const AdminProducts = () => {
           {/* Category */}
           <div>
             <label className="label-base">Category <span className="text-brand-500">*</span></label>
-            <input
-              value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+            <select
+              value={form.category_id}
+              onChange={(e) => setForm((f) => ({ ...f, category_id: e.target.value }))}
               className="input-base"
-              placeholder="e.g. vitamins-supplements, skincare..."
-              list="category-suggestions"
-            />
-            <datalist id="category-suggestions">
-              {["vitamins-supplements", "personal-care", "skincare", "health-devices", "fitness-wellness", "nutrition", ...allCategories].filter((v, i, a) => a.indexOf(v) === i).map((c) => (
-                <option key={c} value={c} />
-              ))}
-            </datalist>
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+            </select>
           </div>
 
           {/* Description */}

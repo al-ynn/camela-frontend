@@ -68,12 +68,6 @@ export const getInitials = (name) => {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }
 
-export const getOriginalPrice = (price) => {
-  const markupFactors = [1.15, 1.2, 1.25, 1.3, 1.35, 1.4]
-  const factor = markupFactors[Math.floor(price * 100) % markupFactors.length]
-  return parseFloat((price * factor).toFixed(2))
-}
-
 export const getOrderStatusColor = (status) => {
   const colors = {
     confirmed: 'badge-info',

@@ -1,26 +1,57 @@
-import { useSelector } from 'react-redux'
 import {
-  selectActiveProducts,
-  selectProductsByCategory,
-  selectProductById,
-} from '../features/catalog/catalogSlice'
+  useGetProductsQuery,
+  useGetProductQuery,
+  useGetProductsByCategoryQuery,
+} from '../services/productsApi'
 
 export const useProducts = () => {
-  const products = useSelector(selectActiveProducts)
-  return { data: products, isLoading: false, isError: false }
+  const {
+    data = [],
+    isLoading,
+    isError,
+    error,
+  } = useGetProductsQuery()
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+  }
 }
 
 export const useProductsByCategory = (category) => {
-  const products = useSelector(selectProductsByCategory(category))
-  return { data: products, isLoading: false, isError: false }
+  const {
+    data = [],
+    isLoading,
+    isError,
+    error,
+  } = useGetProductsByCategoryQuery(category, {
+    skip: !category,
+  })
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+  }
 }
 
 export const useProduct = (id) => {
-  const product = useSelector(selectProductById(id))
+  const {
+    data = null,
+    isLoading,
+    isError,
+    error,
+  } = useGetProductQuery(id, {
+    skip: !id,
+  })
+
   return {
-    data: product || null,
-    isLoading: false,
-    isError: !product,
-    error: !product ? { status: 404 } : null,
+    data,
+    isLoading,
+    isError,
+    error,
   }
 }

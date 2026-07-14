@@ -10,9 +10,11 @@ import {
   selectIsAuthenticated,
   selectAuthLoading,
 } from '../features/auth/authSlice'
-import { clearCart } from '../features/cart/cartSlice'
+import { clearCartState, setCartItems } from '../features/cart/cartSlice'
+import { authService } from '../services/authApi'
 import { clearWishlist } from '../features/wishlist/wishlistSlice'
 import { ROUTES } from '../constants/routes'
+import { commerceService } from '../services/commerceApi'
 
 export const useAuth = () => {
   const dispatch = useDispatch()
@@ -25,6 +27,7 @@ export const useAuth = () => {
   const handleLogin = async (credentials) => {
     const result = await dispatch(loginUser(credentials))
     if (loginUser.fulfilled.match(result)) {
+      dispatch(setCartItems(await commerceService.getCart(result.payload.token)))
       navigate(ROUTES.DASHBOARD)
       return { success: true }
     }
@@ -34,15 +37,19 @@ export const useAuth = () => {
   const handleRegister = async (userData) => {
     const result = await dispatch(registerUser(userData))
     if (registerUser.fulfilled.match(result)) {
+      dispatch(setCartItems(await commerceService.getCart(result.payload.token)))
       navigate(ROUTES.DASHBOARD)
       return { success: true }
     }
     return { success: false, error: result.payload }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (auth.token) {
+      try { await authService.logout(auth.token) } catch { /* local cleanup still ends the session */ }
+    }
     dispatch(logout())
-    dispatch(clearCart())
+    dispatch(clearCartState())
     dispatch(clearWishlist())
     navigate(ROUTES.HOME)
   }

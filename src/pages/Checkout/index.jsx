@@ -1,16 +1,18 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { Check, ChevronRight, CreditCard, MapPin, Package, Truck, User } from 'lucide-react'
 import { useCart } from '../../hooks/useCart'
 import { useSelector } from 'react-redux'
-import { selectUser } from '../../features/auth/authSlice'
-import { placeOrder } from '../../features/orders/ordersSlice'
+import { selectUser, selectAuth } from '../../features/auth/authSlice'
+import { setCurrentOrder } from '../../features/orders/ordersSlice'
+import { commerceService } from '../../services/commerceApi'
 import { formatPrice } from '../../utils/formatters'
 import { SHIPPING_METHODS } from '../../constants/config'
 
@@ -41,20 +43,23 @@ const Checkout = () => {
   })
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { items, totals, coupon, clearCart } = useCart()
+  const { items, totals } = useCart()
   const user = useSelector(selectUser)
+  const token = useSelector(selectAuth).token
 
   const [step, setStep] = useState(1)
   const [contactData, setContactData] = useState(null)
   const [addressData, setAddressData] = useState(null)
+  const [addresses, setAddresses] = useState([])
+  const [shippingAddressId, setShippingAddressId] = useState(null)
   const [selectedShipping, setSelectedShipping] = useState(SHIPPING_METHODS[0])
   const [cardData, setCardData] = useState({ number: '', name: '', expiry: '', cvv: '' })
   const [placing, setPlacing] = useState(false)
 
   const contactForm = useForm({ resolver: zodResolver(contactSchema), defaultValues: {
     email: user?.email || '',
-    firstName: user?.name?.firstname || '',
-    lastName: user?.name?.lastname || '',
+    firstName: user?.name?.split(' ')[0] || '',
+    lastName: user?.name?.split(' ').slice(1).join(' ') || '',
     phone: '',
   }})
 
@@ -62,33 +67,71 @@ const Checkout = () => {
     country: 'United States',
   }})
 
+  useEffect(() => {
+    if (!token) return
+    commerceService.getAddresses(token).then((savedAddresses) => {
+      setAddresses(savedAddresses)
+      const defaultAddress = savedAddresses.find((address) => address.isDefault)
+      if (defaultAddress) {
+        setShippingAddressId(defaultAddress.id)
+        addressForm.reset({
+          address: defaultAddress.address,
+          city: defaultAddress.city,
+          state: defaultAddress.state,
+          zipCode: defaultAddress.zipCode,
+          country: defaultAddress.country,
+        })
+      }
+    })
+  }, [token, addressForm])
+
   const handleContactSubmit = (data) => { setContactData(data); setStep(2) }
-  const handleAddressSubmit = (data) => { setAddressData(data); setStep(3) }
+  const handleAddressSubmit = async (data) => {
+    let address = addresses.find((item) => item.id === shippingAddressId)
+    const matchesSavedAddress = address &&
+      address.address === data.address && address.city === data.city &&
+      address.state === data.state && address.zipCode === data.zipCode && address.country === data.country
+
+    try {
+      if (!matchesSavedAddress) {
+        address = await commerceService.createAddress(token, {
+          label: 'Shipping',
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          zip_code: data.zipCode,
+          country: data.country,
+          is_default: addresses.length === 0,
+        })
+        setAddresses((current) => [...current, address])
+      }
+      setShippingAddressId(address.id)
+      setAddressData(data)
+      setStep(3)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to save shipping address')
+    }
+  }
 
   const handlePlaceOrder = async () => {
-    setPlacing(true)
-    await new Promise((r) => setTimeout(r, 1500))
-    
-    // Recalculate totals with selected shipping price
-    const subtotal = totals.subtotal
-    const discount = totals.discount
-    const afterDiscount = subtotal - discount
-    const shipping = selectedShipping.price
-    const tax = afterDiscount * 0.1
-    const total = afterDiscount + shipping + tax
-    
-    const order = {
-      items: [...items],
-      totals: { subtotal, discount, shipping, tax, total },
-      contact: contactData,
-      address: addressData,
-      shipping: selectedShipping,
-      payment: { method: 'hitpay', cardData },
-      coupon: coupon.code,
+    if (!items.length) {
+      toast.error('Your cart is empty')
+      return
     }
-    dispatch(placeOrder(order))
-    clearCart()
-    navigate(`/order-confirmation/${Date.now()}`)
+
+    setPlacing(true)
+    try {
+      const order = await commerceService.checkout(token, 'HITPAY', shippingAddressId)
+      dispatch(setCurrentOrder(order))
+      const payment = await commerceService.createHitPayPayment(token)
+      if (payment.payment_url) {
+        window.location.assign(payment.payment_url)
+        return
+      }
+      navigate(`/order-confirmation/${order.id}`)
+    } finally {
+      setPlacing(false)
+    }
   }
 
   const handleExpiryChange = (e) => {
@@ -589,7 +632,7 @@ const Checkout = () => {
                         <button onClick={() => setStep(4)} className="btn-outline btn-lg flex-1 justify-center">{t('checkout.back')}</button>
                         <button
                           onClick={handlePlaceOrder}
-                          disabled={placing}
+                          disabled={placing || items.length === 0}
                           className="btn-brand btn-lg flex-1 justify-center gap-2"
                         >
                           {placing ? (

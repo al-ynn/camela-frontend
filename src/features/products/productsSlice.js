@@ -6,7 +6,7 @@ const productsSlice = createSlice({
     filters: {
       category: '',
       priceMin: 0,
-      priceMax: 1000,
+      priceMax: 10000000000,
       rating: 0,
       inStock: false,
       onSale: false,
@@ -25,7 +25,7 @@ const productsSlice = createSlice({
       state.filters = {
         category: '',
         priceMin: 0,
-        priceMax: 1000,
+        priceMax: 10000000000,
         rating: 0,
         inStock: false,
         onSale: false,

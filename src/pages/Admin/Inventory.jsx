@@ -1,16 +1,17 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Search, AlertTriangle, Package, Plus, Minus, Check } from 'lucide-react'
-import { selectAllProducts, updateStock } from '../../features/catalog/catalogSlice'
 import { formatPrice } from '../../utils/formatters'
 import toast from 'react-hot-toast'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
 
 const AdminInventory = () => {
   const { t } = useTranslation()
-  const dispatch = useDispatch()
-  const products = useSelector(selectAllProducts)
+  const token = useSelector(selectAuth).token
+  const [products, setProducts] = useState([])
   const [search, setSearch] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [tempStock, setTempStock] = useState('')
@@ -18,6 +19,13 @@ const AdminInventory = () => {
 
   const getStock = (p) => p.stock ?? 0
   const threshold = 5
+
+  const loadProducts = async () => {
+    if (!token) return
+    try { setProducts(await commerceService.getAdminProducts(token)) } catch { toast.error('Unable to load inventory') }
+  }
+
+  useEffect(() => { loadProducts() }, [token])
 
   const filtered = products.filter((p) => {
     const stock = getStock(p)
@@ -29,20 +37,31 @@ const AdminInventory = () => {
 
   const lowStockCount = products.filter((p) => getStock(p) <= threshold).length
 
-  const handleUpdateStock = (id, newVal) => {
+  const handleUpdateStock = async (id, newVal) => {
     const parsed = parseInt(newVal, 10)
     if (!isNaN(parsed) && parsed >= 0) {
-      dispatch(updateStock({ id, stock: parsed }))
-      toast.success(t('admin.stockUpdated'))
+      const product = products.find((item) => item.id === id)
+      const difference = parsed - getStock(product)
+      if (difference !== 0) {
+        try {
+          await commerceService.adjustInventory(token, id, difference > 0 ? 'STOCK_IN' : 'STOCK_OUT', Math.abs(difference))
+          await loadProducts()
+          toast.success(t('admin.stockUpdated'))
+        } catch { toast.error('Unable to update stock') }
+      }
     }
     setEditingId(null)
     setTempStock('')
   }
 
-  const adjust = (product, delta) => {
+  const adjust = async (product, delta) => {
     const next = Math.max(0, getStock(product) + delta)
-    dispatch(updateStock({ id: product.id, stock: next }))
-    toast.success(`${t('admin.stockAdjusted')} ${next}`)
+    if (next === getStock(product)) return
+    try {
+      await commerceService.adjustInventory(token, product.id, delta > 0 ? 'STOCK_IN' : 'STOCK_OUT', Math.abs(delta))
+      await loadProducts()
+      toast.success(`${t('admin.stockAdjusted')} ${next}`)
+    } catch { toast.error('Unable to adjust stock') }
   }
 
   const stockColor = (stock) => {

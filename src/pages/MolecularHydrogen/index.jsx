@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Droplets, Award, Globe, Factory, FileText, Download, CheckCircle, ChevronDown, MapPin, Phone, Mail, BookOpen, Microscope, Dna, ShieldCheck, Star, Scroll } from 'lucide-react'
 import txData from './translations'
+import { useGetCategoryQuery } from '../../services/productsApi'
 
 const iconMap = {
   Droplets,
@@ -80,6 +81,8 @@ const MolecularHydrogen = () => {
   const { i18n } = useTranslation()
   const lang = i18n.language.startsWith('zh') ? 'zh' : i18n.language.startsWith('ms') ? 'ms' : 'en'
   const tx = txData[lang] || txData.en
+  const { data: categoryLanding } = useGetCategoryQuery('molecular-hydrogen')
+  const category = categoryLanding?.category
 
   return (
     <div className="bg-white dark:bg-gray-950">
@@ -98,7 +101,7 @@ const MolecularHydrogen = () => {
             </span>
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            {tx.heroDesc}
+            {category?.description || tx.heroDesc}
           </motion.p>
         </div>
       </section>

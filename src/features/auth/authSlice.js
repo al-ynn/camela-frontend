@@ -2,24 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { authService } from '../../services/authApi'
 import toast from 'react-hot-toast'
 
-const ADMIN_USERNAMES = ['admin']
-
 export const loginUser = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const data = await authService.login(credentials)
-    const isAdmin = ADMIN_USERNAMES.includes(credentials.username)
-    return {
+        return {
       token: data.token,
-      user: {
-        id: isAdmin ? 0 : 1,
-        username: credentials.username,
-        email: `${credentials.username}@example.com`,
-        name: isAdmin
-          ? { firstname: 'Admin', lastname: 'User' }
-          : { firstname: 'John', lastname: 'Doe' },
-        avatar: `https://ui-avatars.com/api/?name=${credentials.username}&background=e11d48&color=fff`,
-        role: isAdmin ? 'admin' : 'customer',
-      },
+      user: data.user,
     }
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Invalid credentials')
@@ -32,14 +20,8 @@ export const registerUser = createAsyncThunk(
     try {
       const data = await authService.register(userData)
       return {
-        token: 'mock-token-' + Date.now(),
-        user: {
-          id: data.id,
-          username: userData.email.split('@')[0],
-          email: userData.email,
-          name: { firstname: userData.firstName, lastname: userData.lastName },
-          avatar: `https://ui-avatars.com/api/?name=${userData.firstName}+${userData.lastName}&background=e11d48&color=fff`,
-        },
+        token: data.token,
+        user: data.user,
       }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed')
@@ -89,7 +71,7 @@ const authSlice = createSlice({
         state.token = action.payload.token
         state.user = action.payload.user
         state.error = null
-        toast.success(`Welcome back, ${action.payload.user.name.firstname}!`)
+        toast.success(`Welcome back, ${action.payload.user.name}!`)
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
@@ -122,6 +104,6 @@ export const selectAuth = (state) => state.auth
 export const selectUser = (state) => state.auth.user
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated
 export const selectAuthLoading = (state) => state.auth.loading
-export const selectIsAdmin = (state) => state.auth.user?.role === 'admin'
+export const selectIsAdmin = (state) => state.auth.user?.is_admin === true
 
 export default authSlice.reducer

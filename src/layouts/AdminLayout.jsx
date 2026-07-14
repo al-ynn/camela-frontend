@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectUser, logout } from '../features/auth/authSlice'
-import { clearCart } from '../features/cart/cartSlice'
+import { clearCartState } from '../features/cart/cartSlice'
 import { clearWishlist } from '../features/wishlist/wishlistSlice'
 import { ROUTES } from '../constants/routes'
 
@@ -32,7 +32,7 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     dispatch(logout())
-    dispatch(clearCart())
+    dispatch(clearCartState())
     dispatch(clearWishlist())
     navigate(ROUTES.HOME)
   }
@@ -160,12 +160,12 @@ const AdminLayout = () => {
             </button>
             <div className="flex items-center gap-2 pl-2">
               <img
-                src={user?.avatar || `https://ui-avatars.com/api/?name=Admin&background=18181b&color=fff`}
+          src={user?.avatar}
                 alt="Admin"
                 className="w-7 h-7 rounded-full object-cover"
               />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
-                {user?.name?.firstname || 'Admin'}
+          {user?.name}
               </span>
             </div>
           </div>

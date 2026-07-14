@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, SlidersHorizontal, ChevronDown } from 'lucide-react'
 import { setFilter, resetFilters, selectFilters } from '../../features/products/productsSlice'
-import { CATEGORIES } from '../../data/categories'
+import { useGetCategoriesQuery } from '../../services/productsApi'
 import { useState } from 'react'
 import { cn } from '../../utils/helpers'
 
@@ -11,6 +11,7 @@ const ProductFilters = ({ onClose, activeCategory }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const filters = useSelector(selectFilters)
+  const { data: categories = [] } = useGetCategoriesQuery()
 
   const PRICE_RANGES = [
     { label: t('filter.under25'), min: 0, max: 25 },
@@ -107,7 +108,7 @@ const ProductFilters = ({ onClose, activeCategory }) => {
       {/* Category */}
       <FilterSection title={t('filter.category')}>
         <div className="space-y-1.5">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <label
               key={cat.id}
               className="flex items-center gap-3 cursor-pointer group py-1"

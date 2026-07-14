@@ -17,7 +17,6 @@ import wishlistReducer from '../features/wishlist/wishlistSlice'
 import uiReducer from '../features/ui/uiSlice'
 import productsReducer from '../features/products/productsSlice'
 import ordersReducer from '../features/orders/ordersSlice'
-import catalogReducer from '../features/catalog/catalogSlice'
 
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
@@ -27,14 +26,13 @@ const rootReducer = combineReducers({
   ui: uiReducer,
   products: productsReducer,
   orders: ordersReducer,
-  catalog: catalogReducer,
 })
 
 const persistConfig = {
   key: 'camela-root',
   version: 1,
   storage,
-  whitelist: ['cart', 'wishlist', 'auth', 'ui', 'catalog'],
+  whitelist: ['wishlist', 'auth', 'ui'],
   blacklist: [apiSlice.reducerPath, 'products'],
 }
 

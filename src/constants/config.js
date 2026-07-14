@@ -1,4 +1,15 @@
-export const API_BASE_URL = 'https://fakestoreapi.com'
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '/api'
+
+export const resolveApiAssetUrl = (path) => {
+  if (!path) return path
+  if (/^https?:\/\//i.test(path)) return path
+
+  const apiOrigin = API_BASE_URL.replace(/\/api\/?$/, '')
+  const normalizedPath = path.replace(/^\/+/, '')
+
+  return apiOrigin ? `${apiOrigin}/${normalizedPath}` : `/${normalizedPath}`
+}
 
 export const APP_CONFIG = {
   name: 'Camela Group',
@@ -60,11 +71,6 @@ export const VALID_COUPONS = {
   SAVE20: { discount: 0.2, type: 'percent', description: '20% off your order' },
   FLAT15: { discount: 15, type: 'fixed', description: '$15 off your order' },
   WELCOME: { discount: 0.15, type: 'percent', description: '15% off for new customers' },
-}
-
-export const DEMO_USER = {
-  username: 'johnd',
-  password: 'm38rmF$',
 }
 
 export const PAYMENT_METHODS = [

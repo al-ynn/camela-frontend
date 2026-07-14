@@ -7,6 +7,8 @@ const BrandsSection = () => {
   const { t } = useTranslation()
   const { ref, hasIntersected } = useIntersectionObserver({ once: true })
 
+  if (!BRANDS.length) return null
+
   return (
     <section className="py-16 border-y border-gray-100 dark:border-gray-800">
       <div className="container">

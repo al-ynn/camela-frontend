@@ -53,7 +53,7 @@ const DashboardHome = () => {
         <div className="relative z-10">
           <p className="text-gray-400 text-sm mb-1">{t('dashboard.welcome')}</p>
           <h2 className="text-2xl font-display font-bold">
-            {user?.name?.firstname} {user?.name?.lastname} 👋
+            {user?.name} 👋
           </h2>
           <p className="text-gray-400 text-sm mt-2">
             You have <span className="text-white font-semibold">{orders.length}</span> order{orders.length !== 1 ? 's' : ''} and{' '}

@@ -8,17 +8,16 @@ import { Eye, EyeOff, LogIn, Info } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { ROUTES } from '../../constants/routes'
-import { DEMO_USER } from '../../constants/config'
 
 const Login = () => {
   const { t } = useTranslation()
   const { login, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
-  const schema = z.object({
-    username: z.string().min(2, t('auth.validation.usernameRequired')),
-    password: z.string().min(4, t('auth.validation.passwordMinLogin')),
-    rememberMe: z.boolean().optional(),
+    const schema = z.object({
+      email: z.string().email("Please enter a valid email."),
+      password: z.string().min(8, "Password must be at least 8 characters."),
+      rememberMe: z.boolean().optional(),
   })
 
   const {
@@ -29,12 +28,10 @@ const Login = () => {
   } = useForm({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data) => {
-    await login({ username: data.username, password: data.password })
-  }
-
-  const fillDemo = () => {
-    setValue('username', DEMO_USER.username)
-    setValue('password', DEMO_USER.password)
+      await login({
+      email: data.email,
+      password: data.password,
+  })
   }
 
   return (
@@ -52,34 +49,18 @@ const Login = () => {
         </p>
       </div>
 
-      {/* Demo credentials notice */}
-      <button
-        type="button"
-        onClick={fillDemo}
-        className="w-full flex items-start gap-3 p-4 mb-6 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-2xl text-left hover:bg-brand-100 dark:hover:bg-brand-900/30 transition-colors"
-      >
-        <Info size={16} className="text-brand-600 dark:text-brand-400 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">
-            Demo credentials (click to fill)
-          </p>
-          <p className="text-xs text-brand-600 dark:text-brand-400 mt-0.5">
-            Username: <strong>{DEMO_USER.username}</strong> · Password: <strong>{DEMO_USER.password}</strong>
-          </p>
-        </div>
-      </button>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
           <label className="label-base">{t('auth.login.email')}</label>
           <input
-            {...register('username')}
-            placeholder="johnd"
-            autoComplete="username"
-            className={`input-base ${errors.username ? 'border-brand-400 focus:border-brand-500 focus:ring-brand-500/20' : ''}`}
-          />
-          {errors.username && (
-            <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.username.message}</p>
+              {...register('email')}
+              type="email"
+              placeholder="name@example.com"
+              autoComplete="email"
+              className={`input-base ${errors.email ? 'border-brand-400 focus:border-brand-500 focus:ring-brand-500/20' : ''}`}
+            />
+          {errors.email && (
+            <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.email.message}</p>
           )}
         </div>
 

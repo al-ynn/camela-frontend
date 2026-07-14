@@ -1,11 +1,14 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Plus, Pencil, Trash2, Check } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
+import { useSelector } from 'react-redux'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
 
 const schema = z.object({
   label: z.string().min(1, 'Label required'),
@@ -16,39 +19,54 @@ const schema = z.object({
   country: z.string().min(2, 'Country required'),
 })
 
-const DEFAULT_ADDRESSES = [
-  { id: 1, label: 'Home', address: '123 Main Street', city: 'New York', state: 'NY', zipCode: '10001', country: 'United States', isDefault: true },
-]
-
 const Addresses = () => {
   const { t } = useTranslation()
-  const [addresses, setAddresses] = useState(DEFAULT_ADDRESSES)
+  const token = useSelector(selectAuth).token
+  const [addresses, setAddresses] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState(null)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ resolver: zodResolver(schema) })
 
-  const onSubmit = (data) => {
-    if (editId) {
-      setAddresses((prev) => prev.map((a) => a.id === editId ? { ...a, ...data } : a))
-      toast.success('Address updated!')
-    } else {
-      setAddresses((prev) => [...prev, { ...data, id: Date.now(), isDefault: prev.length === 0 }])
-      toast.success('Address added!')
-    }
-    reset()
-    setShowForm(false)
-    setEditId(null)
+  const loadAddresses = async () => {
+    if (!token) return
+    try { setAddresses(await commerceService.getAddresses(token)) } catch { toast.error('Unable to load addresses') }
   }
 
-  const handleDelete = (id) => {
-    setAddresses((prev) => prev.filter((a) => a.id !== id))
-    toast.success('Address removed')
+  useEffect(() => { loadAddresses() }, [token])
+
+  const onSubmit = async (data) => {
+    const payload = { ...data, zip_code: data.zipCode, is_default: addresses.length === 0 }
+    delete payload.zipCode
+    try {
+      if (editId) {
+        await commerceService.updateAddress(token, editId, payload)
+        toast.success('Address updated!')
+      } else {
+        await commerceService.createAddress(token, payload)
+        toast.success('Address added!')
+      }
+      await loadAddresses()
+      reset()
+      setShowForm(false)
+      setEditId(null)
+    } catch (error) { toast.error(error.response?.data?.message || 'Unable to save address') }
   }
 
-  const handleSetDefault = (id) => {
-    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })))
-    toast.success('Default address updated')
+  const handleDelete = async (id) => {
+    try {
+      await commerceService.deleteAddress(token, id)
+      await loadAddresses()
+      toast.success('Address removed')
+    } catch { toast.error('Unable to remove address') }
+  }
+
+  const handleSetDefault = async (id) => {
+    try {
+      await commerceService.setDefaultAddress(token, id)
+      await loadAddresses()
+      toast.success('Default address updated')
+    } catch { toast.error('Unable to update default address') }
   }
 
   const handleEdit = (addr) => {

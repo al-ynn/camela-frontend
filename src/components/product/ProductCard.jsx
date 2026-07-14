@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux'
 import { selectIsInWishlist } from '../../features/wishlist/wishlistSlice'
 import Rating from '../ui/Rating'
 import Badge from '../ui/Badge'
-import { formatPrice, getOriginalPrice } from '../../utils/formatters'
+import { formatPrice } from '../../utils/formatters'
 import { cn } from '../../utils/helpers'
 
 const ProductCard = ({ product, view = 'grid' }) => {
@@ -20,12 +20,18 @@ const ProductCard = ({ product, view = 'grid' }) => {
   const { toggleWishlist } = useWishlist()
   const isInWishlist = useSelector(selectIsInWishlist(product.id))
 
-  const originalPrice = getOriginalPrice(product.price)
-  const discountPercent = Math.round(((originalPrice - product.price) / originalPrice) * 100)
-  const isNew = product.id % 5 === 0
-  const isSale = product.id % 3 === 0
+  const originalPrice = product.compare_price
+  const isSale = Number(originalPrice) > Number(product.price)
+  const discountPercent = isSale
+    ? Math.round(((originalPrice - product.price) / originalPrice) * 100)
+    : 0
+  const isNew = product.featured
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image]
-  const displayImage = hovered && productImages.length > 1 ? productImages[1] : productImages[0]
+  const displayImage =
+  (hovered && productImages.length > 1
+      ? productImages[1]
+      : productImages[0]) ||
+    null
 
   if (view === 'list') {
     return (

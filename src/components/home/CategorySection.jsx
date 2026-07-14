@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { CATEGORIES } from '../../data/categories'
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
-import { useSelector } from 'react-redux'
-import { selectAllProducts } from '../../features/catalog/catalogSlice'
+import { useProducts } from '../../hooks/useProducts'
+import { useGetCategoriesQuery } from '../../services/productsApi'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const CategoryCard = ({ category, index, count }) => {
   const { t } = useTranslation()
@@ -19,18 +19,12 @@ const CategoryCard = ({ category, index, count }) => {
       transition={{ duration: 0.5, delay: index * 0.08 }}
     >
       <Link
-        to={category.slug === 'molecular-hydrogen' ? '/molecular-hydrogen' : category.slug === 'peptide' ? '/peptide' : `/shop/${category.slug}`}
+        to={category.landing_page}
         className="block relative overflow-hidden rounded-2xl group h-64 md:h-72"
       >
         {/* Background image */}
-        <img
-          src={category.image}
-          alt={category.name}
-          loading="lazy"
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-        {/* Gradient overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-t ${category.color} opacity-60 group-hover:opacity-70 transition-opacity duration-300`} />
+        {category.image && <img src={resolveApiAssetUrl(category.image)} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-600 to-brand-400 opacity-60 group-hover:opacity-70 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
         {/* Content */}
@@ -57,11 +51,12 @@ const CategoryCard = ({ category, index, count }) => {
 const CategorySection = () => {
   const { t } = useTranslation()
   const { ref, hasIntersected } = useIntersectionObserver({ once: true })
-  const products = useSelector(selectAllProducts)
+  const { data: products = [] } = useProducts()
+  const { data: categories = [] } = useGetCategoriesQuery()
 
   // Count products per category
-  const categoryCounts = CATEGORIES.reduce((acc, category) => {
-    const count = products.filter(p => p.category === category.slug).length
+  const categoryCounts = categories.reduce((acc, category) => {
+    const count = products.filter(p => p.category === category.name).length
     acc[category.id] = count
     return acc
   }, {})
@@ -98,7 +93,7 @@ const CategorySection = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {CATEGORIES.slice(0, 6).map((category, i) => (
+          {categories.slice(0, 6).map((category, i) => (
             <CategoryCard key={category.id} category={category} index={i} count={categoryCounts[category.id] || 0} />
           ))}
         </div>

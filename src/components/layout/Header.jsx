@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { selectCartCount } from '../../features/cart/cartSlice'
 import { selectWishlistCount } from '../../features/wishlist/wishlistSlice'
-import { selectIsAuthenticated, selectUser, selectIsAdmin, logout } from '../../features/auth/authSlice'
+import { selectIsAuthenticated, selectUser, selectIsAdmin, selectAuth, logout } from '../../features/auth/authSlice'
 import {
   openCartDrawer,
   openMobileMenu,
@@ -30,8 +30,10 @@ import {
   selectTheme,
 } from '../../features/ui/uiSlice'
 import { ROUTES } from '../../constants/routes'
-import { clearCart } from '../../features/cart/cartSlice'
+import { clearCartState } from '../../features/cart/cartSlice'
 import { clearWishlist } from '../../features/wishlist/wishlistSlice'
+import { useGetCategoriesQuery } from '../../services/productsApi'
+import { authService } from '../../services/authApi'
 
 const Header = () => {
   const { t } = useTranslation()
@@ -42,7 +44,9 @@ const Header = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const user = useSelector(selectUser)
   const isAdmin = useSelector(selectIsAdmin)
+  const token = useSelector(selectAuth).token
   const theme = useSelector(selectTheme)
+  const { data: categories = [] } = useGetCategoriesQuery()
 
   const NAV_LINKS = [
     { label: t('nav.home'), href: ROUTES.HOME },
@@ -50,10 +54,7 @@ const Header = () => {
     { label: t('nav.about'), href: ROUTES.ABOUT },
     {
       label: t('nav.categories'),
-      children: [
-        { label: t('nav.molecularHydrogen'), href: '/molecular-hydrogen' },
-        { label: t('nav.peptide'), href: '/peptide' },
-      ],
+      children: categories.map((category) => ({ label: category.name, href: category.landing_page })),
     },
   ]
 
@@ -67,9 +68,12 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (token) {
+      try { await authService.logout(token) } catch { /* continue local cleanup */ }
+    }
     dispatch(logout())
-    dispatch(clearCart())
+    dispatch(clearCartState())
     dispatch(clearWishlist())
     setUserMenuOpen(false)
     navigate(ROUTES.HOME)
@@ -248,11 +252,11 @@ const Header = () => {
                 >
                   <img
                     src={user?.avatar}
-                    alt={user?.name?.firstname}
+                    alt={user?.name}
                     className="w-7 h-7 rounded-full object-cover"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">
-                    {user?.name?.firstname}
+                    {user?.name}
                   </span>
                 </button>
                 <AnimatePresence>
@@ -266,7 +270,7 @@ const Header = () => {
                     >
                       <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {user?.name?.firstname} {user?.name?.lastname}
+                    {user?.name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
                       </div>

@@ -18,7 +18,7 @@ const Register = () => {
     firstName: z.string().min(2, t('auth.validation.firstNameRequired')),
     lastName: z.string().min(2, t('auth.validation.lastNameRequired')),
     email: z.string().email(t('auth.validation.validEmail')),
-    password: z.string().min(6, t('auth.validation.passwordMin')),
+    password: z.string().min(8, t('auth.validation.passwordMin')),
     confirmPassword: z.string(),
     terms: z.boolean().refine((v) => v === true, t('auth.validation.acceptTerms')),
   }).refine((d) => d.password === d.confirmPassword, {
@@ -91,7 +91,7 @@ const Register = () => {
             <input
               {...register('password')}
               type={showPassword ? 'text' : 'password'}
-              placeholder="Min. 6 characters"
+              placeholder="Min. 8 characters"
               autoComplete="new-password"
               className={`input-base pr-12 ${errors.password ? 'border-brand-400' : ''}`}
             />

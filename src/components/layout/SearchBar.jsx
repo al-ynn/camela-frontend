@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, Clock, TrendingUp, ArrowRight } from 'lucide-react'
 import { closeSearch, selectSearchOpen, addRecentSearch, selectRecentSearches } from '../../features/ui/uiSlice'
-import { useProducts } from '../../hooks/useProducts'
+import { useSearchProductsQuery } from '../../services/productsApi'
 import { useDebounce } from '../../hooks/useDebounce'
 import { formatPrice } from '../../utils/formatters'
 
@@ -20,16 +20,11 @@ const SearchBar = () => {
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounce(query, 300)
 
-  const { data: products = [] } = useProducts()
+  const { data: products = [] } = useSearchProductsQuery(debouncedQuery, {
+    skip: debouncedQuery.length < 2,
+  })
 
-  const suggestions = debouncedQuery.length > 1
-    ? products
-        .filter((p) =>
-          p.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-          p.category.toLowerCase().includes(debouncedQuery.toLowerCase())
-        )
-        .slice(0, 5)
-    : []
+  const suggestions = products.slice(0, 5)
 
   useEffect(() => {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 100)

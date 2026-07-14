@@ -5,7 +5,7 @@ import { Bell, Shield, Eye, Moon, Globe, Trash2, AlertTriangle } from 'lucide-re
 import { useDispatch } from 'react-redux'
 import { useTheme } from '../../hooks/useTheme'
 import { logout } from '../../features/auth/authSlice'
-import { clearCart } from '../../features/cart/cartSlice'
+import { clearCartState } from '../../features/cart/cartSlice'
 import { clearWishlist } from '../../features/wishlist/wishlistSlice'
 import toast from 'react-hot-toast'
 import Modal from '../../components/ui/Modal'
@@ -59,7 +59,7 @@ const Settings = () => {
 
   const handleDeleteAccount = () => {
     dispatch(logout())
-    dispatch(clearCart())
+    dispatch(clearCartState())
     dispatch(clearWishlist())
     toast.success('Account deleted successfully')
     navigate('/')

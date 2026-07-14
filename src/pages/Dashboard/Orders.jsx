@@ -2,12 +2,14 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Package, ShoppingBag, ArrowRight, ChevronDown } from 'lucide-react'
-import { useSelector } from 'react-redux'
-import { selectOrders } from '../../features/orders/ordersSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectOrders, setOrders } from '../../features/orders/ordersSlice'
 import { formatPrice } from '../../utils/formatters'
 import { ROUTES } from '../../constants/routes'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
 
 const STATUS_STYLES = {
   confirmed: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
@@ -184,6 +186,13 @@ const OrderRow = ({ order, index }) => {
 const Orders = () => {
   const { t } = useTranslation()
   const orders = useSelector(selectOrders)
+  const token = useSelector(selectAuth).token
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (!token) return
+    commerceService.getOrders(token).then((data) => dispatch(setOrders(data)))
+  }, [dispatch, token])
 
   return (
     <div className="space-y-6">

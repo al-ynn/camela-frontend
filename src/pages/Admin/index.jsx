@@ -1,13 +1,15 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { DollarSign, ShoppingBag, Users, TrendingUp, ArrowRight, AlertTriangle } from 'lucide-react'
 import StatsCard from '../../components/admin/StatsCard'
 import LineChart from '../../components/admin/LineChart'
 import DonutChart from '../../components/admin/DonutChart'
-import { REVENUE_DATA, CATEGORY_STATS, MOCK_ADMIN_ORDERS, LOW_STOCK_ITEMS, ADMIN_STATS } from '../../data/adminData'
 import { formatPrice, formatDateShort, getOrderStatusColor, getOrderStatusLabel } from '../../utils/formatters'
+import { useSelector } from 'react-redux'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
 
 const STATS = [
   { key: 'totalRevenue', icon: DollarSign, color: 'brand', prefix: '$' },
@@ -19,10 +21,16 @@ const STATS = [
 const AdminOverview = () => {
   const { t } = useTranslation()
   const [revenueRange, setRevenueRange] = useState('12m')
+  const token = useSelector(selectAuth).token
+  const [dashboard, setDashboard] = useState({ stats: {}, revenue: [], categories: [], recent_orders: [], low_stock: [] })
+
+  useEffect(() => {
+    if (token) commerceService.getAdminDashboard(token).then(setDashboard)
+  }, [token])
 
   const chartData = revenueRange === '7d'
-    ? REVENUE_DATA.slice(-7).map((d, i) => ({ ...d, month: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i] }))
-    : REVENUE_DATA
+    ? dashboard.revenue.slice(-7).map((d, i) => ({ ...d, month: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i] }))
+    : dashboard.revenue
 
   return (
     <div className="p-6 space-y-6">
@@ -35,7 +43,7 @@ const AdminOverview = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {STATS.map(({ key, icon, color, prefix }, i) => {
-          const stat = ADMIN_STATS[key]
+          const stat = dashboard.stats[key] || { label: key, value: 0, change: 0 }
           return (
             <StatsCard
               key={key}
@@ -79,7 +87,7 @@ const AdminOverview = () => {
               ))}
             </div>
           </div>
-          <LineChart data={revenueRange === '3m' ? REVENUE_DATA.slice(-3) : chartData} dataKey="revenue" isCurrency />
+          <LineChart data={revenueRange === '3m' ? dashboard.revenue.slice(-3) : chartData} dataKey="revenue" isCurrency />
         </motion.div>
 
         {/* Category Breakdown */}
@@ -91,7 +99,7 @@ const AdminOverview = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white">{t('admin.salesByCategory')}</h3>
             <p className="text-xs text-gray-400 mt-0.5">Revenue distribution</p>
           </div>
-          <DonutChart data={CATEGORY_STATS} />
+          <DonutChart data={dashboard.categories} />
         </motion.div>
       </div>
 
@@ -118,7 +126,7 @@ const AdminOverview = () => {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_ADMIN_ORDERS.slice(0, 5).map((order) => (
+                {dashboard.recent_orders.map((order) => (
                   <tr key={order.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
                     <td className="px-5 py-3 font-mono text-xs text-gray-600 dark:text-gray-300">{order.id}</td>
                     <td className="px-5 py-3">
@@ -148,11 +156,11 @@ const AdminOverview = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white">{t('admin.lowStockAlerts')}</h3>
             <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full">
               <AlertTriangle size={10} />
-              {LOW_STOCK_ITEMS.length} items
+              {dashboard.low_stock.length} items
             </span>
           </div>
           <div className="space-y-3">
-            {LOW_STOCK_ITEMS.map((item) => (
+            {dashboard.low_stock.map((item) => (
               <div key={item.id} className="flex items-center justify-between gap-3 p-3 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">{item.name}</p>

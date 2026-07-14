@@ -5,8 +5,9 @@ import { z } from 'zod'
 import { motion } from 'framer-motion'
 import { User, Mail, Phone, Camera, Save } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectUser, updateUser } from '../../features/auth/authSlice'
+import { selectUser, selectAuth, updateUser } from '../../features/auth/authSlice'
 import toast from 'react-hot-toast'
+import { commerceService } from '../../services/commerceApi'
 
 const schema = z.object({
   firstname: z.string().min(2, 'First name is required'),
@@ -20,12 +21,13 @@ const Profile = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const user = useSelector(selectUser)
+  const token = useSelector(selectAuth).token
 
   const { register, handleSubmit, formState: { errors, isDirty, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      firstname: user?.name?.firstname || '',
-      lastname: user?.name?.lastname || '',
+    firstname: user?.name?.split(' ')[0] || '',
+    lastname: user?.name?.split(' ').slice(1).join(' ') || '',
       email: user?.email || '',
       phone: user?.phone || '',
       username: user?.username || '',
@@ -33,9 +35,12 @@ const Profile = () => {
   })
 
   const onSubmit = async (data) => {
-    await new Promise((r) => setTimeout(r, 600))
-    dispatch(updateUser({ name: { firstname: data.firstname, lastname: data.lastname }, email: data.email, username: data.username, phone: data.phone }))
-    toast.success('Profile updated successfully!')
+    try {
+      dispatch(updateUser(await commerceService.updateProfile(token, data)))
+      toast.success('Profile updated successfully!')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to update profile')
+    }
   }
 
   return (
@@ -50,8 +55,8 @@ const Profile = () => {
         <div className="flex items-center gap-5">
           <div className="relative">
             <img
-              src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name?.firstname}+${user?.name?.lastname}&background=18181b&color=fff&size=96`}
-              alt={user?.name?.firstname}
+            src={user?.avatar}
+            alt={user?.name}
               className="w-20 h-20 rounded-2xl object-cover ring-4 ring-gray-100 dark:ring-gray-800"
             />
             <button className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-brand-600 rounded-full flex items-center justify-center shadow-md hover:bg-brand-700 transition-colors">
@@ -60,7 +65,7 @@ const Profile = () => {
           </div>
           <div>
             <p className="font-semibold text-gray-900 dark:text-white text-lg">
-              {user?.name?.firstname} {user?.name?.lastname}
+            {user?.name}
             </p>
             <p className="text-sm text-gray-400">@{user?.username}</p>
             <p className="text-xs text-gray-400 mt-0.5">{user?.email}</p>

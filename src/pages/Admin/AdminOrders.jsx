@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { Search, ChevronDown, Download, Eye } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectOrders, updateOrderStatus } from '../../features/orders/ordersSlice'
-import { MOCK_ADMIN_ORDERS } from '../../data/adminData'
 import { formatPrice, formatDateShort, getOrderStatusColor, getOrderStatusLabel } from '../../utils/formatters'
 import Modal from '../../components/ui/Modal'
 import toast from 'react-hot-toast'
@@ -29,8 +28,7 @@ const AdminOrders = () => {
 
   const PER_PAGE = 8
 
-  const combinedOrders = [
-    ...storeOrders.map((o) => ({
+  const combinedOrders = storeOrders.map((o) => ({
       id: o.id,
       customer: `${o.contact?.firstName || 'Customer'} ${o.contact?.lastName || ''}`.trim(),
       email: o.contact?.email || 'N/A',
@@ -40,13 +38,7 @@ const AdminOrders = () => {
       date: o.createdAt?.slice(0, 10) || '',
       payment: o.payment?.method === 'hitpay' ? 'HitPay' : o.paymentMethod || 'Card',
       source: 'live',
-    })),
-    ...MOCK_ADMIN_ORDERS.map((o) => ({
-      ...o,
-      status: orderStatuses[o.id] || o.status,
-      source: 'mock',
-    })),
-  ]
+    }))
 
   const filtered = combinedOrders.filter((o) => {
     const q = search.toLowerCase()
@@ -66,9 +58,6 @@ const AdminOrders = () => {
     if (isLiveOrder) {
       // Dispatch Redux action to persist status change
       dispatch(updateOrderStatus({ id: orderId, status: newStatus }))
-    } else {
-      // For mock orders, use local state
-      setOrderStatuses((prev) => ({ ...prev, [orderId]: newStatus }))
     }
     toast.success(`Order ${orderId} status updated to ${newStatus}`)
   }

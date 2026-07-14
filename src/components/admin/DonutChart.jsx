@@ -19,15 +19,37 @@ const describeArc = (cx, cy, r, startAngle, endAngle) => {
 
 const DonutChart = ({ data = [] }) => {
   const [hovered, setHovered] = useState(null)
-  const total = data.reduce((s, d) => s + d.sales, 0)
+  const normalizedData = data
+    .map((item) => ({
+      ...item,
+      sales: Number(item?.sales),
+    }))
+    .filter((item) => Number.isFinite(item.sales))
+
+  if (!normalizedData.length) {
+    return (
+      <div className="w-full h-[180px] flex items-center justify-center text-sm text-gray-400">
+        No chart data available
+      </div>
+    )
+  }
+
+  const total = normalizedData.reduce((s, d) => s + d.sales, 0)
+  if (!Number.isFinite(total) || total <= 0) {
+    return (
+      <div className="w-full h-[180px] flex items-center justify-center text-sm text-gray-400">
+        No chart data available
+      </div>
+    )
+  }
   let cumulative = 0
 
   return (
     <div className="flex flex-col sm:flex-row items-center gap-6">
       <div className="flex-shrink-0">
         <svg width="180" height="180" viewBox="0 0 180 180">
-          {data.map((segment, i) => {
-            const pct = segment.sales / total
+          {normalizedData.map((segment, i) => {
+            const pct = Number.isFinite(segment.sales / total) ? segment.sales / total : 0
             const startAngle = cumulative * 360
             cumulative += pct
             const endAngle = cumulative * 360
@@ -48,17 +70,17 @@ const DonutChart = ({ data = [] }) => {
           })}
           {/* Center text */}
           <text x={CX} y={CY - 8} textAnchor="middle" fontSize="20" fontWeight="700" fill="currentColor">
-            {hovered !== null ? `${data[hovered].sales}%` : `${total}%`}
+            {hovered !== null ? `${normalizedData[hovered].sales}%` : `${total}%`}
           </text>
           <text x={CX} y={CY + 12} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.5">
-            {hovered !== null ? data[hovered].category.split(' ')[0] : 'Total Sales'}
+            {hovered !== null ? normalizedData[hovered].category.split(' ')[0] : 'Total Sales'}
           </text>
         </svg>
       </div>
 
       {/* Legend */}
       <div className="flex flex-col gap-2 w-full">
-        {data.map((segment, i) => (
+        {normalizedData.map((segment, i) => (
           <div
             key={i}
             className="flex items-center justify-between gap-3 cursor-pointer group"

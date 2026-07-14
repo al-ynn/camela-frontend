@@ -13,7 +13,7 @@ import Breadcrumb from '../../components/layout/Breadcrumb'
 import { selectFilters, selectSort, selectView, selectPage } from '../../features/products/productsSlice'
 import { sortProducts, filterProducts, paginateProducts } from '../../utils/helpers'
 import { PRODUCTS_PER_PAGE } from '../../constants/config'
-import { getCategoryName } from '../../data/categories'
+import { useGetCategoriesQuery } from '../../services/productsApi'
 import { useDispatch } from 'react-redux'
 import { setPage } from '../../features/products/productsSlice'
 
@@ -29,18 +29,27 @@ const Shop = () => {
 
   const { data: allProducts = [], isLoading: allLoading } = useProducts()
   const { data: categoryProducts = [], isLoading: catLoading } = useProductsByCategory(category || '')
+  const { data: categories = [] } = useGetCategoriesQuery()
 
   const isLoading = category ? catLoading : allLoading
   const rawProducts = category ? categoryProducts : allProducts
 
+  console.log("rawProducts", rawProducts)
+
   const filtered = filterProducts(rawProducts, filters)
+
+  console.log("filtered", filtered)
+
   const sorted = sortProducts(filtered, sort)
+
+  console.log("sorted", sorted)
+  
   const paginated = paginateProducts(sorted, page, PRODUCTS_PER_PAGE)
   const totalPages = Math.ceil(sorted.length / PRODUCTS_PER_PAGE)
 
   const breadcrumbs = [
     { label: t('nav.shop'), href: '/shop' },
-    ...(category ? [{ label: getCategoryName(category) }] : []),
+    ...(category ? [{ label: categories.find((item) => item.slug === category)?.name || category }] : []),
   ]
 
   return (
@@ -50,7 +59,7 @@ const Shop = () => {
         <div className="container py-8">
           <Breadcrumb items={breadcrumbs} />
           <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white mt-3">
-            {category ? getCategoryName(category) : t('shop.allProducts')}
+            {category ? categories.find((item) => item.slug === category)?.name || category : t('shop.allProducts')}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {isLoading ? '...' : `${sorted.length} ${t('shop.productsFound')}`}

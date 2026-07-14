@@ -72,18 +72,9 @@ export const getSortLabel = (value) => {
   return SORT_OPTIONS.find((o) => o.value === value)?.label || 'Featured'
 }
 
-export const getSizes = (_category) => {
-  return []
-}
-
-export const getColors = (_category) => {
-  return []
-}
-
 export const cn = (...classes) => classes.filter(Boolean).join(' ')
 
 export const isEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 export const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-export const generateOrderNumber = () => 'ORD-' + Date.now().toString().slice(-8)

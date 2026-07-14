@@ -9,7 +9,7 @@ import { selectIsAuthenticated, selectUser } from '../../features/auth/authSlice
 import { selectCartCount } from '../../features/cart/cartSlice'
 import { selectWishlistCount } from '../../features/wishlist/wishlistSlice'
 import { ROUTES } from '../../constants/routes'
-import { CATEGORIES } from '../../data/categories'
+import { useGetCategoriesQuery } from '../../services/productsApi'
 
 const MobileMenu = () => {
   const dispatch = useDispatch()
@@ -19,6 +19,7 @@ const MobileMenu = () => {
   const user = useSelector(selectUser)
   const cartCount = useSelector(selectCartCount)
   const wishlistCount = useSelector(selectWishlistCount)
+  const { data: categories = [] } = useGetCategoriesQuery()
 
   const close = () => dispatch(closeMobileMenu())
 
@@ -82,7 +83,7 @@ const MobileMenu = () => {
                 <img src={user?.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
                 <div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {user?.name?.firstname} {user?.name?.lastname}
+              {user?.name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
                 </div>
@@ -152,17 +153,11 @@ const MobileMenu = () => {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
                 Categories
               </p>
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => {
-                    if (cat.slug === 'molecular-hydrogen') {
-                      goTo('/molecular-hydrogen')
-                    } else if (cat.slug === 'peptide') {
-                      goTo('/peptide')
-                    } else {
-                      goTo(`/shop/${cat.slug}`)
-                    }
+                    goTo(cat.landing_page)
                   }}
                   className="flex items-center justify-between w-full px-3 py-3.5 rounded-xl text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 mb-1 transition-colors min-h-[48px]"
                 >
