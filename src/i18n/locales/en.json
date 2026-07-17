@@ -485,7 +485,7 @@
     "paymentProvider": "Payment Provider",
     "edit": "Edit",
     "reviewOrder": "Review Order",
-    "reviewDescription": "Please review your order details before proceeding to payment.",
+    "reviewDescription": "Please review your order details before placing your order.",
     "products": "Products",
     "orderTotal": "Order Total",
     "payment": "Payment",

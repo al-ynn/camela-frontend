@@ -1,17 +1,18 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { Check, ChevronRight, CreditCard, MapPin, Package, Pencil, Truck, User } from 'lucide-react'
+import { Check, ChevronRight, MapPin, Package, Pencil, Truck, User } from 'lucide-react'
 import { useCart } from '../../hooks/useCart'
 import { useSelector } from 'react-redux'
 import { selectUser, selectAuth } from '../../features/auth/authSlice'
 import { setCurrentOrder } from '../../features/orders/ordersSlice'
+import { setCartItems } from '../../features/cart/cartSlice'
 import { commerceService } from '../../services/commerceApi'
 import { formatPrice } from '../../utils/formatters'
 import { SHIPPING_METHODS } from '../../constants/config'
@@ -47,7 +48,6 @@ const Checkout = () => {
     { id: 1, label: t('checkout.steps.information'), icon: User },
     { id: 2, label: t('checkout.steps.delivery'), icon: Truck },
     { id: 3, label: t('checkout.steps.review'), icon: Package },
-    { id: 4, label: t('checkout.steps.payment'), icon: CreditCard },
   ]
 
   const contactSchema = z.object({
@@ -65,7 +65,6 @@ const Checkout = () => {
     country: z.string().min(2, t('checkout.validation.countryRequired')),
   })
 
-  const navigate = useNavigate()
   const dispatch = useDispatch()
   const { items, totals } = useCart()
   const user = useSelector(selectUser)
@@ -81,6 +80,7 @@ const Checkout = () => {
   const [selectedShipping, setSelectedShipping] = useState(SHIPPING_METHODS[0])
   const [placing, setPlacing] = useState(false)
   const [couponCode, setCouponCode] = useState('')
+  const hydratedCartRef = useRef(false)
 
   const contactForm = useForm({
     resolver: zodResolver(contactSchema),
@@ -119,6 +119,23 @@ const Checkout = () => {
       }
     })
   }, [token, addressForm])
+
+  useEffect(() => {
+    if (!token) return
+    if (hydratedCartRef.current) return
+    if (items.length > 0) return
+
+    hydratedCartRef.current = true
+    commerceService.getCart(token)
+      .then((cartItems) => {
+        if (Array.isArray(cartItems) && cartItems.length > 0) {
+          dispatch(setCartItems(cartItems))
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to hydrate checkout cart', error.response?.data || error)
+      })
+  }, [token, items.length, dispatch])
 
   const handleInformationSubmit = async () => {
     const contact = contactForm.getValues()
@@ -173,10 +190,13 @@ const Checkout = () => {
       dispatch(setCurrentOrder(order))
       const payment = await commerceService.createHitPayPayment(token)
       if (payment.payment_url) {
-        window.location.assign(payment.payment_url)
+        window.location.href = payment.payment_url
         return
       }
-      navigate(`/order-confirmation/${order.id}`)
+      toast.error(payment.message || 'Unable to start payment. Please try again.')
+    } catch (error) {
+      console.error('checkout/place-order error', error.response?.data || error)
+      toast.error(error.response?.data?.message || 'Unable to place order')
     } finally {
       setPlacing(false)
     }
@@ -564,63 +584,8 @@ const Checkout = () => {
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl border-2 border-gray-900 dark:border-white bg-gray-50 dark:bg-gray-800">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('checkout.paymentMethod')}</p>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">HP</div>
-                          <div>
-                            <p className="font-semibold text-gray-900 dark:text-white">{t('checkout.hitPaySecureCheckout')}</p>
-                            <p className="text-xs text-gray-500">{t('checkout.redirectToHitPay')}</p>
-                          </div>
-                        </div>
-                      </div>
-
                       <div className="flex gap-3">
                         <button onClick={() => setStep(2)} className="btn-outline btn-lg flex-1 justify-center">{t('checkout.back')}</button>
-                        <button onClick={() => setStep(4)} className="btn-brand btn-lg flex-1 justify-center gap-2">{t('checkout.proceedToPayment')} <ChevronRight size={17} /></button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Step 4 - Payment */}
-                {step === 4 && (
-                  <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <div className="card p-6 space-y-6">
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <CreditCard size={18} /> {t('checkout.payment')}
-                      </h2>
-
-                      <div className="p-5 rounded-xl border-2 border-gray-900 dark:border-white bg-gray-50 dark:bg-gray-800">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{t('checkout.paymentProvider')}</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 bg-brand-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">HP</div>
-                          <div>
-                            <p className="font-semibold text-gray-900 dark:text-white text-lg">{t('checkout.hitPaySecureCheckout')}</p>
-                            <p className="text-xs text-gray-500">Secure payment gateway</p>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{t('checkout.redirectToHitPay')}</p>
-                      </div>
-
-                      <div className="p-4 bg-surface-secondary dark:bg-surface-dark-secondary rounded-xl space-y-2 text-sm">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('checkout.orderSummary')}</p>
-                        <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                          <span>{t('checkout.orderTotal')}</span><span>{formatPrice(totals.subtotal)}</span>
-                        </div>
-                        <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                          <span>{t('cart.shipping')}</span><span>{totals.shipping === 0 ? t('checkout.free') : formatPrice(totals.shipping)}</span>
-                        </div>
-                        <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                          <span>{t('checkout.tax')}</span><span>{formatPrice(totals.tax)}</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-base text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-800">
-                          <span>{t('checkout.grandTotal')}</span><span>{formatPrice(totals.total)}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button onClick={() => setStep(3)} className="btn-outline btn-lg flex-1 justify-center">{t('checkout.back')}</button>
                         <button
                           onClick={handlePlaceOrder}
                           disabled={placing || items.length === 0}
@@ -629,13 +594,13 @@ const Checkout = () => {
                           {placing ? (
                             <>
                               <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                               </svg>
                               {t('common.loading')}
                             </>
                           ) : (
-                            <>{t('checkout.proceedToPayment')} · {formatPrice(totals.total)}</>
+                            <>{t('checkout.proceedToPayment')} <ChevronRight size={17} /></>
                           )}
                         </button>
                       </div>

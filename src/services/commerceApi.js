@@ -67,14 +67,16 @@ export const commerceService = {
     await client(token).delete('/cart')
   },
   async checkout(token, paymentMethod, shippingAddressId) {
-    const response = await client(token).post('/checkout', {
+    const payload = {
       payment_method: paymentMethod,
       shipping_address_id: shippingAddressId,
-    })
+    }
+    console.log('checkout payload', payload)
+    const response = await client(token).post('/checkout', payload)
     return order(response.data.data?.data || response.data.data)
   },
   async createHitPayPayment(token) {
-    const response = await client(token).post('/payments/hitpay')
+    const response = await client(token).post('/payments/create')
     return response.data
   },
   async getOrders(token) {

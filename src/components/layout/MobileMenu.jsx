@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Logo from '../common/Logo'
+import AvatarImage from '../common/AvatarImage'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, Heart, ShoppingBag, LogIn } from 'lucide-react'
@@ -80,7 +81,12 @@ const MobileMenu = () => {
             {/* User section */}
             {isAuthenticated ? (
               <div className="flex items-center gap-3 px-5 py-4 bg-gray-50 dark:bg-gray-800/50">
-                <img src={user?.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+                <AvatarImage
+                  src={user?.avatar}
+                  name={user?.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                  fallbackClassName="w-10 h-10 text-xs"
+                />
                 <div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
               {user?.name}

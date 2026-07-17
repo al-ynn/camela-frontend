@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Logo from '../components/common/Logo'
+import AvatarImage from '../components/common/AvatarImage'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -159,10 +160,12 @@ const AdminLayout = () => {
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-brand-600 rounded-full" />
             </button>
             <div className="flex items-center gap-2 pl-2">
-              <img
-          src={user?.avatar}
+              <AvatarImage
+                src={user?.avatar}
+                name={user?.name}
                 alt="Admin"
                 className="w-7 h-7 rounded-full object-cover"
+                fallbackClassName="w-7 h-7 text-[10px]"
               />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
           {user?.name}

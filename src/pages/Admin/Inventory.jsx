@@ -79,7 +79,7 @@ const AdminInventory = () => {
   return (
     <div className="p-6 space-y-5">
       <div>
-        <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">{t('admin.inventory')}</h1>
+        <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">{t('admin.inventory.title')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.inventoryDesc')}</p>
       </div>
 

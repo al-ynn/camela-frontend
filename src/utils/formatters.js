@@ -69,25 +69,37 @@ export const getInitials = (name) => {
 }
 
 export const getOrderStatusColor = (status) => {
+  const value = String(status || '').toLowerCase()
   const colors = {
     confirmed: 'badge-info',
     processing: 'badge-warning',
     shipped: 'badge-brand',
     delivered: 'badge-success',
+    pending: 'badge-warning',
+    paid: 'badge-success',
+    failed: 'badge-error',
     cancelled: 'bg-brand-50 text-brand-700',
+    canceled: 'bg-brand-50 text-brand-700',
+    expired: 'badge-gray',
     returned: 'badge-gray',
   }
-  return colors[status] || 'badge-gray'
+  return colors[value] || 'badge-gray'
 }
 
 export const getOrderStatusLabel = (status) => {
+  const value = String(status || '').toLowerCase()
   const labels = {
     confirmed: 'Confirmed',
     processing: 'Processing',
     shipped: 'Shipped',
     delivered: 'Delivered',
+    pending: 'Pending',
+    paid: 'Paid',
+    failed: 'Failed',
     cancelled: 'Cancelled',
+    canceled: 'Cancelled',
+    expired: 'Expired',
     returned: 'Returned',
   }
-  return labels[status] || status
+  return labels[value] || status
 }

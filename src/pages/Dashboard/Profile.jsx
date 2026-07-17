@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { selectUser, selectAuth, updateUser } from '../../features/auth/authSlice'
 import toast from 'react-hot-toast'
 import { commerceService } from '../../services/commerceApi'
+import AvatarImage from '../../components/common/AvatarImage'
 
 const schema = z.object({
   firstname: z.string().min(2, 'First name is required'),
@@ -54,10 +55,12 @@ const Profile = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card p-6">
         <div className="flex items-center gap-5">
           <div className="relative">
-            <img
-            src={user?.avatar}
-            alt={user?.name}
+            <AvatarImage
+              src={user?.avatar}
+              name={user?.name}
+              alt={user?.name}
               className="w-20 h-20 rounded-2xl object-cover ring-4 ring-gray-100 dark:ring-gray-800"
+              fallbackClassName="w-20 h-20 rounded-2xl text-lg ring-4 ring-gray-100 dark:ring-gray-800"
             />
             <button className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-brand-600 rounded-full flex items-center justify-center shadow-md hover:bg-brand-700 transition-colors">
               <Camera size={13} className="text-white" />

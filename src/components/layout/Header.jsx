@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Logo from '../common/Logo'
+import AvatarImage from '../common/AvatarImage'
 import LanguageSwitcher from '../common/LanguageSwitcher'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
@@ -250,10 +251,11 @@ const Header = () => {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                 >
-                  <img
+                  <AvatarImage
                     src={user?.avatar}
-                    alt={user?.name}
+                    name={user?.name}
                     className="w-7 h-7 rounded-full object-cover"
+                    fallbackClassName="w-7 h-7 text-[10px]"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">
                     {user?.name}

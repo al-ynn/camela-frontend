@@ -1,4 +1,5 @@
 import { Outlet, NavLink, Link } from 'react-router-dom'
+import AvatarImage from '../components/common/AvatarImage'
 import {
   LayoutDashboard,
   Package,
@@ -35,10 +36,11 @@ const DashboardLayout = () => {
             <div className="card p-6 sticky top-24">
               {/* User info */}
               <div className="flex items-center gap-4 pb-5 mb-5 border-b border-gray-100 dark:border-gray-800">
-                <img
+                <AvatarImage
                   src={user?.avatar}
-            alt={user?.name}
+                  name={user?.name}
                   className="w-12 h-12 rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900"
+                  fallbackClassName="w-12 h-12 text-sm"
                 />
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 dark:text-white truncate">
