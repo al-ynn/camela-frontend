@@ -219,8 +219,10 @@
     "recentOrders": "Pesanan Terkini",
     "viewAllOrders": "Lihat Semua Pesanan",
     "noOrders": "Tiada pesanan lagi",
-    "startShopping": "Mula Membeli-belah",
-    "addAddress": "Tambah Alamat Baru",
+      "startShopping": "Mula Membeli-belah",
+      "redeem": "Tebus",
+      "loyaltyPoints": "Mata Kesetiaan",
+      "addAddress": "Tambah Alamat Baru",
     "editAddress": "Edit Alamat",
     "deleteAddress": "Padam Alamat",
     "setDefault": "Tetapkan sebagai Lalai",
@@ -715,6 +717,47 @@
         "footnote": "Paten berdaftar di Pejabat Harta Intelek Korea (2015) · Lesen Paten AS (2016) · Lesen Paten Jepun (2018) · Dianugerahkan di Pameran Antarabangsa Ciptaan Geneva & Pameran Ciptaan Antarabangsa Seoul (2015)."
       }
     }
+  },
+  "adminSettings": {
+    "title": "Tetapan Kedai",
+    "subtitle": "Konfigurasikan pilihan kedai anda",
+    "storeInfo": {
+      "title": "Maklumat Kedai",
+      "subtitle": "Butiran asas yang dipaparkan kepada pelanggan",
+      "name": "Nama Kedai",
+      "tagline": "Slogan",
+      "supportEmail": "E-mel Sokongan",
+      "phone": "Telefon",
+      "address": "Alamat"
+    },
+    "payment": {
+      "title": "Kaedah Pembayaran",
+      "subtitle": "Aktifkan atau nyahaktif kaedah pembayaran yang diterima"
+    },
+    "shipping": {
+      "title": "Penghantaran & Hantaran",
+      "subtitle": "Tetapkan kadar penghantaran dan ambang penghantaran percuma",
+      "threshold": "Ambang Penghantaran Percuma",
+      "thresholdDesc": "Pesanan melebihi jumlah ini mendapat penghantaran standard percuma"
+    },
+    "tax": {
+      "title": "Tetapan Cukai",
+      "subtitle": "Konfigurasikan kadar cukai yang digunakan semasa pembayaran",
+      "rate": "Kadar Cukai Lalai",
+      "rateDesc": "Digunakan pada semua pesanan melainkan ditetapkan sebaliknya"
+    },
+    "notifications": {
+      "title": "Pemberitahuan",
+      "subtitle": "Keutamaan amaran pentadbir"
+    },
+    "security": {
+      "title": "Keselamatan & Akses",
+      "subtitle": "Urus tetapan keselamatan pentadbir"
+    },
+    "dangerZone": "Zon Bahaya",
+    "resetAllSettings": "Tetapkan Semula Semua Tetapan",
+    "resetAllSettingsDesc": "Pulihkan semua tetapan kepada tetapan kilang",
+    "resetRequiresConfirmation": "Tetapan semula memerlukan pengesahan super-admin"
   },
   "searchResults": {
     "resultsFor": "Hasil carian untuk",

@@ -20,7 +20,6 @@ const NAV_ITEMS = [
   { icon: Heart, label: 'Wishlist', href: ROUTES.DASHBOARD_WISHLIST },
   { icon: MapPin, label: 'Addresses', href: ROUTES.DASHBOARD_ADDRESSES },
   { icon: User, label: 'Profile', href: ROUTES.DASHBOARD_PROFILE },
-  { icon: CreditCard, label: 'Payment', href: '/dashboard/payment' },
   { icon: Settings, label: 'Settings', href: ROUTES.DASHBOARD_SETTINGS },
 ]
 

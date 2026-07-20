@@ -76,10 +76,6 @@ const Apply = () => {
         motivation: data.motivation,
       }
 
-      console.log('Sending email with params:', templateParams)
-      console.log('Service ID:', import.meta.env.VITE_EMAILJS_SERVICE_ID)
-      console.log('Template ID:', import.meta.env.VITE_EMAILJS_TEMPLATE_ID)
-
       const response = await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
@@ -87,16 +83,9 @@ const Apply = () => {
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       )
 
-      console.log('EmailJS response:', response)
       setSubmitted(true)
       toast.success(t('apply.successToast'))
     } catch (error) {
-      console.error('Email send error:', error)
-      console.error('Error details:', {
-        text: error.text,
-        status: error.status,
-        message: error.message
-      })
       toast.error(`Failed to submit: ${error.text || error.message}`)
     }
   }

@@ -233,8 +233,10 @@
     "recentOrders": "最近订单",
     "viewAllOrders": "查看所有订单",
     "noOrders": "暂无订单",
-    "startShopping": "开始购物",
-    "addAddress": "添加新地址",
+      "startShopping": "开始购物",
+      "redeem": "兑换",
+      "loyaltyPoints": "积分",
+      "addAddress": "添加新地址",
     "editAddress": "编辑地址",
     "deleteAddress": "删除地址",
     "setDefault": "设为默认",
@@ -804,6 +806,47 @@
         "footnote": "韩国知识产权局专利注册（2015年）· 美国专利许可（2016年）· 日本专利许可（2018年）· 荣获日内瓦国际发明展及首尔国际发明博览会奖项（2015年）。"
       }
     }
+  },
+  "adminSettings": {
+    "title": "店铺设置",
+    "subtitle": "配置您的店铺偏好",
+    "storeInfo": {
+      "title": "店铺信息",
+      "subtitle": "向客户展示的基本信息",
+      "name": "店铺名称",
+      "tagline": "标语",
+      "supportEmail": "支持邮箱",
+      "phone": "电话",
+      "address": "地址"
+    },
+    "payment": {
+      "title": "支付方式",
+      "subtitle": "启用或停用可接受的支付方式"
+    },
+    "shipping": {
+      "title": "配送与运输",
+      "subtitle": "设置运费和免运费门槛",
+      "threshold": "免运费门槛",
+      "thresholdDesc": "超过此金额的订单可享标准配送免费"
+    },
+    "tax": {
+      "title": "税务设置",
+      "subtitle": "配置结账时使用的税率",
+      "rate": "默认税率",
+      "rateDesc": "除非另有说明，否则适用于所有订单"
+    },
+    "notifications": {
+      "title": "通知",
+      "subtitle": "管理员提醒偏好"
+    },
+    "security": {
+      "title": "安全与访问",
+      "subtitle": "管理管理员安全设置"
+    },
+    "dangerZone": "危险区域",
+    "resetAllSettings": "重置所有设置",
+    "resetAllSettingsDesc": "将所有设置恢复为出厂默认值",
+    "resetRequiresConfirmation": "重置需要超级管理员确认"
   },
   "searchResults": {
     "resultsFor": "搜索结果",

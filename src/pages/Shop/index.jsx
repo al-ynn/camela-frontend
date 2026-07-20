@@ -34,15 +34,12 @@ const Shop = () => {
   const isLoading = category ? catLoading : allLoading
   const rawProducts = category ? categoryProducts : allProducts
 
-  console.log("rawProducts", rawProducts)
 
   const filtered = filterProducts(rawProducts, filters)
 
-  console.log("filtered", filtered)
 
   const sorted = sortProducts(filtered, sort)
 
-  console.log("sorted", sorted)
   
   const paginated = paginateProducts(sorted, page, PRODUCTS_PER_PAGE)
   const totalPages = Math.ceil(sorted.length / PRODUCTS_PER_PAGE)

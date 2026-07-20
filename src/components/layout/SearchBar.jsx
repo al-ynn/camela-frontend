@@ -50,6 +50,8 @@ const SearchBar = () => {
     if (e.key === 'Enter') handleSearch()
   }
 
+  const TRENDING = t('search.trending', { returnObjects: true }) || [];
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -155,9 +157,14 @@ const SearchBar = () => {
                   )}
                   <div>
                     <p className="flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3 uppercase tracking-wider">
-                      <TrendingUp size={12} /> {t('search.trending')}
+                      <TrendingUp size={12} />
+                      {t('search.trendingLabel')}
                     </p>
+
+      
                     <div className="flex flex-wrap gap-2">
+
+                      
                       {TRENDING.map((term) => (
                         <button
                           key={term}

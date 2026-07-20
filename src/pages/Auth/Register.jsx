@@ -57,7 +57,7 @@ const Register = () => {
             <label className="label-base">{t('auth.register.firstName')}</label>
             <input
               {...register('firstName')}
-              placeholder="John"
+              placeholder=""
               className={`input-base ${errors.firstName ? 'border-brand-400' : ''}`}
             />
             {errors.firstName && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.firstName.message}</p>}
@@ -66,7 +66,7 @@ const Register = () => {
             <label className="label-base">{t('auth.register.lastName')}</label>
             <input
               {...register('lastName')}
-              placeholder="Doe"
+              placeholder=""
               className={`input-base ${errors.lastName ? 'border-brand-400' : ''}`}
             />
             {errors.lastName && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.lastName.message}</p>}

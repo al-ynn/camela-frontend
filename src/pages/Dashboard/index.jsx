@@ -38,7 +38,6 @@ const DashboardHome = () => {
     { icon: Package, label: t('dashboard.totalOrders'), value: orders.length, href: ROUTES.DASHBOARD_ORDERS, color: 'bg-brand-600', delay: 0 },
     { icon: Heart, label: t('nav.wishlist'), value: wishlistCount, href: ROUTES.DASHBOARD_WISHLIST, color: 'bg-brand-500', delay: 0.05 },
     { icon: MapPin, label: t('dashboard.addresses'), value: 1, href: ROUTES.DASHBOARD_ADDRESSES, color: 'bg-amber-500', delay: 0.1 },
-    { icon: Star, label: 'Loyalty Points', value: '250', href: ROUTES.DASHBOARD, color: 'bg-emerald-500', delay: 0.15 },
   ]
 
   return (
@@ -131,26 +130,6 @@ const DashboardHome = () => {
         )}
       </div>
 
-      {/* Promo */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="card p-5 border-brand-100 dark:border-brand-900 bg-brand-50 dark:bg-brand-900/10"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-brand-100 dark:bg-brand-900/40 rounded-2xl flex items-center justify-center">
-            <TrendingUp size={22} className="text-brand-600 dark:text-brand-400" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 dark:text-white">You have 250 loyalty points!</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Redeem for $2.50 off your next order.</p>
-          </div>
-          <Link to={ROUTES.SHOP} className="btn-brand btn-sm flex-shrink-0">
-            Redeem
-          </Link>
-        </div>
-      </motion.div>
     </div>
   )
 }

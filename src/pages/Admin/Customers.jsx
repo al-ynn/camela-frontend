@@ -112,7 +112,7 @@ const AdminCustomers = () => {
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.phone')}</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.location')}</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <ThBtn field="orders">{t('admin.orders')}</ThBtn>
+                  <ThBtn field="orders">{t('admin.orders.title')}</ThBtn>
                 </th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   <ThBtn field="spent">{t('admin.totalSpent')}</ThBtn>

@@ -82,16 +82,6 @@ const Header = () => {
 
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="bg-gray-900 dark:bg-black text-white text-xs text-center py-2.5 px-4 font-medium tracking-wide">
-        <span className="hidden sm:inline">🎉 {t('header.freeShipping')} — </span>
-        <Link to={ROUTES.SHOP} className="underline hover:text-brand-400 transition-colors">
-          {t('header.shopNow')}
-        </Link>
-        <span className="hidden sm:inline"> · {t('header.useCode')} </span>
-        <span className="text-brand-400 font-bold">SAVE10</span>
-        <span className="hidden sm:inline"> {t('header.forOff')}</span>
-      </div>
 
       {/* Main Header */}
       <header

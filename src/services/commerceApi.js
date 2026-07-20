@@ -71,7 +71,6 @@ export const commerceService = {
       payment_method: paymentMethod,
       shipping_address_id: shippingAddressId,
     }
-    console.log('checkout payload', payload)
     const response = await client(token).post('/checkout', payload)
     return order(response.data.data?.data || response.data.data)
   },
@@ -91,6 +90,33 @@ export const commerceService = {
     const response = await client(token).get('/admin/dashboard')
     return response.data
   },
+
+  async getAdminOrders(token) {
+
+      const response = await client(token).get('/admin/orders');
+
+      return response.data.data.map((order) => ({
+
+          id: order.order_number,
+
+          customer: order.customer?.name ?? "",
+
+          email: order.customer?.email ?? "",
+
+          items: order.items?.length ?? 0,
+
+          total: order.grand_total,
+
+          payment: order.payment_method,
+
+          date: order.created_at,
+
+          status: order.order_status.toLowerCase(),
+
+      }));
+
+  },
+
   async getAdminProducts(token) {
     const response = await client(token).get('/admin/products')
     return response.data.data.map(adminProduct)

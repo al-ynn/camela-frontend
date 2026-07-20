@@ -27,11 +27,15 @@ const ProductCard = ({ product, view = 'grid' }) => {
     : 0
   const isNew = product.featured
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image]
-  const displayImage =
-  (hovered && productImages.length > 1
-      ? productImages[1]
-      : productImages[0]) ||
-    null
+  const currentImage =
+  hovered && productImages.length > 1
+    ? productImages[1]
+    : productImages[0]
+
+const displayImage =
+  typeof currentImage === 'string'
+    ? currentImage
+    : currentImage?.image_url || currentImage?.url || currentImage?.image || product.image
 
   if (view === 'list') {
     return (

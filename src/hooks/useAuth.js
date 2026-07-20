@@ -57,13 +57,14 @@ export const useAuth = () => {
   const handleUpdateUser = (data) => dispatch(updateUser(data))
 
   return {
-    user,
-    isAuthenticated,
-    loading,
-    error: auth.error,
-    login: handleLogin,
-    register: handleRegister,
-    logout: handleLogout,
-    updateUser: handleUpdateUser,
-  }
+  user,
+  token: auth.token, 
+  isAuthenticated,
+  loading,
+  error: auth.error,
+  login: handleLogin,
+  register: handleRegister,
+  logout: handleLogout,
+  updateUser: handleUpdateUser,
+}
 }

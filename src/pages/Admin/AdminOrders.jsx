@@ -3,10 +3,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, ChevronDown, Download, Eye } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectOrders, updateOrderStatus } from '../../features/orders/ordersSlice'
 import { formatPrice, formatDateShort, getOrderStatusColor, getOrderStatusLabel } from '../../utils/formatters'
 import Modal from '../../components/ui/Modal'
 import toast from 'react-hot-toast'
+import { useEffect } from "react";
+import { commerceService } from "../../services/commerceApi";
+import { useAuth } from "../../hooks/useAuth";
 
 const ALL_STATUSES = ['all', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
 
@@ -19,7 +21,10 @@ const StatusBadge = ({ status }) => (
 const AdminOrders = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const storeOrders = useSelector(selectOrders)
+  const { token } = useAuth();
+
+  console.log("TOKEN:", token);
+
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
@@ -28,17 +33,7 @@ const AdminOrders = () => {
 
   const PER_PAGE = 8
 
-  const combinedOrders = storeOrders.map((o) => ({
-      id: o.id,
-      customer: `${o.contact?.firstName || 'Customer'} ${o.contact?.lastName || ''}`.trim(),
-      email: o.contact?.email || 'N/A',
-      items: o.items?.length || 0,
-      total: o.totals?.total || 0,
-      status: orderStatuses[o.id] || o.status,
-      date: o.createdAt?.slice(0, 10) || '',
-      payment: o.payment?.method === 'hitpay' ? 'HitPay' : o.paymentMethod || 'Card',
-      source: 'live',
-    }))
+  const [combinedOrders, setCombinedOrders] = useState([]);
 
   const filtered = combinedOrders.filter((o) => {
     const q = search.toLowerCase()
@@ -52,26 +47,57 @@ const AdminOrders = () => {
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   const updateStatus = (orderId, newStatus) => {
-    // Check if this is a live order (from Redux store)
-    const isLiveOrder = storeOrders.find((o) => o.id === orderId)
-    
-    if (isLiveOrder) {
-      // Dispatch Redux action to persist status change
-      dispatch(updateOrderStatus({ id: orderId, status: newStatus }))
-    }
-    toast.success(`Order ${orderId} status updated to ${newStatus}`)
-  }
+
+      setCombinedOrders(previous =>
+
+          previous.map(order =>
+
+              order.id === orderId
+
+                  ? { ...order, status: newStatus }
+
+                  : order
+
+          )
+
+      );
+
+      toast.success(`Order ${orderId} updated.`);
+
+  };
 
   const statusCounts = ALL_STATUSES.reduce((acc, s) => {
     acc[s] = s === 'all' ? combinedOrders.length : combinedOrders.filter((o) => o.status === s).length
     return acc
   }, {})
 
+  useEffect(() => {
+
+      const loadOrders = async () => {
+
+          try {
+
+              const orders = await commerceService.getAdminOrders(token);
+
+              setCombinedOrders(orders);
+
+          } catch (err) {
+
+              console.error(err);
+
+          }
+
+      };
+
+      loadOrders();
+
+  }, [token]);
+
   return (
     <div className="p-6 space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">{t('admin.orders')}</h1>
+          <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">{t('admin.orders.title')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{combinedOrders.length} {t('admin.totalOrders')}</p>
         </div>
         <button

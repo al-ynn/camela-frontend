@@ -50,40 +50,6 @@ const Footer = () => {
     <footer className="bg-gray-950 text-gray-400 mt-auto">
       {/* Newsletter */}
       <div className="border-b border-gray-800">
-        <div className="container py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-xl font-display font-bold text-white mb-1">
-                {t('footer.newsletterTitle')}
-              </h3>
-              <p className="text-sm text-gray-400">
-                {t('footer.newsletterDesc')}
-              </p>
-            </div>
-            <form onSubmit={handleSubscribe} className="flex w-full md:w-auto gap-2">
-              <div className="relative flex-1 md:w-72">
-                <Mail
-                  size={15}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-                />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t('footer.enterEmail')}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-900 border border-gray-800 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-brand-500 transition-colors"
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn-brand btn-md px-5 flex-shrink-0 gap-2"
-              >
-                {t('footer.subscribe')}
-                <ArrowRight size={15} />
-              </button>
-            </form>
-          </div>
-        </div>
       </div>
 
       {/* Main Links */}

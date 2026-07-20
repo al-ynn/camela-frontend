@@ -19,10 +19,20 @@ const describeArc = (cx, cy, r, startAngle, endAngle) => {
 
 const DonutChart = ({ data = [] }) => {
   const [hovered, setHovered] = useState(null)
+  const COLORS = [
+    '#3B82F6',
+    '#10B981',
+    '#F59E0B',
+    '#EF4444',
+    '#8B5CF6',
+    '#06B6D4',
+  ]
+
   const normalizedData = data
-    .map((item) => ({
-      ...item,
-      sales: Number(item?.sales),
+    .map((item, index) => ({
+      category: item.category ?? item.name,
+      sales: Number(item.sales ?? item.value),
+      color: item.color ?? COLORS[index % COLORS.length],
     }))
     .filter((item) => Number.isFinite(item.sales))
 
@@ -70,7 +80,9 @@ const DonutChart = ({ data = [] }) => {
           })}
           {/* Center text */}
           <text x={CX} y={CY - 8} textAnchor="middle" fontSize="20" fontWeight="700" fill="currentColor">
-            {hovered !== null ? `${normalizedData[hovered].sales}%` : `${total}%`}
+            {hovered !== null
+              ? normalizedData[hovered].sales
+              : total}
           </text>
           <text x={CX} y={CY + 12} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.5">
             {hovered !== null ? normalizedData[hovered].category.split(' ')[0] : 'Total Sales'}
@@ -95,9 +107,17 @@ const DonutChart = ({ data = [] }) => {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <div className="w-16 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: `${segment.sales}%`, background: segment.color }} />
+                <div
+                    className="h-full rounded-full"
+                    style={{
+                        width: `${(segment.sales / total) * 100}%`,
+                        background: segment.color
+                    }}
+                />
               </div>
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-8 text-right">{segment.sales}%</span>
+              <span className="text-xs font-semibold ...">
+                  {((segment.sales / total) * 100).toFixed(0)}%
+              </span>
             </div>
           </div>
         ))}

@@ -123,17 +123,19 @@ const Checkout = () => {
   useEffect(() => {
     if (!token) return
     if (hydratedCartRef.current) return
-    if (items.length > 0) return
 
     hydratedCartRef.current = true
     commerceService.getCart(token)
       .then((cartItems) => {
-        if (Array.isArray(cartItems) && cartItems.length > 0) {
+        if (Array.isArray(cartItems)) {
           dispatch(setCartItems(cartItems))
+        } else {
+          dispatch(setCartItems([]))
         }
       })
       .catch((error) => {
         console.error('Failed to hydrate checkout cart', error.response?.data || error)
+        dispatch(setCartItems([]))
       })
   }, [token, items.length, dispatch])
 
@@ -195,7 +197,6 @@ const Checkout = () => {
       }
       toast.error(payment.message || 'Unable to start payment. Please try again.')
     } catch (error) {
-      console.error('checkout/place-order error', error.response?.data || error)
       toast.error(error.response?.data?.message || 'Unable to place order')
     } finally {
       setPlacing(false)

@@ -224,7 +224,7 @@ const AdminProducts = () => {
         <select
           value={categoryFilter}
           onChange={(e) => { setCategoryFilter(e.target.value); setPage(1) }}
-          className="input-base h-9 w-full sm:w-52"
+          className="input-base h w-full sm:w-52"
         >
           <option value="">All Categories</option>
           {allCategories.map((c) => <option key={c} value={c}>{c}</option>)}

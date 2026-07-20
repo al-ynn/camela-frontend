@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Store, CreditCard, Truck, Percent, Bell, Shield, Save, RefreshCw } from 'lucide-react'
 import { APP_CONFIG, SHIPPING_METHODS, TAX_RATE } from '../../constants/config'
@@ -26,6 +27,7 @@ const Section = ({ icon: Icon, title, subtitle, children }) => (
 )
 
 const AdminSettings = () => {
+  const { t } = useTranslation()
   const [storeInfo, setStoreInfo] = useState({
     name: APP_CONFIG.name,
     tagline: APP_CONFIG.tagline,
@@ -60,30 +62,30 @@ const AdminSettings = () => {
   return (
     <div className="p-6 space-y-5 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">Store Settings</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Configure your store preferences</p>
+        <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">{t('adminSettings.title')}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t('adminSettings.subtitle')}</p>
       </div>
 
       {/* Store Info */}
-      <Section icon={Store} title="Store Information" subtitle="Basic details shown to customers">
+      <Section icon={Store} title={t('adminSettings.storeInfo.title')} subtitle={t('adminSettings.storeInfo.subtitle')}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="label-base">Store Name</label><input value={storeInfo.name} onChange={(e) => setStoreInfo({ ...storeInfo, name: e.target.value })} className="input-base" /></div>
-            <div><label className="label-base">Tagline</label><input value={storeInfo.tagline} onChange={(e) => setStoreInfo({ ...storeInfo, tagline: e.target.value })} className="input-base" /></div>
+            <div><label className="label-base">{t('adminSettings.storeInfo.name')}</label><input value={storeInfo.name} onChange={(e) => setStoreInfo({ ...storeInfo, name: e.target.value })} className="input-base" /></div>
+            <div><label className="label-base">{t('adminSettings.storeInfo.tagline')}</label><input value={storeInfo.tagline} onChange={(e) => setStoreInfo({ ...storeInfo, tagline: e.target.value })} className="input-base" /></div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="label-base">Support Email</label><input type="email" value={storeInfo.email} onChange={(e) => setStoreInfo({ ...storeInfo, email: e.target.value })} className="input-base" /></div>
-            <div><label className="label-base">Phone</label><input value={storeInfo.phone} onChange={(e) => setStoreInfo({ ...storeInfo, phone: e.target.value })} className="input-base" /></div>
+            <div><label className="label-base">{t('adminSettings.storeInfo.supportEmail')}</label><input type="email" value={storeInfo.email} onChange={(e) => setStoreInfo({ ...storeInfo, email: e.target.value })} className="input-base" /></div>
+            <div><label className="label-base">{t('adminSettings.storeInfo.phone')}</label><input value={storeInfo.phone} onChange={(e) => setStoreInfo({ ...storeInfo, phone: e.target.value })} className="input-base" /></div>
           </div>
-          <div><label className="label-base">Address</label><input value={storeInfo.address} onChange={(e) => setStoreInfo({ ...storeInfo, address: e.target.value })} className="input-base" /></div>
+          <div><label className="label-base">{t('adminSettings.storeInfo.address')}</label><input value={storeInfo.address} onChange={(e) => setStoreInfo({ ...storeInfo, address: e.target.value })} className="input-base" /></div>
         </div>
         <div className="flex justify-end pt-2">
-          <button onClick={() => handleSave('Store Information')} className="btn-brand btn-sm gap-2"><Save size={13} /> Save</button>
+          <button onClick={() => handleSave(t('adminSettings.storeInfo.title'))} className="btn-brand btn-sm gap-2"><Save size={13} /> {t('common.save')}</button>
         </div>
       </Section>
 
       {/* Payment */}
-      <Section icon={CreditCard} title="Payment Methods" subtitle="Enable or disable accepted payment methods">
+      <Section icon={CreditCard} title={t('adminSettings.payment.title')} subtitle={t('adminSettings.payment.subtitle')}>
         <div className="space-y-3">
           {[
             ['card', 'Credit / Debit Card', 'Visa, Mastercard, Amex'],
@@ -102,18 +104,18 @@ const AdminSettings = () => {
           ))}
         </div>
         <div className="flex justify-end pt-2">
-          <button onClick={() => handleSave('Payment')} className="btn-brand btn-sm gap-2"><Save size={13} /> Save</button>
+          <button onClick={() => handleSave(t('adminSettings.payment.title'))} className="btn-brand btn-sm gap-2"><Save size={13} /> {t('common.save')}</button>
         </div>
       </Section>
 
       {/* Shipping */}
-      <Section icon={Truck} title="Shipping & Delivery" subtitle="Set shipping rates and free shipping threshold">
+      <Section icon={Truck} title={t('adminSettings.shipping.title')} subtitle={t('adminSettings.shipping.subtitle')}>
         <div className="space-y-4">
           {SHIPPING_METHODS.map((method) => (
             <div key={method.id} className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
-                <p className="text-xs text-gray-400">{method.description}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
+              <p className="text-xs text-gray-400">{method.description}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">$</span>
@@ -129,8 +131,8 @@ const AdminSettings = () => {
           ))}
           <div className="flex items-center justify-between gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">Free Shipping Threshold</p>
-              <p className="text-xs text-gray-400">Orders above this amount get free standard shipping</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{t('adminSettings.shipping.threshold')}</p>
+              <p className="text-xs text-gray-400">{t('adminSettings.shipping.thresholdDesc')}</p>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-400">$</span>
@@ -139,16 +141,16 @@ const AdminSettings = () => {
           </div>
         </div>
         <div className="flex justify-end pt-2">
-          <button onClick={() => handleSave('Shipping')} className="btn-brand btn-sm gap-2"><Save size={13} /> Save</button>
+          <button onClick={() => handleSave(t('adminSettings.shipping.title'))} className="btn-brand btn-sm gap-2"><Save size={13} /> {t('common.save')}</button>
         </div>
       </Section>
 
       {/* Tax */}
-      <Section icon={Percent} title="Tax Settings" subtitle="Configure tax rates applied at checkout">
+      <Section icon={Percent} title={t('adminSettings.tax.title')} subtitle={t('adminSettings.tax.subtitle')}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">Default Tax Rate</p>
-            <p className="text-xs text-gray-400">Applied to all orders unless overridden</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">{t('adminSettings.tax.rate')}</p>
+            <p className="text-xs text-gray-400">{t('adminSettings.tax.rateDesc')}</p>
           </div>
           <div className="flex items-center gap-2">
             <input type="number" value={taxRate} onChange={(e) => setTaxRate(parseFloat(e.target.value))} className="input-base w-20 py-2 text-sm" step="0.1" min="0" max="50" />
@@ -156,12 +158,12 @@ const AdminSettings = () => {
           </div>
         </div>
         <div className="flex justify-end">
-          <button onClick={() => handleSave('Tax')} className="btn-brand btn-sm gap-2"><Save size={13} /> Save</button>
+          <button onClick={() => handleSave(t('adminSettings.tax.title'))} className="btn-brand btn-sm gap-2"><Save size={13} /> {t('common.save')}</button>
         </div>
       </Section>
 
       {/* Notifications */}
-      <Section icon={Bell} title="Notifications" subtitle="Admin alert preferences">
+      <Section icon={Bell} title={t('adminSettings.notifications.title')} subtitle={t('adminSettings.notifications.subtitle')}>
         <div className="space-y-3">
           {[
             ['newOrder', 'New Order Placed', 'Alert when a customer places an order'],
@@ -182,7 +184,7 @@ const AdminSettings = () => {
       </Section>
 
       {/* Security */}
-      <Section icon={Shield} title="Security & Access" subtitle="Manage admin security settings">
+      <Section icon={Shield} title={t('adminSettings.security.title')} subtitle={t('adminSettings.security.subtitle')}>
         <div className="space-y-3">
           {[
             ['twoFactor', 'Two-Factor Authentication', 'Require 2FA for admin login'],
@@ -202,14 +204,14 @@ const AdminSettings = () => {
 
       {/* Danger Zone */}
       <div className="card p-6 border-red-100 dark:border-red-900/40">
-        <h3 className="font-semibold text-brand-600 dark:text-brand-400 mb-4">Danger Zone</h3>
+        <h3 className="font-semibold text-brand-600 dark:text-brand-400 mb-4">{t('adminSettings.dangerZone')}</h3>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-red-50 dark:bg-red-900/10 rounded-xl">
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">Reset All Settings</p>
-            <p className="text-xs text-gray-400">Restore all settings to their factory defaults</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">{t('adminSettings.resetAllSettings')}</p>
+            <p className="text-xs text-gray-400">{t('adminSettings.resetAllSettingsDesc')}</p>
           </div>
-          <button onClick={() => toast.error('Reset requires super-admin confirmation')} className="btn bg-brand-600 text-white hover:bg-brand-700 btn-sm gap-2 flex-shrink-0">
-            <RefreshCw size={13} /> Reset
+          <button onClick={() => toast.error(t('adminSettings.resetRequiresConfirmation'))} className="btn bg-brand-600 text-white hover:bg-brand-700 btn-sm gap-2 flex-shrink-0">
+            <RefreshCw size={13} /> {t('adminSettings.resetAllSettings')}
           </button>
         </div>
       </div>

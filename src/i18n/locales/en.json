@@ -233,8 +233,10 @@
     "recentOrders": "Recent Orders",
     "viewAllOrders": "View All Orders",
     "noOrders": "No orders yet",
-    "startShopping": "Start Shopping",
-    "addAddress": "Add New Address",
+      "startShopping": "Start Shopping",
+      "redeem": "Redeem",
+      "loyaltyPoints": "Loyalty Points",
+      "addAddress": "Add New Address",
     "editAddress": "Edit Address",
     "deleteAddress": "Delete Address",
     "setDefault": "Set as Default",
@@ -288,7 +290,14 @@
     "products": "Products",
     "seeAllResults": "See all results for",
     "recentSearches": "Recent Searches",
-    "trending": "Trending"
+    "trendingLabel": "Trending",
+    "trending": [
+      "Walnut Peptide",
+      "Hydrogen Water",
+      "Supplements",
+      "Health Products",
+      "Skincare"
+    ]
   },
   "error": {
     "title": "Something went wrong",
@@ -527,11 +536,9 @@
       "paymentConfirmed": "Payment Confirmed",
       "processing": "Processing...",
       "orderProcessing": "Order Processing",
-      "est12": "Est. 1–2 business days",
       "shipped": "Shipped",
-      "est35": "Est. 3–5 business days",
-      "delivered": "Delivered",
-      "est57": "Est. 5–7 business days"
+      "delivered": "Delivered"
+    
     }
   },
   "orders": {
@@ -816,6 +823,47 @@
         "footnote": "Patent registered at Korea Intellectual Property Office (2015) · USA Patent License (2016) · Japan Patent License (2018) · Awarded at International Exhibition of Inventions, Geneva & Seoul International Invention Fair (2015)."
       }
     }
+  },
+  "adminSettings": {
+    "title": "Store Settings",
+    "subtitle": "Configure your store preferences",
+    "storeInfo": {
+      "title": "Store Information",
+      "subtitle": "Basic details shown to customers",
+      "name": "Store Name",
+      "tagline": "Tagline",
+      "supportEmail": "Support Email",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "payment": {
+      "title": "Payment Methods",
+      "subtitle": "Enable or disable accepted payment methods"
+    },
+    "shipping": {
+      "title": "Shipping & Delivery",
+      "subtitle": "Set shipping rates and free shipping threshold",
+      "threshold": "Free Shipping Threshold",
+      "thresholdDesc": "Orders above this amount get free standard shipping"
+    },
+    "tax": {
+      "title": "Tax Settings",
+      "subtitle": "Configure tax rates applied at checkout",
+      "rate": "Default Tax Rate",
+      "rateDesc": "Applied to all orders unless overridden"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Admin alert preferences"
+    },
+    "security": {
+      "title": "Security & Access",
+      "subtitle": "Manage admin security settings"
+    },
+    "dangerZone": "Danger Zone",
+    "resetAllSettings": "Reset All Settings",
+    "resetAllSettingsDesc": "Restore all settings to their factory defaults",
+    "resetRequiresConfirmation": "Reset requires super-admin confirmation"
   },
   "searchResults": {
     "resultsFor": "Search results for",

@@ -53,6 +53,7 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [imageZoomed, setImageZoomed] = useState(false)
+  const [failedImages, setFailedImages] = useState({})
 
   if (isLoading) return (
     <div className="container py-10">
@@ -76,6 +77,12 @@ const ProductDetail = () => {
   const related = getRelatedProducts(allProducts, product, 4)
 
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image]
+  const fallbackImage = '/livepure-product.png'
+  const resolveImage = (img, index) => {
+    if (!img) return fallbackImage
+    if (failedImages[index]) return fallbackImage
+    return img
+  }
 
   const handleAddToCart = () => {
     if (sizes.length > 0 && !selectedSize) {
@@ -105,12 +112,12 @@ const ProductDetail = () => {
       label: t('product.specifications'),
       content: (
         <div className="space-y-3">
-          {[
-            { label: 'Category', value: product.category },
+          {[ 
+            { label: t('product.category'), value: product.category },
             { label: 'Product ID', value: `#${product.id}` },
-            ...(product.rating ? [{ label: 'Rating', value: `${product.rating.rate}/5 (${product.rating.count} reviews)` }] : []),
-            { label: 'Availability', value: product.stock > 0 ? 'In Stock' : 'Out of Stock' },
-            { label: 'SKU', value: product.sku },
+            ...(product.rating ? [{ label: t('product.rating'), value: `${product.rating.rate}/5 (${product.rating.count} ${t('product.reviews').toLowerCase()})` }] : []),
+            { label: t('product.availability'), value: product.stock > 0 ? t('product.inStock') : t('product.outOfStock') },
+            { label: t('product.sku'), value: product.sku },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-800 last:border-0 text-sm">
               <span className="text-gray-500 dark:text-gray-400">{label}</span>
@@ -165,7 +172,7 @@ const ProductDetail = () => {
         {/* Breadcrumb */}
         <Breadcrumb
           items={[
-            { label: 'Shop', href: '/shop' },
+            { label: t('nav.shop'), href: '/shop' },
             { label: product.category, href: product.category_landing_page || '/shop' },
             { label: product.title },
           ]}
@@ -183,8 +190,9 @@ const ProductDetail = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: imageZoomed ? 1.3 : 1 }}
                 transition={{ duration: 0.3 }}
-                src={productImages[selectedImage]}
+                src={resolveImage(productImages[selectedImage], selectedImage)}
                 alt={product.title}
+                onError={() => setFailedImages((current) => ({ ...current, [selectedImage]: true }))}
                 className="w-full h-full object-contain p-8"
               />
               {discountPercent > 5 && (
@@ -206,7 +214,12 @@ const ProductDetail = () => {
                       : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'
                   )}
                 >
-                  <img src={img} alt="" className="w-full h-full object-contain p-2" />
+                  <img
+                    src={resolveImage(img, i)}
+                    alt=""
+                    onError={() => setFailedImages((current) => ({ ...current, [i]: true }))}
+                    className="w-full h-full object-contain p-2"
+                  />
                 </button>
               ))}
             </div>
@@ -237,7 +250,7 @@ const ProductDetail = () => {
               {discountPercent > 5 && (
                 <>
                   <span className="text-xl text-gray-400 line-through">{formatPrice(originalPrice)}</span>
-                  <Badge variant="sale">Save {discountPercent}%</Badge>
+                  <Badge variant="sale">{t('product.save')} {discountPercent}%</Badge>
                 </>
               )}
             </div>
