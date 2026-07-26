@@ -1,4 +1,4 @@
-import { SORT_OPTIONS } from '../constants/config'
+import { SORT_OPTIONS, resolveApiAssetUrl } from '../constants/config'
 
 export const sortProducts = (products, sortBy) => {
   const arr = [...products]
@@ -75,6 +75,16 @@ export const randomBetween = (min, max) => Math.floor(Math.random() * (max - min
 
 export const getSortLabel = (value) => {
   return SORT_OPTIONS.find((o) => o.value === value)?.label || 'Featured'
+}
+
+export const resolveProductImageUrl = (image) => {
+  if (!image) return image
+
+  const rawUrl = typeof image === 'string'
+    ? image
+    : image.image_url || image.url || image.image || image.path || image.image_path
+
+  return resolveApiAssetUrl(rawUrl)
 }
 
 export const cn = (...classes) => classes.filter(Boolean).join(' ')

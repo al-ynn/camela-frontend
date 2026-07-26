@@ -27,8 +27,7 @@ import Accordion from '../../components/ui/Accordion'
 import ProductCard from '../../components/product/ProductCard'
 import Breadcrumb from '../../components/layout/Breadcrumb'
 import { formatPrice } from '../../utils/formatters'
-import { getRelatedProducts } from '../../utils/helpers'
-import { cn } from '../../utils/helpers'
+import { getRelatedProducts, cn, resolveProductImageUrl } from '../../utils/helpers'
 import toast from 'react-hot-toast'
 
 const ProductDetail = () => {
@@ -81,7 +80,7 @@ const ProductDetail = () => {
   const resolveImage = (img, index) => {
     if (!img) return fallbackImage
     if (failedImages[index]) return fallbackImage
-    return img
+    return resolveProductImageUrl(img) || fallbackImage
   }
 
   const handleAddToCart = () => {

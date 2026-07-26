@@ -10,7 +10,10 @@ export const useProducts = () => {
     isLoading,
     isError,
     error,
-  } = useGetProductsQuery()
+  } = useGetProductsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+  })
 
   return {
     data,
@@ -28,6 +31,8 @@ export const useProductsByCategory = (category) => {
     error,
   } = useGetProductsByCategoryQuery(category, {
     skip: !category,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
   })
 
   return {
@@ -46,6 +51,8 @@ export const useProduct = (id) => {
     error,
   } = useGetProductQuery(id, {
     skip: !id,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
   })
 
   return {

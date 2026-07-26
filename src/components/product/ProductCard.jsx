@@ -10,7 +10,7 @@ import { selectIsInWishlist } from '../../features/wishlist/wishlistSlice'
 import Rating from '../ui/Rating'
 import Badge from '../ui/Badge'
 import { formatPrice } from '../../utils/formatters'
-import { cn } from '../../utils/helpers'
+import { cn, resolveProductImageUrl } from '../../utils/helpers'
 
 const ProductCard = ({ product, view = 'grid' }) => {
   const { t } = useTranslation()
@@ -27,9 +27,7 @@ const ProductCard = ({ product, view = 'grid' }) => {
     : productImages[0]
 
 const displayImage =
-  typeof currentImage === 'string'
-    ? currentImage
-    : currentImage?.image_url || currentImage?.url || currentImage?.image || product.image
+  resolveProductImageUrl(currentImage) || resolveProductImageUrl(product.image)
 
   if (view === 'list') {
     return (
@@ -40,9 +38,10 @@ const displayImage =
       >
         <Link to={`/product/${product.id}`} className="flex-shrink-0 w-28 h-28 bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden">
           <img
-            src={productImages[0]}
+            src={resolveProductImageUrl(productImages[0])}
             alt={product.title}
             className="w-full h-full object-contain p-2"
+            onError={(e) => { e.currentTarget.src = '/livepure-product.png' }}
           />
         </Link>
         <div className="flex-1 min-w-0">
@@ -111,6 +110,9 @@ const displayImage =
             alt={product.title}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              e.currentTarget.src = '/livepure-product.png'
+            }}
             className={cn(
               'w-full h-full object-contain p-4 transition-all duration-500',
               hovered ? 'scale-105' : 'scale-100',

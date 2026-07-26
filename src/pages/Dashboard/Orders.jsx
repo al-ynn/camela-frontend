@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { selectAuth } from '../../features/auth/authSlice'
 import { commerceService } from '../../services/commerceApi'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const STATUS_STYLES = {
   confirmed: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
@@ -83,7 +84,7 @@ const OrderRow = ({ order, index }) => {
                 {order.items?.map((item) => (
                   <div key={item.key} className="flex items-start gap-3">
                     <img
-                      src={item.image}
+                      src={resolveApiAssetUrl(item.image)}
                       alt={item.title}
                       className="w-16 h-16 object-contain bg-gray-50 dark:bg-gray-800 rounded-xl p-2 flex-shrink-0"
                     />

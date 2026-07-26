@@ -15,6 +15,7 @@ import { setCurrentOrder } from '../../features/orders/ordersSlice'
 import { setCartItems } from '../../features/cart/cartSlice'
 import { commerceService } from '../../services/commerceApi'
 import { formatPrice } from '../../utils/formatters'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const COUNTRIES = [
   'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia',
@@ -371,7 +372,7 @@ const Checkout = () => {
           <div key={item.key} className="flex gap-3 py-3 first:pt-0 last:pb-0">
             <div className="relative">
               <div className="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden flex-shrink-0">
-                <img src={item.image} alt="" className="w-full h-full object-contain p-1.5" />
+                <img src={resolveApiAssetUrl(item.image)} alt="" className="w-full h-full object-contain p-1.5" />
               </div>
               <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-700 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {item.quantity}
@@ -628,7 +629,7 @@ const Checkout = () => {
                           {items.map((item) => (
                             <div key={item.key} className="flex items-center gap-3">
                               <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
-                                <img src={item.image} alt="" className="w-full h-full object-contain p-1" />
+                                <img src={resolveApiAssetUrl(item.image)} alt="" className="w-full h-full object-contain p-1" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">{item.title}</p>

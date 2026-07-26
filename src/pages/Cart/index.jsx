@@ -6,6 +6,7 @@ import { ShoppingBag, Trash2, Plus, Minus, Tag, X, ArrowRight, ArrowLeft } from 
 import { useCart } from '../../hooks/useCart'
 import { formatPrice } from '../../utils/formatters'
 import { ROUTES } from '../../constants/routes'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const Cart = () => {
   const { t } = useTranslation()
@@ -88,7 +89,7 @@ const Cart = () => {
                       className="flex-shrink-0 w-24 h-24 bg-surface-secondary dark:bg-gray-800 rounded-xl overflow-hidden"
                     >
                       <img
-                        src={item.image}
+                        src={resolveApiAssetUrl(item.image)}
                         alt={item.title}
                         className="w-full h-full object-contain p-2"
                       />

@@ -7,6 +7,7 @@ import { formatPrice } from '../../utils/formatters'
 import toast from 'react-hot-toast'
 import { selectAuth } from '../../features/auth/authSlice'
 import { commerceService } from '../../services/commerceApi'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const AdminInventory = () => {
   const { t } = useTranslation()
@@ -145,7 +146,7 @@ const AdminInventory = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                           {product.image
-                            ? <img src={product.image} alt="" className="w-full h-full object-contain p-1" />
+                            ? <img src={resolveApiAssetUrl(product.image)} alt="" className="w-full h-full object-contain p-1" />
                             : <Package size={14} className="text-gray-300 m-auto" />
                           }
                         </div>

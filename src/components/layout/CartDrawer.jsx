@@ -8,6 +8,7 @@ import { clearCartState, selectCartItems, selectCartTotals } from '../../feature
 import { useCart } from '../../hooks/useCart'
 import { formatPrice } from '../../utils/formatters'
 import { ROUTES } from '../../constants/routes'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const CartDrawer = () => {
   const dispatch = useDispatch()
@@ -100,7 +101,7 @@ const CartDrawer = () => {
                         className="w-16 h-16 flex-shrink-0 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                       >
                         <img
-                          src={item.image}
+                          src={resolveApiAssetUrl(item.image)}
                           alt={item.title}
                           className="w-full h-full object-contain p-2"
                         />

@@ -6,6 +6,7 @@ import { CheckCircle, Package, ArrowRight, Home, ShoppingBag } from 'lucide-reac
 import { selectCurrentOrder } from '../../features/orders/ordersSlice'
 import { formatPrice } from '../../utils/formatters'
 import { ROUTES } from '../../constants/routes'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const OrderConfirmation = () => {
   const { t } = useTranslation()
@@ -94,7 +95,7 @@ const OrderConfirmation = () => {
               {order.items.slice(0, 3).map((item) => (
                 <div key={item.key} className="flex items-center gap-3 py-2">
                   <img
-                    src={item.image}
+                    src={resolveApiAssetUrl(item.image)}
                     alt={item.title}
                     className="w-10 h-10 object-contain bg-gray-50 dark:bg-gray-800 rounded-lg p-1"
                   />

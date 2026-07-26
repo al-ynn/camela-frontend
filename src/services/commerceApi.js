@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { API_BASE_URL } from '../constants/config'
+import { resolveApiAssetUrl } from '../constants/config'
 
 const client = (token) => axios.create({
   baseURL: API_BASE_URL,
@@ -13,7 +14,7 @@ const cartItem = (item) => ({
   cartItemId: item.id,
   title: item.product.title,
   price: item.price,
-  image: item.product.image,
+  image: resolveApiAssetUrl(item.product.image),
   category: item.product.category,
   quantity: item.quantity,
 })
@@ -27,7 +28,7 @@ const order = (value) => ({
     key: String(item.id),
     id: item.product.id,
     title: item.product.title,
-    image: item.product.image,
+    image: resolveApiAssetUrl(item.product.image),
     category: item.product.category,
     price: item.price,
     quantity: item.quantity,
@@ -54,8 +55,8 @@ const adminProduct = (product) => ({
     category: product.category,
     category_id: product.category_id,
 
-    image: product.image,
-    images: product.images,
+    image: resolveApiAssetUrl(product.image),
+    images: (product.images || []).map((image) => resolveApiAssetUrl(image)),
 
     description: product.description,
     short_description: product.short_description,

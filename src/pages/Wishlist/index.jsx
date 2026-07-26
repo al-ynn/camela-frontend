@@ -7,6 +7,7 @@ import { useCart } from '../../hooks/useCart'
 import { formatPrice } from '../../utils/formatters'
 import Rating from '../../components/ui/Rating'
 import { ROUTES } from '../../constants/routes'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const Wishlist = () => {
   const { t } = useTranslation()
@@ -79,7 +80,7 @@ const Wishlist = () => {
                 <div className="relative aspect-product bg-gray-50 dark:bg-gray-800">
                   <Link to={`/product/${item.id}`}>
                     <img
-                      src={item.image}
+                      src={resolveApiAssetUrl(item.image)}
                       alt={item.title}
                       className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                     />
