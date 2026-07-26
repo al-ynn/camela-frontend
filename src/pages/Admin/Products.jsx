@@ -2,8 +2,18 @@ import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import {
-  Search, Plus, Pencil, Trash2, X, Check,
-  ChevronUp, ChevronDown, ToggleLeft, ToggleRight, ImagePlus, Upload,
+  Search,
+  Plus,
+  Pencil,
+  X,
+  Check,
+  ChevronUp,
+  ChevronDown,
+  ToggleLeft,
+  ToggleRight,
+  ImagePlus,
+  Upload,
+  Trash2,
 } from 'lucide-react'
 import { formatPrice } from '../../utils/formatters'
 import Rating from '../../components/ui/Rating'
@@ -35,8 +45,24 @@ const AdminProducts = () => {
   const allCategories = categories.map((category) => category.name)
 
   const loadProducts = async () => {
-    if (!token) return
-    try { setProducts(await commerceService.getAdminProducts(token)) } catch { toast.error('Unable to load products') }
+      if (!token) return
+
+      try {
+          const products = await commerceService.getAdminProducts(token)
+
+          products.sort((a, b) => {
+              if (a.active === b.active) {
+                  return a.id - b.id
+              }
+
+              return a.active ? -1 : 1
+          })
+
+          setProducts(products)
+
+      } catch {
+          toast.error('Unable to load products')
+      }
   }
 
   useEffect(() => { loadProducts() }, [token])
@@ -163,11 +189,21 @@ const AdminProducts = () => {
     try {
       await commerceService.updateAdminProduct(token, product.id, {
         category_id: product.category_id,
-        status: product.active ? 'ARCHIVED' : 'ACTIVE',
+        status: product.active ? 'INACTIVE' : 'ACTIVE',
       })
+
       await loadProducts()
-      toast.success(product.active ? 'Product deactivated' : 'Product activated')
-    } catch { toast.error('Unable to update product status') }
+
+      toast.success(
+        product.active
+          ? 'Product deactivated successfully.'
+          : 'Product activated successfully.'
+      )
+
+    } catch (error) {
+      console.error(error)
+      toast.error('Unable to update product status.')
+    }
   }
 
   const handleDelete = async () => {
@@ -255,17 +291,32 @@ const AdminProducts = () => {
               <thead className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
                 <tr>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <ThBtn field="id">#</ThBtn>
+                      <ThBtn field="id">#</ThBtn>
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Product</th>
+
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <ThBtn field="price">Price</ThBtn>
+                      SKU
                   </th>
+
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <ThBtn field="stock">Stock</ThBtn>
+                      Product
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <ThBtn field="price">Price</ThBtn>
+                  </th>
+
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <ThBtn field="stock">Stock</ThBtn>
+                  </th>
+
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Status
+                  </th>
+
+                  <th className="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -277,7 +328,16 @@ const AdminProducts = () => {
                     animate={{ opacity: 1 }}
                     className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors"
                   >
-                    <td className="px-5 py-3 text-xs text-gray-400">#{product.id}</td>
+                    <td className="px-5 py-3 text-xs text-gray-400">
+                        #{product.id}
+                    </td>
+
+                    <td className="px-5 py-3">
+                        <span className="font-mono text-xs text-gray-400">
+                            {product.sku}
+                        </span>
+                    </td>
+
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex-shrink-0 overflow-hidden border border-gray-100 dark:border-gray-700">
@@ -295,7 +355,21 @@ const AdminProducts = () => {
                       </div>
                     </td>
                     <td className="px-5 py-3 font-semibold text-gray-900 dark:text-white text-xs">{formatPrice(product.price)}</td>
-                    <td className="px-5 py-3 text-xs font-medium text-gray-700 dark:text-gray-300">{product.stock ?? 0}</td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
+
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                              {product.stock ?? 0}
+                          </span>
+
+                          {product.low_stock === 1 && (
+                              <span className="rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-[10px] font-semibold">
+                                  LOW
+                              </span>
+                          )}
+
+                      </div>
+                  </td>
                     <td className="px-5 py-3">
                       <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold ${product.active === false ? 'bg-gray-100 dark:bg-gray-800 text-gray-400' : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'}`}>
                         {product.active === false ? 'Inactive' : 'Active'}
@@ -308,9 +382,6 @@ const AdminProducts = () => {
                         </button>
                         <button onClick={() => openEdit(product)} title="Edit" className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                           <Pencil size={13} />
-                        </button>
-                        <button onClick={() => setDeleteId(product.id)} title="Delete" className="p-1.5 rounded-lg text-gray-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
-                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>
@@ -331,19 +402,6 @@ const AdminProducts = () => {
           )}
         </div>
       )}
-
-      {/* Delete Confirmation Modal */}
-      <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Delete Product" size="sm">
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-5">
-          Are you sure you want to permanently delete this product? It will be removed from the store immediately.
-        </p>
-        <div className="flex gap-3">
-          <button onClick={() => setDeleteId(null)} className="btn-outline btn-md flex-1 justify-center">Cancel</button>
-          <button onClick={handleDelete} className="btn bg-brand-600 text-white hover:bg-brand-700 btn-md flex-1 justify-center gap-2">
-            <Trash2 size={14} /> Delete
-          </button>
-        </div>
-      </Modal>
 
       {/* Add / Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={closeModal} title={editProduct ? 'Edit Product' : 'Add New Product'} size="md">

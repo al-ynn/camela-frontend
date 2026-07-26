@@ -25,6 +25,7 @@ const OrderConfirmation = lazy(() => import('../pages/Checkout/OrderConfirmation
 const Login = lazy(() => import('../pages/Auth/Login'))
 const Register = lazy(() => import('../pages/Auth/Register'))
 const ForgotPassword = lazy(() => import('../pages/Auth/ForgotPassword'))
+const EmailVerified = lazy(() => import('../pages/EmailVerified'))
 
 const DashboardHome = lazy(() => import('../pages/Dashboard'))
 const DashboardProfile = lazy(() => import('../pages/Dashboard/Profile'))
@@ -47,7 +48,6 @@ const AdminOverview = lazy(() => import('../pages/Admin'))
 const AdminProducts = lazy(() => import('../pages/Admin/Products'))
 const AdminOrders = lazy(() => import('../pages/Admin/AdminOrders'))
 const AdminCustomers = lazy(() => import('../pages/Admin/Customers'))
-const AdminAnalytics = lazy(() => import('../pages/Admin/Analytics'))
 const AdminInventory = lazy(() => import('../pages/Admin/Inventory'))
 const AdminSettings = lazy(() => import('../pages/Admin/AdminSettings'))
 
@@ -106,6 +106,7 @@ const AppRoutes = () => (
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="email-verified" element={<EmailVerified />} />
       </Route>
 
       {/* Admin — standalone layout, no header/footer */}
@@ -121,7 +122,6 @@ const AppRoutes = () => (
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="customers" element={<AdminCustomers />} />
-        <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="inventory" element={<AdminInventory />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>

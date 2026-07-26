@@ -32,7 +32,7 @@ export const authService = {
       },
     })
 
-    return response.data
+    return response.data.data ?? response.data
   },
 
   logout: async (token) => {
@@ -48,4 +48,40 @@ export const authService = {
 
     return response.data
   },
+
+  resendVerification: async (token, email) => {
+    const response = await authAxios.post(
+      '/email/verification/resend',
+      { email },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+    return response.data
+  },
+
+  sendPasswordResetLink: async (email) => {
+    const response = await authAxios.post('/forgot-password', { email })
+    return response.data
+  },
+
+  resetPassword: async (payload) => {
+    const response = await authAxios.post('/reset-password', payload)
+    return response.data
+  },
+
+  changePassword: async (token, payload) => {
+    const response = await authAxios.patch(
+      '/settings/password',
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    return response.data
+  },
 }
+

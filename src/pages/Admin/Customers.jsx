@@ -1,10 +1,22 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Mail, Eye, Ban, ChevronUp, ChevronDown, Phone, MapPin } from 'lucide-react'
+import {
+  Search,
+  Eye,
+  ChevronUp,
+  ChevronDown,
+  Phone,
+  MapPin,
+  Ban,
+} from 'lucide-react'
 import { formatPrice, formatDateShort } from '../../utils/formatters'
 import Modal from '../../components/ui/Modal'
 import toast from 'react-hot-toast'
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
 
 const AdminCustomers = () => {
   const { t } = useTranslation()
@@ -16,14 +28,34 @@ const AdminCustomers = () => {
   const [page, setPage] = useState(1)
   const [customers, setCustomers] = useState([])
 
+  const { token } = useSelector(selectAuth)
+
   const PER_PAGE = 8
+
+  const loadCustomers = async () => {
+
+      try {
+
+          const data = await commerceService.getAdminCustomers(token)
+
+          setCustomers(data)
+
+      } catch (error) {
+
+          console.error(error)
+
+          toast.error('Unable to load customers.')
+
+      }
+
+  }
 
   const filtered = customers
     .filter((c) => {
       const q = search.toLowerCase()
       return (
         (statusFilter === 'all' || c.status === statusFilter) &&
-        (!q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || (c.phone && c.phone.includes(q)))
+        (!q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || o.orderNumber.toLowerCase().includes(q) || (c.phone && c.phone.includes(q)))
       )
     })
     .sort((a, b) => {
@@ -32,6 +64,16 @@ const AdminCustomers = () => {
       if (sortField === 'orders') return (a.orders - b.orders) * dir
       return (a.spent - b.spent) * dir
     })
+
+  useEffect(() => {
+
+      if (token) {
+
+          loadCustomers()
+
+      }
+
+  }, [token])
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -64,7 +106,13 @@ const AdminCustomers = () => {
     { label: t('admin.totalCustomers'), value: customers.length },
     { label: t('admin.active'), value: customers.filter((c) => c.status === 'active').length },
     { label: t('admin.inactive'), value: customers.filter((c) => c.status === 'inactive').length },
-    { label: t('admin.avgLifetimeValue'), value: formatPrice(customers.reduce((s, c) => s + c.spent, 0) / customers.length) },
+    { label: t('admin.avgLifetimeValue'), 
+      value: customers.length
+    ? formatPrice(
+        customers.reduce((sum, c) => sum + (c.spent || 0), 0) /
+        customers.length
+      )
+    : formatPrice(0),},
   ]
 
   return (
@@ -105,18 +153,12 @@ const AdminCustomers = () => {
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <ThBtn field="name">{t('admin.customer')}</ThBtn>
-                </th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer ID</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Full Name</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.phone')}</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.location')}</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <ThBtn field="orders">{t('admin.orders.title')}</ThBtn>
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <ThBtn field="spent">{t('admin.totalSpent')}</ThBtn>
-                </th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Orders</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total Spent</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.joined')}</th>
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.status')}</th>
                 <th className="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">{t('admin.actions')}</th>
@@ -126,7 +168,7 @@ const AdminCustomers = () => {
               {paginated.map((customer) => (
                 <motion.tr key={customer.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
                   <td className="px-5 py-3">
-                    <span className="font-mono text-[11px] text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">{customer.id}</span>
+                    <span className="font-mono text-[11px] text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">{customer.display_id}</span>
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
@@ -155,9 +197,6 @@ const AdminCustomers = () => {
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => setViewCustomer(customer)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                         <Eye size={13} />
-                      </button>
-                      <button onClick={() => toast(`Email sent to ${customer.name}`, { icon: '✉️' })} className="p-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
-                        <Mail size={13} />
                       </button>
                       <button onClick={() => toggleStatus(customer.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
                         <Ban size={13} />

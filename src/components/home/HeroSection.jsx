@@ -89,12 +89,6 @@ const HeroSection = () => {
               {t('home.hero.shopNow')}
               <ArrowRight size={18} />
             </Link>
-            <Link
-              to="/shop/vitamins-supplements"
-              className="btn bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 btn-xl"
-            >
-              {t('common.filter')}
-            </Link>
           </motion.div>
 
           {/* Social proof */}

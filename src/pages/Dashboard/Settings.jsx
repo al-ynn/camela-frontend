@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Bell, Shield, Eye, Moon, Globe, Trash2, AlertTriangle } from 'lucide-react'
+import { Bell, Shield, Moon, Trash2, AlertTriangle } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { useTheme } from '../../hooks/useTheme'
 import { logout } from '../../features/auth/authSlice'
@@ -10,6 +10,8 @@ import { clearWishlist } from '../../features/wishlist/wishlistSlice'
 import toast from 'react-hot-toast'
 import Modal from '../../components/ui/Modal'
 import { useNavigate } from 'react-router-dom'
+import { authService } from '../../services/authApi'
+import { useSelector } from 'react-redux'
 
 const Toggle = ({ checked, onChange }) => (
   <button
@@ -44,18 +46,22 @@ const Settings = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
+  const token = useSelector((state) => state.auth.token)
 
   const [deleteModal, setDeleteModal] = useState(false)
+  const [passwordModal, setPasswordModal] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+  })
   const [notifications, setNotifications] = useState({
     orderUpdates: true,
-    promotions: true,
-    newArrivals: false,
-    priceDrops: true,
   })
-  const [privacy, setPrivacy] = useState({
-    profileVisible: true,
-    activityTracking: false,
-  })
+
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/
 
   const handleDeleteAccount = () => {
     dispatch(logout())
@@ -65,6 +71,50 @@ const Settings = () => {
     navigate('/')
   }
 
+  const handlePasswordChange = async () => {
+    setPasswordError('')
+
+    if (!passwordForm.current_password || !passwordForm.password || !passwordForm.password_confirmation) {
+      setPasswordError('Please complete all password fields.')
+      return
+    }
+
+    if (!passwordPattern.test(passwordForm.password)) {
+      setPasswordError('Password must be at least 8 characters and include uppercase, lowercase, and a special character.')
+      return
+    }
+
+    if (passwordForm.password !== passwordForm.password_confirmation) {
+      setPasswordError('Passwords do not match.')
+      return
+    }
+
+    try {
+      setPasswordLoading(true)
+      await authService.changePassword(token, {
+        current_password: passwordForm.current_password,
+        password: passwordForm.password,
+        password_confirmation: passwordForm.password_confirmation,
+      })
+      toast.success('Password updated successfully')
+      setPasswordModal(false)
+      setPasswordForm({
+        current_password: '',
+        password: '',
+        password_confirmation: '',
+      })
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.errors?.current_password?.[0] ||
+        error?.response?.data?.errors?.password?.[0] ||
+        'Failed to update password.'
+      setPasswordError(message)
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
@@ -72,31 +122,21 @@ const Settings = () => {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your account preferences</p>
       </div>
 
-      {/* Appearance */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
         <Section icon={Moon} title="Appearance">
           <SettingRow label="Dark Mode" description="Switch between light and dark theme">
             <Toggle checked={theme === 'dark'} onChange={toggleTheme} />
           </SettingRow>
-          <SettingRow label="Language" description="Select your preferred language">
-            <select className="input-base py-1.5 w-32 text-sm">
-              <option>English</option>
-              <option>Spanish</option>
-              <option>French</option>
-              <option>German</option>
-            </select>
-          </SettingRow>
         </Section>
       </motion.div>
 
-      {/* Notifications */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
         <Section icon={Bell} title="Notifications">
           {Object.entries(notifications).map(([key, value]) => (
             <SettingRow
               key={key}
               label={key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
-              description="Receive email and push notifications"
+              description="Receive email notifications"
             >
               <Toggle checked={value} onChange={(v) => setNotifications((p) => ({ ...p, [key]: v }))} />
             </SettingRow>
@@ -104,43 +144,19 @@ const Settings = () => {
         </Section>
       </motion.div>
 
-      {/* Privacy */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-        <Section icon={Eye} title="Privacy">
-          {Object.entries(privacy).map(([key, value]) => (
-            <SettingRow
-              key={key}
-              label={key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
-            >
-              <Toggle checked={value} onChange={(v) => setPrivacy((p) => ({ ...p, [key]: v }))} />
-            </SettingRow>
-          ))}
-        </Section>
-      </motion.div>
-
-      {/* Security */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
         <Section icon={Shield} title="Security">
           <SettingRow label="Change Password" description="Update your account password">
             <button
-              onClick={() => toast('Password change via email link — feature coming soon!', { icon: '📧' })}
+              onClick={() => setPasswordModal(true)}
               className="btn-outline btn-sm"
             >
               Change
             </button>
           </SettingRow>
-          <SettingRow label="Two-Factor Authentication" description="Add an extra layer of security">
-            <button
-              onClick={() => toast('2FA setup coming soon!', { icon: '🔐' })}
-              className="btn-outline btn-sm"
-            >
-              Enable
-            </button>
-          </SettingRow>
         </Section>
       </motion.div>
 
-      {/* Danger zone */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <div className="card p-6 border-brand-100 dark:border-brand-900/40">
           <h3 className="font-semibold text-brand-600 dark:text-brand-400 flex items-center gap-2 mb-4">
@@ -162,7 +178,6 @@ const Settings = () => {
         </div>
       </motion.div>
 
-      {/* Delete confirmation modal */}
       <Modal isOpen={deleteModal} onClose={() => setDeleteModal(false)} title="Delete Account" size="sm">
         <div className="text-center space-y-4">
           <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
@@ -175,6 +190,66 @@ const Settings = () => {
             <button onClick={() => setDeleteModal(false)} className="btn-outline btn-md flex-1 justify-center">Cancel</button>
             <button onClick={handleDeleteAccount} className="btn bg-brand-600 text-white hover:bg-brand-700 btn-md flex-1 justify-center">
               Yes, Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={passwordModal} onClose={() => setPasswordModal(false)} title="Change Password" size="sm">
+        <div className="space-y-4">
+          <div>
+            <label className="label-base">Current Password</label>
+            <input
+              type="password"
+              value={passwordForm.current_password}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))}
+              className="input-base"
+              placeholder="Enter current password"
+            />
+          </div>
+          <div>
+            <label className="label-base">New Password</label>
+            <input
+              type="password"
+              value={passwordForm.password}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, password: e.target.value }))}
+              className="input-base"
+              placeholder="At least 8 chars, uppercase, lowercase, special"
+            />
+          </div>
+          <div>
+            <label className="label-base">Confirm New Password</label>
+            <input
+              type="password"
+              value={passwordForm.password_confirmation}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, password_confirmation: e.target.value }))}
+              className="input-base"
+              placeholder="Confirm new password"
+            />
+          </div>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Password must be at least 8 characters and include uppercase, lowercase, and one special character.
+          </p>
+
+          {passwordError && (
+            <p className="text-sm text-brand-600 dark:text-brand-400">{passwordError}</p>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={() => setPasswordModal(false)}
+              className="btn-outline btn-md flex-1 justify-center"
+              disabled={passwordLoading}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePasswordChange}
+              className="btn bg-brand-600 text-white hover:bg-brand-700 btn-md flex-1 justify-center"
+              disabled={passwordLoading}
+            >
+              {passwordLoading ? 'Updating...' : 'Update Password'}
             </button>
           </div>
         </div>

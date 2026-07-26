@@ -15,7 +15,6 @@ import { setCurrentOrder } from '../../features/orders/ordersSlice'
 import { setCartItems } from '../../features/cart/cartSlice'
 import { commerceService } from '../../services/commerceApi'
 import { formatPrice } from '../../utils/formatters'
-import { SHIPPING_METHODS } from '../../constants/config'
 
 const COUNTRIES = [
   'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia',
@@ -69,6 +68,7 @@ const Checkout = () => {
   const { items, totals } = useCart()
   const user = useSelector(selectUser)
   const token = useSelector(selectAuth).token
+  const verified = !!user?.email_verified_at
 
   const [step, setStep] = useState(1)
   const [contactData, setContactData] = useState(null)
@@ -77,10 +77,67 @@ const Checkout = () => {
   const [sameAsBilling, setSameAsBilling] = useState(true)
   const [addresses, setAddresses] = useState([])
   const [shippingAddressId, setShippingAddressId] = useState(null)
-  const [selectedShipping, setSelectedShipping] = useState(SHIPPING_METHODS[0])
+
+  const [settings, setSettings] = useState(null)
+
+  const [shippingMethods, setShippingMethods] = useState([])
+
+  const [selectedShipping, setSelectedShipping] = useState(null)
+
+  const shippingCost =
+    selectedShipping
+        ? Number(selectedShipping.price)
+        : 0;
+
+  const taxRate =
+
+      Number(settings?.tax_rate ?? 0)
+
+  const taxAmount = Number(
+
+      ((totals.subtotal * taxRate) / 100).toFixed(2)
+
+  )
+
+  const grandTotal = Number(
+
+      (
+
+          totals.subtotal +
+
+          shippingCost +
+
+          taxAmount -
+
+          totals.discount
+
+      ).toFixed(2)
+
+  )
+
   const [placing, setPlacing] = useState(false)
   const [couponCode, setCouponCode] = useState('')
   const hydratedCartRef = useRef(false)
+
+  const handleVerifyNow = () => {
+    window.location.href = '/dashboard/profile'
+  }
+
+  if (!verified) {
+    return (
+      <div className="min-h-screen bg-surface-secondary dark:bg-surface-dark flex items-center justify-center px-4">
+        <div className="max-w-xl w-full card p-8 text-center space-y-4">
+          <p className="text-xl font-display font-bold text-gray-900 dark:text-white">Email Verification Required</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Before placing your first order, please verify your email address.
+          </p>
+          <button onClick={handleVerifyNow} className="btn-brand btn-md inline-flex mx-auto">
+            Verify Now
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const contactForm = useForm({
     resolver: zodResolver(contactSchema),
@@ -122,6 +179,9 @@ const Checkout = () => {
 
   useEffect(() => {
     if (!token) return
+
+    commerceService.getAddresses(token)
+
     if (hydratedCartRef.current) return
 
     hydratedCartRef.current = true
@@ -138,6 +198,49 @@ const Checkout = () => {
         dispatch(setCartItems([]))
       })
   }, [token, items.length, dispatch])
+
+  useEffect(() => {
+
+      if (!token) return;
+
+      commerceService
+          .getStoreSettings(token)
+          .then((store) => {
+
+              setSettings(store);
+
+              console.log(store);
+
+              const methods = [
+
+                  {
+                      id: 'standard',
+                      name: 'Standard Shipping',
+                      price: Number(store.standard_shipping ?? 0),
+                  },
+
+                  {
+                      id: "express",
+                      name: "Express Shipping",
+                      price: Number(store.express_shipping ?? 0),
+                  },
+
+                  {
+                      id: "overnight",
+                      name: "Next Business Day",
+                      price: Number(store.overnight_shipping ?? 0),
+                  },
+
+              ];
+
+              setShippingMethods(methods);
+
+              setSelectedShipping(methods[0]);
+
+          })
+          .catch(console.error);
+
+  }, [token]);
 
   const handleInformationSubmit = async () => {
     const contact = contactForm.getValues()
@@ -188,7 +291,20 @@ const Checkout = () => {
 
     setPlacing(true)
     try {
-      const order = await commerceService.checkout(token, 'HITPAY', shippingAddressId)
+     const order = await commerceService.checkout(
+
+          token,
+
+          'HITPAY',
+
+          shippingAddressId,
+
+          null,
+
+          selectedShipping.id
+
+      )
+
       dispatch(setCurrentOrder(order))
       const payment = await commerceService.createHitPayPayment(token)
       if (payment.payment_url) {
@@ -283,15 +399,17 @@ const Checkout = () => {
         )}
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('cart.shipping')}</span>
-          <span>{totals.shipping === 0 ? t('checkout.free') : formatPrice(totals.shipping)}</span>
+          {shippingCost === 0
+            ? t('checkout.free')
+            : formatPrice(shippingCost)}
         </div>
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('checkout.tax')}</span>
-          <span>{formatPrice(totals.tax)}</span>
+          <span>{formatPrice(taxAmount)}</span>
         </div>
         <div className="flex justify-between font-bold text-base text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-800">
           <span>{t('checkout.grandTotal')}</span>
-          <span>{formatPrice(totals.total)}</span>
+          <span>{formatPrice(grandTotal)}</span>
         </div>
       </div>
     </div>
@@ -462,7 +580,7 @@ const Checkout = () => {
                         <Truck size={18} /> {t('checkout.delivery')}
                       </h2>
                       <div className="space-y-3">
-                        {SHIPPING_METHODS.map((method) => (
+                        {shippingMethods.map((method) => (
                           <label
                             key={method.id}
                             className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
@@ -481,7 +599,6 @@ const Checkout = () => {
                             <div className="flex-1">
                               <p className="font-medium text-gray-900 dark:text-white">{method.name}</p>
                               <p className="text-sm text-gray-400">{method.description}</p>
-                              {method.freeOver && <p className="text-xs text-green-600 dark:text-green-400">{t('checkout.freeOver', { amount: method.freeOver })}</p>}
                             </div>
                             <span className="font-semibold text-gray-900 dark:text-white">
                               {method.price === 0 ? t('checkout.free') : formatPrice(method.price)}
@@ -543,7 +660,7 @@ const Checkout = () => {
                       <ReviewSection title={t('checkout.delivery')} onEdit={() => setStep(2)}>
                         <p className="text-sm text-gray-900 dark:text-white">{selectedShipping.name}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{selectedShipping.description}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('checkout.estimatedDelivery')}: {selectedShipping.estimated || '3–5 business days'}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('checkout.estimatedDelivery')}: </p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
                           {t('checkout.shippingFee')}: {selectedShipping.price === 0 ? t('checkout.free') : formatPrice(selectedShipping.price)}
                         </p>
@@ -561,13 +678,16 @@ const Checkout = () => {
                             </div>
                           )}
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                            <span>{t('cart.shipping')}</span><span>{totals.shipping === 0 ? t('checkout.free') : formatPrice(totals.shipping)}</span>
+                            <span>{t('cart.shipping')}</span>
+                            <span>{shippingCost === 0
+                                ? t('checkout.free')
+                                : formatPrice(shippingCost)}</span>
                           </div>
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                            <span>{t('checkout.tax')}</span><span>{formatPrice(totals.tax)}</span>
+                            <span>{t('checkout.tax')}</span><span>{formatPrice(taxAmount)}</span>
                           </div>
                           <div className="flex justify-between font-bold text-base text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-800">
-                            <span>{t('checkout.grandTotal')}</span><span>{formatPrice(totals.total)}</span>
+                            <span>{t('checkout.grandTotal')}</span><span>{formatPrice(grandTotal)}</span>
                           </div>
                         </div>
                       </div>

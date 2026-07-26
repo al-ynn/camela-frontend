@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { Globe } from 'lucide-react'
+import { Flag, FlagIcon, Globe } from 'lucide-react'
 
 const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
+  { code: 'en', name: 'English'},
+  { code: 'zh', name: '中文' },
+  { code: 'ms', name: 'Bahasa Melayu'},
 ]
 
 const LanguageSwitcher = () => {

@@ -22,7 +22,6 @@ const Home = () => {
         subtitle={t('home.featured.subtitle')}
         limit={8}
       />
-      <FlashSale />
       <BrandsSection />
       <Testimonials />
       <Newsletter />

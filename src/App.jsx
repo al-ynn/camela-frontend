@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Toaster } from 'react-hot-toast'
 import { store, persistor } from './store'
@@ -7,6 +9,40 @@ import AppRoutes from './routes'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import { FullPageSpinner } from './components/ui/Spinner'
 import ThemeProvider from './components/common/ThemeProvider'
+import { authService } from './services/authApi'
+import { clearAuthSession, updateUser } from './features/auth/authSlice'
+
+const AuthSessionValidator = () => {
+  const dispatch = useDispatch()
+  const token = useSelector((state) => state.auth.token)
+
+  useEffect(() => {
+    let active = true
+
+    const validateToken = async () => {
+      if (!token) return
+
+      try {
+        const user = await authService.getProfile(token)
+        dispatch(updateUser(user))
+      } catch (error) {
+        if (!active) return
+
+        if (error.response?.status === 401) {
+          dispatch(clearAuthSession())
+        }
+      }
+    }
+
+    validateToken()
+
+    return () => {
+      active = false
+    }
+  }, [dispatch, token])
+
+  return null
+}
 
 const App = () => {
   return (
@@ -15,6 +51,7 @@ const App = () => {
         <BrowserRouter>
           <ThemeProvider>
             <ErrorBoundary>
+              <AuthSessionValidator />
               <AppRoutes />
               <Toaster
                 position="bottom-right"

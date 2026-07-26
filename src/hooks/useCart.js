@@ -12,6 +12,7 @@ import {
 import { openCartDrawer } from '../features/ui/uiSlice'
 import { commerceService } from '../services/commerceApi'
 import toast from 'react-hot-toast'
+import { selectUser } from '../features/auth/authSlice'
 
 export const useCart = () => {
   const dispatch = useDispatch()
@@ -21,9 +22,14 @@ export const useCart = () => {
   const totals = useSelector(selectCartTotals)
   const coupon = useSelector(selectCoupon)
   const token = useSelector((state) => state.auth.token)
+  const user = useSelector(selectUser)
 
   const handleAddToCart = async (product, quantity = 1) => {
     if (!token) return toast.error('Please log in to add items to your cart')
+    if (!user?.email_verified_at) {
+      toast.error('Please verify your email before purchasing products.')
+      return
+    }
     try {
       dispatch(setCartItems(await commerceService.addToCart(token, product.id, quantity)))
       dispatch(openCartDrawer())

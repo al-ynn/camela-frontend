@@ -197,7 +197,6 @@ const ProductDetail = () => {
               />
               {discountPercent > 5 && (
                 <div className="absolute top-4 left-4">
-                  <Badge variant="sale" className="text-sm">-{discountPercent}%</Badge>
                 </div>
               )}
             </div>

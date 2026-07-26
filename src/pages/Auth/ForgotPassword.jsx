@@ -5,29 +5,67 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ROUTES } from '../../constants/routes'
 import toast from 'react-hot-toast'
+import { authService } from '../../services/authApi'
+import { useSearchParams } from 'react-router-dom'
 
 const ForgotPassword = () => {
   const { t } = useTranslation()
   const [sent, setSent] = useState(false)
   const [email, setEmail] = useState('')
+  const [searchParams] = useSearchParams()
+  const token = searchParams.get('token')
+  const resetEmail = searchParams.get('email') || ''
+  const resetMode = Boolean(token && resetEmail)
+  const [resetSubmitting, setResetSubmitting] = useState(false)
 
-  const schema = z.object({
-    email: z.string().email(t('auth.validation.validEmail')),
-  })
+  const schema = resetMode
+    ? z.object({
+        password: z.string().min(8, 'Password must be at least 8 characters.'),
+        password_confirmation: z.string().min(8, 'Password confirmation is required.'),
+      }).refine((d) => d.password === d.password_confirmation, {
+        message: 'Passwords do not match.',
+        path: ['password_confirmation'],
+      })
+    : z.object({
+        email: z.string().email(t('auth.validation.validEmail')),
+      })
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data) => {
-    await new Promise((r) => setTimeout(r, 1000))
-    setEmail(data.email)
-    setSent(true)
-    toast.success('Reset link sent!')
+    if (resetMode) {
+      try {
+        setResetSubmitting(true)
+        await authService.resetPassword({
+          token,
+          email: resetEmail,
+          password: data.password,
+          password_confirmation: data.password_confirmation,
+        })
+        toast.success('Password updated successfully.')
+        setTimeout(() => window.location.assign(ROUTES.LOGIN), 800)
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Unable to reset password.')
+      } finally {
+        setResetSubmitting(false)
+      }
+      return
+    }
+
+    try {
+      await authService.sendPasswordResetLink(data.email)
+      setEmail(data.email)
+      setSent(true)
+      toast.success('Reset link sent!')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to send reset link.')
+    }
   }
 
-  if (sent) {
+  if (!resetMode && sent) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -74,6 +112,23 @@ const ForgotPassword = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {resetMode ? (
+          <>
+            <div className="card p-4 bg-brand-50/70 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/30 text-sm text-gray-600 dark:text-gray-300">
+              Resetting password for <span className="font-semibold text-gray-900 dark:text-white">{resetEmail}</span>
+            </div>
+            <div>
+              <label className="label-base">New password</label>
+              <input {...register('password')} type="password" className={`input-base ${errors.password ? 'border-brand-400' : ''}`} />
+              {errors.password && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.password.message}</p>}
+            </div>
+            <div>
+              <label className="label-base">Confirm new password</label>
+              <input {...register('password_confirmation')} type="password" className={`input-base ${errors.password_confirmation ? 'border-brand-400' : ''}`} />
+              {errors.password_confirmation && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.password_confirmation.message}</p>}
+            </div>
+          </>
+        ) : (
         <div>
           <label className="label-base">{t('auth.register.email')}</label>
           <div className="relative">
@@ -87,13 +142,14 @@ const ForgotPassword = () => {
           </div>
           {errors.email && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.email.message}</p>}
         </div>
+        )}
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || resetSubmitting}
           className="btn-brand btn-lg w-full justify-center gap-2"
         >
-          {isSubmitting ? t('common.loading') : t('auth.forgot.sendResetLink')}
+          {isSubmitting || resetSubmitting ? t('common.loading') : resetMode ? 'Reset Password' : t('auth.forgot.sendResetLink')}
         </button>
       </form>
 

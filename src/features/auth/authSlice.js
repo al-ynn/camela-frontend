@@ -29,6 +29,17 @@ export const registerUser = createAsyncThunk(
   }
 )
 
+export const resendVerificationEmail = createAsyncThunk(
+  'auth/resendVerification',
+  async ({ token, email }, { rejectWithValue }) => {
+    try {
+      return await authService.resendVerification(token, email)
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Unable to resend verification email')
+    }
+  }
+)
+
 const initialState = {
   user: null,
   token: null,
@@ -36,6 +47,7 @@ const initialState = {
   loading: false,
   error: null,
   rememberMe: false,
+  verificationResendAt: null,
 }
 
 const authSlice = createSlice({
@@ -49,11 +61,17 @@ const authSlice = createSlice({
       state.error = null
       toast.success('Logged out successfully')
     },
+    clearAuthSession: (state) => {
+      state.user = null
+      state.token = null
+      state.isAuthenticated = false
+      state.error = null
+    },
     clearError: (state) => {
       state.error = null
     },
     updateUser: (state, action) => {
-      state.user = { ...state.user, ...action.payload }
+      state.user = action.payload
     },
     setRememberMe: (state, action) => {
       state.rememberMe = action.payload
@@ -95,10 +113,24 @@ const authSlice = createSlice({
         state.error = action.payload
         toast.error(action.payload || 'Registration failed')
       })
+      .addCase(resendVerificationEmail.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(resendVerificationEmail.fulfilled, (state) => {
+        state.loading = false
+        state.verificationResendAt = Date.now()
+        toast.success('Verification email sent successfully.')
+      })
+      .addCase(resendVerificationEmail.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+        toast.error(action.payload || 'Unable to resend verification email')
+      })
   },
 })
 
-export const { logout, clearError, updateUser, setRememberMe } = authSlice.actions
+export const { logout, clearAuthSession, clearError, updateUser, setRememberMe } = authSlice.actions
 
 export const selectAuth = (state) => state.auth
 export const selectUser = (state) => state.auth.user

@@ -5,14 +5,18 @@ import { Store, CreditCard, Truck, Percent, Bell, Shield, Save, RefreshCw } from
 import { APP_CONFIG, SHIPPING_METHODS, TAX_RATE } from '../../constants/config'
 import toast from 'react-hot-toast'
 
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { commerceService } from '../../services/commerceApi'
+
 const Toggle = ({ checked, onChange }) => (
   <button onClick={() => onChange(!checked)} className={`relative w-10 h-5.5 h-[22px] rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
   </button>
 )
 
-const Section = ({ icon: Icon, title, subtitle, children }) => (
-  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="card p-6 space-y-5">
+const Section = ({ icon: Icon, title, subtitle, children, id }) => (
+  <motion.div id={id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="card p-6 space-y-5">
     <div className="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-800">
       <div className="w-9 h-9 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
         <Icon size={17} className="text-gray-500" />
@@ -28,6 +32,10 @@ const Section = ({ icon: Icon, title, subtitle, children }) => (
 
 const AdminSettings = () => {
   const { t } = useTranslation()
+  const token = useSelector((state) => state.auth.token)
+
+  console.log("ADMIN TOKEN:", token);
+  
   const [storeInfo, setStoreInfo] = useState({
     name: APP_CONFIG.name,
     tagline: APP_CONFIG.tagline,
@@ -55,8 +63,119 @@ const AdminSettings = () => {
     SHIPPING_METHODS.reduce((acc, m) => ({ ...acc, [m.id]: m.price }), {})
   )
 
-  const handleSave = (section) => {
-    toast.success(`${section} settings saved!`)
+  useEffect(() => {
+      if (!token) return
+
+      const loadSettings = async () => {
+          try {
+
+              const settings =
+                  await commerceService.getStoreSettings(token)
+
+              setStoreInfo({
+                  name: settings.store_name,
+                  tagline: settings.tagline,
+                  email: settings.support_email,
+                  phone: settings.phone,
+                  address: settings.address,
+              })
+
+              setShippingRates({
+                  standard: Number(settings.standard_shipping),
+                  express: Number(settings.express_shipping),
+                  overnight: Number(settings.overnight_shipping),
+              })
+
+              setFreeShippingThreshold(
+                  Number(settings.free_shipping_threshold)
+              )
+
+              setTaxRate(
+                  Number(settings.tax_rate)
+              )
+
+              setNotifications({
+                  newOrder: settings.notify_new_order,
+                  lowStock: settings.notify_low_stock,
+                  newCustomer: settings.notify_new_customer,
+                  orderDelivered: settings.notify_order_delivered,
+              })
+
+              setSecurity((prev) => ({
+                  ...prev,
+                  maintenanceMode:
+                      settings.maintenance_mode,
+              }))
+
+          } catch (e) {
+
+              console.error(e)
+
+          }
+      }
+
+      loadSettings()
+
+  }, [token])
+
+  const handleSave = async (section) => {
+
+      try {
+
+          await commerceService.updateStoreSettings(token, {
+
+              store_name: storeInfo.name,
+              tagline: storeInfo.tagline,
+              support_email: storeInfo.email,
+              phone: storeInfo.phone,
+              address: storeInfo.address,
+
+              standard_shipping:
+                  shippingRates.standard,
+
+              express_shipping:
+                  shippingRates.express,
+
+              overnight_shipping:
+                  shippingRates.overnight,
+
+              free_shipping_threshold:
+                  freeShippingThreshold,
+
+              tax_rate:
+                  taxRate,
+
+              notify_new_order:
+                  notifications.newOrder,
+
+              notify_low_stock:
+                  notifications.lowStock,
+
+              notify_new_customer:
+                  notifications.newCustomer,
+
+              notify_order_delivered:
+                  notifications.orderDelivered,
+
+              maintenance_mode:
+                  security.maintenanceMode,
+
+          })
+
+          toast.success(
+              `${section} settings saved`
+          )
+
+      } catch (e) {
+
+          console.error(e)
+
+          toast.error(
+              'Failed to save settings.'
+          )
+
+      }
+
   }
 
   return (
@@ -84,29 +203,6 @@ const AdminSettings = () => {
         </div>
       </Section>
 
-      {/* Payment */}
-      <Section icon={CreditCard} title={t('adminSettings.payment.title')} subtitle={t('adminSettings.payment.subtitle')}>
-        <div className="space-y-3">
-          {[
-            ['card', 'Credit / Debit Card', 'Visa, Mastercard, Amex'],
-            ['paypal', 'PayPal', 'PayPal checkout integration'],
-            ['applePay', 'Apple Pay', 'Safari & iOS devices'],
-            ['googlePay', 'Google Pay', 'Chrome & Android devices'],
-            ['bankTransfer', 'Bank Transfer', 'Manual payment processing'],
-          ].map(([key, label, desc]) => (
-            <div key={key} className="flex items-center justify-between gap-4 py-2">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{label}</p>
-                <p className="text-xs text-gray-400">{desc}</p>
-              </div>
-              <Toggle checked={paymentMethods[key]} onChange={(v) => setPaymentMethods((p) => ({ ...p, [key]: v }))} />
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-end pt-2">
-          <button onClick={() => handleSave(t('adminSettings.payment.title'))} className="btn-brand btn-sm gap-2"><Save size={13} /> {t('common.save')}</button>
-        </div>
-      </Section>
 
       {/* Shipping */}
       <Section icon={Truck} title={t('adminSettings.shipping.title')} subtitle={t('adminSettings.shipping.subtitle')}>
@@ -163,14 +259,18 @@ const AdminSettings = () => {
       </Section>
 
       {/* Notifications */}
-      <Section icon={Bell} title={t('adminSettings.notifications.title')} subtitle={t('adminSettings.notifications.subtitle')}>
+      <Section
+          id="admin-notifications"
+          icon={Bell}
+          title={t('adminSettings.notifications.title')}
+          subtitle={t('adminSettings.notifications.subtitle')}
+        >
         <div className="space-y-3">
           {[
             ['newOrder', 'New Order Placed', 'Alert when a customer places an order'],
             ['lowStock', 'Low Stock Warning', 'Alert when product stock drops below threshold'],
             ['newCustomer', 'New Customer Registered', 'Alert on new account creation'],
             ['orderDelivered', 'Order Delivered', 'Alert when orders are marked delivered'],
-            ['refundRequest', 'Refund Requests', 'Alert on customer refund requests'],
           ].map(([key, label, desc]) => (
             <div key={key} className="flex items-center justify-between gap-4 py-1.5">
               <div>
@@ -187,8 +287,6 @@ const AdminSettings = () => {
       <Section icon={Shield} title={t('adminSettings.security.title')} subtitle={t('adminSettings.security.subtitle')}>
         <div className="space-y-3">
           {[
-            ['twoFactor', 'Two-Factor Authentication', 'Require 2FA for admin login'],
-            ['loginAlerts', 'Login Alerts', 'Email notification on new login'],
             ['maintenanceMode', 'Maintenance Mode', 'Take store offline for maintenance'],
           ].map(([key, label, desc]) => (
             <div key={key} className={`flex items-center justify-between gap-4 py-1.5 ${key === 'maintenanceMode' && security.maintenanceMode ? 'p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-900/30' : ''}`}>

@@ -37,7 +37,6 @@ const DashboardHome = () => {
   const stats = [
     { icon: Package, label: t('dashboard.totalOrders'), value: orders.length, href: ROUTES.DASHBOARD_ORDERS, color: 'bg-brand-600', delay: 0 },
     { icon: Heart, label: t('nav.wishlist'), value: wishlistCount, href: ROUTES.DASHBOARD_WISHLIST, color: 'bg-brand-500', delay: 0.05 },
-    { icon: MapPin, label: t('dashboard.addresses'), value: 1, href: ROUTES.DASHBOARD_ADDRESSES, color: 'bg-amber-500', delay: 0.1 },
   ]
 
   return (

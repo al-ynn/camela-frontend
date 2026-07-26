@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '../../utils/helpers'
@@ -31,14 +32,25 @@ const Drawer = ({
   className,
   footer,
 }) => {
+  const location = useLocation()
+
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = ''
-    return () => { document.body.style.overflow = '' }
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [isOpen])
 
   useEffect(() => {
-    const handleEscape = (e) => { if (e.key === 'Escape') onClose() }
+    if (isOpen) onClose()
+  }, [location.pathname])
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+
     if (isOpen) document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
@@ -61,7 +73,7 @@ const Drawer = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={onClose}
+            onPointerDown={onClose}
           />
           <motion.div
             initial={variant.initial}
@@ -69,7 +81,7 @@ const Drawer = ({
             exit={variant.exit}
             transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
             className={cn(
-              'absolute bg-white dark:bg-gray-900 shadow-premium flex flex-col',
+              'absolute bg-white dark:bg-gray-900 shadow-premium flex flex-col pointer-events-auto z-10',
               'border-l border-gray-100 dark:border-gray-800',
               positionClass[position],
               position !== 'bottom' && width,
@@ -81,6 +93,7 @@ const Drawer = ({
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
               )}
               <button
+                type="button"
                 onClick={onClose}
                 className="ml-auto p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
               >

@@ -1,35 +1,88 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Logo from '../components/common/Logo'
 import AvatarImage from '../components/common/AvatarImage'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, Package, ShoppingBag, Users, BarChart2,
+  LayoutDashboard, Package, ShoppingBag, Users,
   Boxes, Settings, ChevronLeft, ChevronRight, Bell, LogOut,
-  ExternalLink, Menu, X, Store,
+  ExternalLink, Menu, X, Store, BellRing, CheckCircle2, CircleSlash2,
+  Check, MailOpen, Mail, Clock3, TriangleAlert, ShoppingCart, UserPlus, PackageCheck,
 } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectUser, logout } from '../features/auth/authSlice'
 import { clearCartState } from '../features/cart/cartSlice'
 import { clearWishlist } from '../features/wishlist/wishlistSlice'
 import { ROUTES } from '../constants/routes'
+import { commerceService } from '../services/commerceApi'
 
 const NAV_ITEMS = [
   { label: 'Overview', icon: LayoutDashboard, href: '/admin' },
   { label: 'Products', icon: Package, href: '/admin/products' },
   { label: 'Orders', icon: ShoppingBag, href: '/admin/orders' },
   { label: 'Customers', icon: Users, href: '/admin/customers' },
-  { label: 'Analytics', icon: BarChart2, href: '/admin/analytics' },
   { label: 'Inventory', icon: Boxes, href: '/admin/inventory' },
   { label: 'Settings', icon: Settings, href: '/admin/settings' },
 ]
 
+const NOTIFICATION_ICON_MAP = {
+  new_order: ShoppingCart,
+  low_stock: TriangleAlert,
+  new_customer: UserPlus,
+  order_delivered: PackageCheck,
+}
+
+const getNotificationArray = (payload) => payload?.items?.data ?? []
+
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const [notificationItems, setNotificationItems] = useState([])
+  const [notificationMeta, setNotificationMeta] = useState({ unreadCount: 0 })
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const user = useSelector(selectUser)
+  const token = useSelector((state) => state.auth.token)
+
+  useEffect(() => {
+    let active = true
+
+    const loadNotifications = async () => {
+      if (!token) return
+      try {
+        const data = await commerceService.getAdminNotifications(token)
+        if (!active) return
+
+        setNotificationItems(getNotificationArray(data))
+        setNotificationMeta({
+          unreadCount: data?.unread_count ?? 0,
+        })
+      } catch {
+        if (active) {
+          setNotificationItems([])
+          setNotificationMeta({ unreadCount: 0 })
+        }
+      }
+    }
+
+    loadNotifications()
+    return () => { active = false }
+  }, [token, notificationOpen])
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!event.target.closest('[data-admin-notifications]')) {
+        setNotificationOpen(false)
+      }
+    }
+
+    if (notificationOpen) {
+      document.addEventListener('pointerdown', handleOutsideClick)
+    }
+
+    return () => document.removeEventListener('pointerdown', handleOutsideClick)
+  }, [notificationOpen])
 
   const handleLogout = () => {
     dispatch(logout())
@@ -40,7 +93,6 @@ const AdminLayout = () => {
 
   const SidebarContent = ({ isMobile = false }) => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className={`flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-800 ${collapsed && !isMobile ? 'justify-center' : ''}`}>
         {collapsed && !isMobile ? (
           <img
@@ -53,7 +105,6 @@ const AdminLayout = () => {
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map(({ label, icon: Icon, href }) => (
           <NavLink
@@ -84,7 +135,6 @@ const AdminLayout = () => {
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="p-3 border-t border-gray-100 dark:border-gray-800 space-y-1">
         <NavLink
           to={ROUTES.HOME}
@@ -106,7 +156,6 @@ const AdminLayout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
-      {/* Desktop Sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 64 : 220 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
@@ -121,7 +170,6 @@ const AdminLayout = () => {
         </button>
       </motion.aside>
 
-      {/* Mobile Sidebar */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -141,9 +189,7 @@ const AdminLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar */}
         <header className="h-14 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 flex-shrink-0">
           <div className="flex items-center gap-3">
             <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
@@ -154,11 +200,115 @@ const AdminLayout = () => {
               <span className="text-xs text-gray-500 dark:text-gray-400">Admin Dashboard</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
+
+          <div className="flex items-center gap-2 relative" data-admin-notifications>
+            <button
+              type="button"
+              onClick={() => setNotificationOpen((v) => !v)}
+              className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400"
+              aria-label="Admin notifications"
+              aria-expanded={notificationOpen}
+            >
               <Bell size={17} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-brand-600 rounded-full" />
+              {notificationMeta.unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-brand-600 text-white text-[10px] leading-4 text-center font-semibold">
+                  {notificationMeta.unreadCount > 9 ? '9+' : notificationMeta.unreadCount}
+                </span>
+              )}
             </button>
+
+            <AnimatePresence>
+              {notificationOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute right-0 top-12 w-[360px] max-w-[calc(100vw-1rem)] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-premium overflow-hidden z-50"
+                >
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-2">
+                        <BellRing size={15} /> Notifications
+                      </h3>
+                      <p className="text-xs text-gray-400 mt-0.5">Live admin alerts</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!token || !notificationItems.length) return
+                          await commerceService.markAllAdminNotificationsRead(token)
+                          const refreshed = await commerceService.getAdminNotifications(token)
+                          setNotificationItems(getNotificationArray(refreshed))
+                          setNotificationMeta({ unreadCount: refreshed?.unread_count ?? 0 })
+                        }}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        Mark all read
+                      </button>
+                      <button type="button" onClick={() => setNotificationOpen(false)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-3 max-h-[420px] overflow-y-auto space-y-2">
+                    {notificationItems.length ? notificationItems.map((item) => {
+                      const Icon = NOTIFICATION_ICON_MAP[item.type] ?? Bell
+                      const unread = !item.read_at
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={async () => {
+                            if (!token) return
+                            if (unread) {
+                              await commerceService.markAdminNotificationRead(token, item.id)
+                            }
+                            if (item.url) {
+                              navigate(item.url)
+                              setNotificationOpen(false)
+                            } else {
+                              const refreshed = await commerceService.getAdminNotifications(token)
+                              setNotificationItems(getNotificationArray(refreshed))
+                              setNotificationMeta({ unreadCount: refreshed?.unread_count ?? 0 })
+                            }
+                          }}
+                          className={`w-full text-left flex items-start gap-3 rounded-xl p-3 border transition-colors ${unread ? 'border-brand-200 dark:border-brand-900/40 bg-brand-50 dark:bg-brand-900/10' : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40'}`}
+                        >
+                          <div className={`mt-0.5 w-9 h-9 rounded-full flex items-center justify-center ${unread ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'}`}>
+                            <Icon size={16} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</p>
+                              {unread && <span className="mt-1 inline-flex w-2.5 h-2.5 rounded-full bg-brand-500" />}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{item.message}</p>
+                            <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-gray-400">
+                              <span className="inline-flex items-center gap-1">
+                                {unread ? <Mail size={12} /> : <MailOpen size={12} />}
+                                {unread ? 'Unread' : 'Read'}
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Clock3 size={12} />
+                                {item.created_at}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    }) : (
+                      <div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                        No notifications yet.
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="flex items-center gap-2 pl-2">
               <AvatarImage
                 src={user?.avatar}
@@ -168,13 +318,12 @@ const AdminLayout = () => {
                 fallbackClassName="w-7 h-7 text-[10px]"
               />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
-          {user?.name}
+                {user?.name}
               </span>
             </div>
           </div>
         </header>
 
-        {/* Content */}
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>

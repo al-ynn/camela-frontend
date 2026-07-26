@@ -62,7 +62,7 @@ const LineChart = ({ data = [], dataKey = 'revenue', color = '#e11d48', gradient
     x: scaleX(i, normalizedData.length),
     y: scaleY(d[dataKey], min, max),
     value: d[dataKey],
-    label: d.month || d.day || d.label || String(i + 1),
+    label: d.label || d.month || d.day || String(i + 1),
   }))
 
   const linePath = smoothPath(points)

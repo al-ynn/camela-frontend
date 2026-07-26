@@ -20,12 +20,6 @@ const ProductCard = ({ product, view = 'grid' }) => {
   const { toggleWishlist } = useWishlist()
   const isInWishlist = useSelector(selectIsInWishlist(product.id))
 
-  const originalPrice = product.compare_price
-  const isSale = Number(originalPrice) > Number(product.price)
-  const discountPercent = isSale
-    ? Math.round(((originalPrice - product.price) / originalPrice) * 100)
-    : 0
-  const isNew = product.featured
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image]
   const currentImage =
   hovered && productImages.length > 1
@@ -124,13 +118,7 @@ const displayImage =
             )}
           />
         </Link>
-
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {isSale && <Badge variant="sale">-{discountPercent}%</Badge>}
-          {isNew && <Badge variant="new">New</Badge>}
-        </div>
-
+        
         {/* Wishlist */}
         <motion.button
           initial={{ opacity: 0, scale: 0.8 }}
@@ -182,11 +170,6 @@ const displayImage =
             <span className="text-lg font-bold text-gray-900 dark:text-white">
               {formatPrice(product.price)}
             </span>
-            {isSale && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(originalPrice)}
-              </span>
-            )}
           </div>
           <motion.button
             whileTap={{ scale: 0.95 }}

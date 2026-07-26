@@ -29,40 +29,58 @@ const AdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [viewOrder, setViewOrder] = useState(null)
+  const [statusOrder, setStatusOrder] = useState(null)
+  const [selectedStatus, setSelectedStatus] = useState('')
   const [orderStatuses, setOrderStatuses] = useState({})
 
   const PER_PAGE = 8
 
   const [combinedOrders, setCombinedOrders] = useState([]);
 
-  const filtered = combinedOrders.filter((o) => {
-    const q = search.toLowerCase()
-    return (
-      (statusFilter === 'all' || o.status === statusFilter) &&
-      (!q || o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || o.email.toLowerCase().includes(q))
-    )
+  const filteredOrders = combinedOrders.filter((o) => {
+
+      const matchesSearch =
+          o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+          o.customer.toLowerCase().includes(search.toLowerCase())
+
+      const matchesStatus =
+          statusFilter === "all" ||
+          o.status === statusFilter
+
+      return matchesSearch && matchesStatus
+
   })
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE)
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  const totalPages = Math.ceil(filteredOrders.length / PER_PAGE)
 
-  const updateStatus = (orderId, newStatus) => {
+  const paginated = filteredOrders.slice(
+      (page - 1) * PER_PAGE,
+      page * PER_PAGE
+  )
 
-      setCombinedOrders(previous =>
+  const updateStatus = async (orderId, newStatus) => {
 
-          previous.map(order =>
+      try {
 
-              order.id === orderId
+          await commerceService.updateOrderStatus(
+              token,
+              orderId,
+              newStatus.toUpperCase()
+          );
 
-                  ? { ...order, status: newStatus }
+          const orders = await commerceService.getAdminOrders(token);
 
-                  : order
+          setCombinedOrders(orders);
 
-          )
+          toast.success("Order status updated.");
 
-      );
+      } catch (err) {
 
-      toast.success(`Order ${orderId} updated.`);
+          console.error(err);
+
+          toast.error("Failed to update order status.");
+
+      }
 
   };
 
@@ -100,12 +118,6 @@ const AdminOrders = () => {
           <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">{t('admin.orders.title')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{combinedOrders.length} {t('admin.totalOrders')}</p>
         </div>
-        <button
-          onClick={() => toast(t('admin.exportComingSoon'), { icon: '📥' })}
-          className="btn-outline btn-md gap-2 self-start sm:self-auto"
-        >
-          <Download size={15} /> {t('admin.exportCSV')}
-        </button>
       </div>
 
       {/* Status Tabs */}
@@ -117,7 +129,7 @@ const AdminOrders = () => {
             className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-all ${
               statusFilter === s
                 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
+                : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-b border-yellow-500/30 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
           >
             {s === 'all' ? t('admin.all') : getOrderStatusLabel(s)}
@@ -153,7 +165,7 @@ const AdminOrders = () => {
             <tbody>
               {paginated.map((order) => (
                 <motion.tr
-                  key={order.id}
+                  key={order.orderNumber}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -161,7 +173,7 @@ const AdminOrders = () => {
                 >
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-gray-600 dark:text-gray-300">{order.id}</span>
+                      <span className="font-mono text-xs text-gray-600 dark:text-gray-300">{order.orderNumber}</span>
                       {order.source === 'live' && (
                         <span className="text-[9px] px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded font-semibold">LIVE</span>
                       )}
@@ -183,22 +195,15 @@ const AdminOrders = () => {
                       <button onClick={() => setViewOrder(order)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                         <Eye size={13} />
                       </button>
-                      <div className="relative group">
-                        <button className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-0.5">
+                      <button
+                        onClick={() => {
+                            setStatusOrder(order)
+                            setSelectedStatus(order.status.toLowerCase())
+                        }}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      >
                           <ChevronDown size={13} />
-                        </button>
-                        <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-900 rounded-xl shadow-premium border border-gray-100 dark:border-gray-800 overflow-hidden z-20 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity">
-                          {['confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => updateStatus(order.id, s)}
-                              className={`w-full text-left px-3 py-2 text-xs transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${order.status === s ? 'font-semibold text-brand-600 dark:text-brand-400' : 'text-gray-700 dark:text-gray-300'}`}
-                            >
-                              {getOrderStatusLabel(s)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -209,7 +214,14 @@ const AdminOrders = () => {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-xs text-gray-400">{t('admin.showing')} {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, filtered.length)} {t('admin.of')} {filtered.length}</p>
+            <p className="text-xs text-gray-400">
+                {t('admin.showing')}
+                {(page - 1) * PER_PAGE + 1}
+                –
+                {Math.min(page * PER_PAGE, filteredOrders.length)}
+                {t('admin.of')}
+                {filteredOrders.length}
+            </p>
             <div className="flex gap-1">
               <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">{t('admin.prev')}</button>
               <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">{t('admin.next')}</button>
@@ -237,13 +249,132 @@ const AdminOrders = () => {
                   <button
                     key={s}
                     onClick={() => { updateStatus(viewOrder.id, s); setViewOrder({ ...viewOrder, status: s }) }}
-                    className={`px-3 py-1.5 text-xs rounded-xl font-medium border transition-all ${viewOrder.status === s ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}
+                    className={`bg-[#111827] rounded-3xl border border-yellow-500 shadow-2xl ${viewOrder.status === s ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}
                   >
                     {getOrderStatusLabel(s)}
                   </button>
                 ))}
               </div>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {statusOrder && (
+        <Modal
+          isOpen={!!statusOrder}
+          onClose={() => setStatusOrder(null)}
+          title="Update Order Status"
+          size="sm"
+        >
+          <div className="space-y-6">
+
+            {/* Order Info */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                Order ID
+              </label>
+
+              <p className="text-base font-semibold text-white">
+                  {statusOrder.orderNumber}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                Customer
+              </label>
+
+              <p className="text-base text-white">
+                {statusOrder.customer}
+              </p>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                Status
+              </label>
+
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="
+                    w-full
+                    h-12
+                    px-4
+                    rounded-2xl
+                    bg-[#111827]
+                    border
+                    border-yellow-500
+                    text-white
+                    appearance-none
+                    outline-none
+                    focus:ring-2
+                    focus:ring-yellow-500
+                    cursor-pointer
+                "
+            >
+                <option value="confirmed">Confirmed</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex items-center justify-between pt-6">
+
+              <button
+                onClick={() => setStatusOrder(null)}
+                className="
+                    px-7
+                    py-3
+                    rounded-full
+                    border-2
+                    border-yellow-500
+                    bg-transparent
+                    text-yellow-400
+                    font-semibold
+                    transition-all
+                    duration-200
+                    hover:bg-yellow-500
+                    hover:text-black
+                    hover:border-yellow-500
+                    active:scale-95
+                "
+            >
+                Cancel
+            </button>
+
+              <button
+                onClick={() => {
+                    updateStatus(statusOrder.id, selectedStatus)
+                    setStatusOrder(null)
+                }}
+                className="
+                    px-7
+                    py-3
+                    rounded-full
+                    border-2
+                    border-yellow-500
+                    bg-yellow-500
+                    text-gray-900
+                    font-semibold
+                    transition-all
+                    duration-200
+                    hover:bg-transparent
+                    hover:text-yellow-400
+                    hover:border-yellow-500
+                    active:scale-95
+                "
+            >
+                Save Changes
+            </button>
+
+            </div>
+
           </div>
         </Modal>
       )}

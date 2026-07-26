@@ -20,7 +20,8 @@ export const sortProducts = (products, sortBy) => {
 
 export const filterProducts = (products, filters) => {
   return products.filter((product) => {
-    if (filters.category && product.category !== filters.category) return false
+    const productCategory = product.category_slug || product.category
+    if (filters.category && productCategory !== filters.category) return false
     if (product.price < filters.priceMin || product.price > filters.priceMax) return false
     if (filters.rating > 0 && (product.rating?.rate || 0) < filters.rating) return false
     return true
@@ -45,7 +46,11 @@ export const paginateProducts = (products, page, perPage) => {
 
 export const getRelatedProducts = (products, product, count = 4) => {
   return products
-    .filter((p) => p.id !== product.id && p.category === product.category)
+    .filter((p) => {
+      const pCategory = p.category_slug || p.category
+      const currentCategory = product.category_slug || product.category
+      return p.id !== product.id && pCategory === currentCategory
+    })
     .slice(0, count)
 }
 

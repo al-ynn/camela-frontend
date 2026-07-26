@@ -8,7 +8,6 @@ const variants = {
   gray: 'badge-gray',
   danger: 'badge bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400',
   dark: 'badge bg-gray-900 text-white dark:bg-white dark:text-gray-900',
-  sale: 'badge bg-brand-600 text-white',
   new: 'badge bg-green-600 text-white',
 }
 

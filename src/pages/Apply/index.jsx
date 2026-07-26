@@ -8,7 +8,21 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, CheckCircle2, Send } from 'lucide-react'
 import { ROUTES } from '../../constants/routes'
 import toast from 'react-hot-toast'
-import emailjs from '@emailjs/browser'
+import { commerceService } from '../../services/commerceApi'
+
+const getFriendlySubmitError = (error) => {
+  const response = error?.response?.data
+  const validationError =
+    response?.message ||
+    response?.error ||
+    (Array.isArray(response?.errors) ? response.errors[0] : null)
+
+  if (validationError) return validationError
+  if (error?.text) return error.text
+  if (error?.message) return error.message
+  if (typeof error === 'string' && error.trim()) return error
+  return 'Membership application could not be submitted. Please try again.'
+}
 
 const Apply = () => {
   const { t } = useTranslation()
@@ -67,26 +81,17 @@ const Apply = () => {
 
   const onSubmit = async (data) => {
     try {
-      const templateParams = {
-        to_email: 'camela.trading@gmail.com',
-        from_name: data.fullName,
-        from_email: data.email,
+      await commerceService.submitMembershipApplication({
+        full_name: data.fullName,
+        email: data.email,
         phone: data.phone,
-        application_type: config.title,
-        motivation: data.motivation,
-      }
-
-      const response = await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        templateParams,
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      )
+        health_goals: data.motivation,
+      })
 
       setSubmitted(true)
       toast.success(t('apply.successToast'))
     } catch (error) {
-      toast.error(`Failed to submit: ${error.text || error.message}`)
+      toast.error(`Failed to submit: ${getFriendlySubmitError(error)}`)
     }
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   loginUser,
   registerUser,
+  resendVerificationEmail,
   logout,
   updateUser,
   selectAuth,
@@ -44,6 +45,14 @@ export const useAuth = () => {
     return { success: false, error: result.payload }
   }
 
+  const handleResendVerification = async (email) => {
+    if (!auth.token) return { success: false, error: 'Please log in first.' }
+    const result = await dispatch(resendVerificationEmail({ token: auth.token, email }))
+    return resendVerificationEmail.fulfilled.match(result)
+      ? { success: true }
+      : { success: false, error: result.payload }
+  }
+
   const handleLogout = async () => {
     if (auth.token) {
       try { await authService.logout(auth.token) } catch { /* local cleanup still ends the session */ }
@@ -65,6 +74,7 @@ export const useAuth = () => {
   login: handleLogin,
   register: handleRegister,
   logout: handleLogout,
-  updateUser: handleUpdateUser,
-}
+    updateUser: handleUpdateUser,
+    resendVerification: handleResendVerification,
+  }
 }

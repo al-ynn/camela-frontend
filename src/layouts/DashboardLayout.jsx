@@ -1,4 +1,5 @@
-import { Outlet, NavLink, Link } from 'react-router-dom'
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import AvatarImage from '../components/common/AvatarImage'
 import {
   LayoutDashboard,
@@ -25,10 +26,46 @@ const NAV_ITEMS = [
 
 const DashboardLayout = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const verified = !!user?.email_verified_at
+
+  useEffect(() => {
+    setBannerDismissed(localStorage.getItem('dashboard-verification-banner-dismissed') === '1')
+  }, [])
+
+  const handleVerifyNow = () => {
+    navigate(ROUTES.DASHBOARD_PROFILE, { state: { focusVerification: true } })
+  }
+
+  const handleDismissBanner = () => {
+    setBannerDismissed(true)
+    localStorage.setItem('dashboard-verification-banner-dismissed', '1')
+  }
 
   return (
     <div className="min-h-screen bg-surface-secondary dark:bg-surface-dark">
       <div className="container py-8">
+        {!verified && !bannerDismissed && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+            <div className="flex items-start justify-between gap-4 flex-col sm:flex-row sm:items-center">
+              <div>
+                <h3 className="font-semibold">Verify your email address</h3>
+                <p className="mt-1 text-sm text-amber-800/90 dark:text-amber-100/80">
+                  To protect your account and enable secure purchasing, please verify your email address before placing an order.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={handleVerifyNow} className="btn-brand btn-sm">
+                  Verify Now
+                </button>
+                <button onClick={handleDismissBanner} className="btn-outline btn-sm">
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
           {/* Sidebar */}
           <aside className="hidden lg:block">

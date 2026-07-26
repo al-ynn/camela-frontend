@@ -28,9 +28,18 @@ const AdminOverview = () => {
     if (token) commerceService.getAdminDashboard(token).then(setDashboard)
   }, [token])
 
-  const chartData = revenueRange === '7d'
-    ? dashboard.revenue.slice(-7).map((d, i) => ({ ...d, month: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i] }))
-    : dashboard.revenue
+  const chartData =
+    revenueRange === '7d'
+      ? dashboard.weekly_revenue.map(item => ({
+          ...item,
+          label: new Date(item.month).toLocaleDateString('en-US', {
+            weekday: 'short',
+          }),
+        }))
+      : dashboard.revenue.map(item => ({
+          ...item,
+          label: item.month,
+        }))
 
   return (
     <div className="p-6 space-y-6">
@@ -87,7 +96,20 @@ const AdminOverview = () => {
               ))}
             </div>
           </div>
-          <LineChart data={revenueRange === '3m' ? dashboard.revenue.slice(-3) : chartData} dataKey="revenue" isCurrency />
+          <LineChart
+              data={
+                  revenueRange === '3m'
+                      ? dashboard.revenue
+                            .slice(-3)
+                            .map(item => ({
+                                ...item,
+                                label: item.month,
+                            }))
+                      : chartData
+              }
+              dataKey="revenue"
+              isCurrency
+          />
         </motion.div>
 
         {/* Category Breakdown */}
@@ -127,8 +149,8 @@ const AdminOverview = () => {
               </thead>
               <tbody>
                 {dashboard.recent_orders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                    <td className="px-5 py-3 font-mono text-xs text-gray-600 dark:text-gray-300">{order.id}</td>
+                  <tr key={order.orderNumber} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                    <td className="px-5 py-3 font-mono text-xs text-gray-600 dark:text-gray-300">{order.orderNumber}</td>
                     <td className="px-5 py-3">
                       <p className="font-medium text-gray-900 dark:text-white text-xs">{order.customer}</p>
                       <p className="text-gray-400 text-[11px]">{order.email}</p>

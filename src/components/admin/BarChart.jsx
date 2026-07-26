@@ -55,7 +55,7 @@ const BarChart = ({ data = [], dataKey = 'revenue', color = '#e11d48', isCurrenc
 
             {/* Label */}
             <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500 truncate w-full text-center">
-              {d.month || d.day || d.label}
+              {d.label || d.month || d.day}
             </span>
           </div>
         )
