@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import AvatarImage from '../components/common/AvatarImage'
 import {
@@ -27,8 +27,10 @@ const NAV_ITEMS = [
 const DashboardLayout = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const verified = !!user?.email_verified_at
+  const hideVerificationBanner = location.pathname === ROUTES.DASHBOARD_PROFILE
 
   useEffect(() => {
     setBannerDismissed(localStorage.getItem('dashboard-verification-banner-dismissed') === '1')
@@ -46,7 +48,7 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen bg-surface-secondary dark:bg-surface-dark">
       <div className="container py-8">
-        {!verified && !bannerDismissed && (
+        {!verified && !bannerDismissed && !hideVerificationBanner && (
           <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
             <div className="flex items-start justify-between gap-4 flex-col sm:flex-row sm:items-center">
               <div>

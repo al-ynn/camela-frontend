@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -33,8 +34,7 @@ const CartDrawer = () => {
       close()
     }
     // Close any open drawer on navigation so overlays never stick around.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname])
+  }, [location.pathname, isOpen])
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -48,7 +48,9 @@ const CartDrawer = () => {
   }, [isOpen])
 
   const goTo = (href) => {
-    close()
+    flushSync(() => {
+      close()
+    })
     navigate(href)
   }
 

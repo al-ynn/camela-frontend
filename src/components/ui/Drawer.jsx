@@ -44,7 +44,7 @@ const Drawer = ({
 
   useEffect(() => {
     if (isOpen) onClose()
-  }, [location.pathname])
+  }, [location.pathname, isOpen, onClose])
 
   useEffect(() => {
     const handleEscape = (e) => {

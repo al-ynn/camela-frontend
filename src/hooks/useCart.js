@@ -30,26 +30,49 @@ export const useCart = () => {
       toast.error('Please verify your email before purchasing products.')
       return
     }
+    const safeQuantity = Number(quantity) || 1
+    if (safeQuantity <= 0) {
+      toast.error('Please choose a valid quantity')
+      return
+    }
     try {
-      dispatch(setCartItems(await commerceService.addToCart(token, product.id, quantity)))
+      const updatedCart = await commerceService.addToCart(token, product.id, safeQuantity)
+      dispatch(setCartItems(updatedCart))
       dispatch(openCartDrawer())
       toast.success('Added to cart!')
-    } catch (error) { toast.error(error.response?.data?.message || 'Unable to update cart') }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to update cart')
+    }
   }
 
   const handleRemoveFromCart = async (key) => {
     if (!token) return
-    dispatch(setCartItems(await commerceService.removeCartItem(token, key)))
+    try {
+      const updatedCart = await commerceService.removeCartItem(token, key)
+      dispatch(setCartItems(updatedCart))
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to remove cart item')
+    }
   }
 
   const handleUpdateQuantity = async (key, quantity) => {
     if (!token) return
     if (quantity <= 0) return handleRemoveFromCart(key)
-    dispatch(setCartItems(await commerceService.updateCartItem(token, key, quantity)))
+    try {
+      const updatedCart = await commerceService.updateCartItem(token, key, quantity)
+      dispatch(setCartItems(updatedCart))
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to update cart')
+    }
   }
 
   const handleClearCart = async () => {
-    if (token) await commerceService.clearCart(token)
+    try {
+      if (token) await commerceService.clearCart(token)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to clear cart')
+      return
+    }
     dispatch(clearCartState())
   }
 
