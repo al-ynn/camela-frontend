@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Heart, ShoppingCart, Eye } from 'lucide-react'
 import { useCart } from '../../hooks/useCart'
@@ -11,9 +11,11 @@ import Rating from '../ui/Rating'
 import Badge from '../ui/Badge'
 import { formatPrice } from '../../utils/formatters'
 import { cn, resolveProductImageUrl } from '../../utils/helpers'
+import { ROUTES } from '../../constants/routes'
 
 const ProductCard = ({ product, view = 'grid' }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [imageLoaded, setImageLoaded] = useState(false)
   const [hovered, setHovered] = useState(false)
   const { addToCart } = useCart()
@@ -26,8 +28,13 @@ const ProductCard = ({ product, view = 'grid' }) => {
     ? productImages[1]
     : productImages[0]
 
-const displayImage =
+  const displayImage =
   resolveProductImageUrl(currentImage) || resolveProductImageUrl(product.image)
+
+  const handleBuyNow = async () => {
+    const added = await addToCart(product)
+    if (added) navigate(ROUTES.CHECKOUT)
+  }
 
   if (view === 'list') {
     return (
@@ -83,6 +90,13 @@ const displayImage =
             >
               <ShoppingCart size={14} />
               {t('product.addToCart')}
+            </button>
+            <button
+              onClick={handleBuyNow}
+              className="btn-outline btn-sm gap-2"
+            >
+              <ShoppingCart size={14} />
+              Buy Now
             </button>
           </div>
         </div>
@@ -180,6 +194,14 @@ const displayImage =
           >
             <ShoppingCart size={13} />
             <span>{t('product.addToCart')}</span>
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handleBuyNow}
+            className="btn-outline btn-sm gap-1.5 w-full"
+          >
+            <ShoppingCart size={13} />
+            <span>Buy Now</span>
           </motion.button>
         </div>
       </div>

@@ -24,7 +24,6 @@ import { selectCartCount } from '../../features/cart/cartSlice'
 import { selectWishlistCount } from '../../features/wishlist/wishlistSlice'
 import { selectIsAuthenticated, selectUser, selectIsAdmin, selectAuth, logout } from '../../features/auth/authSlice'
 import {
-  openCartDrawer,
   openMobileMenu,
   openSearch,
   toggleTheme,
@@ -216,8 +215,8 @@ const Header = () => {
             </Link>
 
             {/* Cart */}
-            <button
-              onClick={() => dispatch(openCartDrawer())}
+            <Link
+              to={ROUTES.CART}
               className="relative p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               aria-label="Cart"
             >
@@ -232,7 +231,7 @@ const Header = () => {
                   {cartCount}
                 </motion.span>
               )}
-            </button>
+            </Link>
 
             {/* User Menu */}
             {isAuthenticated ? (

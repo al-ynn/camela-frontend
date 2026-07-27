@@ -9,7 +9,6 @@ import {
   selectCartTotals,
   selectCoupon,
 } from '../features/cart/cartSlice'
-import { openCartDrawer } from '../features/ui/uiSlice'
 import { commerceService } from '../services/commerceApi'
 import toast from 'react-hot-toast'
 import { selectUser } from '../features/auth/authSlice'
@@ -33,15 +32,16 @@ export const useCart = () => {
     const safeQuantity = Number(quantity) || 1
     if (safeQuantity <= 0) {
       toast.error('Please choose a valid quantity')
-      return
+      return false
     }
     try {
       const updatedCart = await commerceService.addToCart(token, product.id, safeQuantity)
       dispatch(setCartItems(updatedCart))
-      dispatch(openCartDrawer())
       toast.success('Added to cart!')
+      return true
     } catch (error) {
       toast.error(error.response?.data?.message || 'Unable to update cart')
+      return false
     }
   }
 
@@ -50,8 +50,10 @@ export const useCart = () => {
     try {
       const updatedCart = await commerceService.removeCartItem(token, key)
       dispatch(setCartItems(updatedCart))
+      return true
     } catch (error) {
       toast.error(error.response?.data?.message || 'Unable to remove cart item')
+      return false
     }
   }
 
@@ -61,8 +63,10 @@ export const useCart = () => {
     try {
       const updatedCart = await commerceService.updateCartItem(token, key, quantity)
       dispatch(setCartItems(updatedCart))
+      return true
     } catch (error) {
       toast.error(error.response?.data?.message || 'Unable to update cart')
+      return false
     }
   }
 
@@ -74,6 +78,7 @@ export const useCart = () => {
       return
     }
     dispatch(clearCartState())
+    return true
   }
 
   const handleApplyCoupon = () => toast.error('Coupons are not available')

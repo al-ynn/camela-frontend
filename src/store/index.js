@@ -32,7 +32,7 @@ const persistConfig = {
   key: 'camela-root',
   version: 1,
   storage,
-  whitelist: ['wishlist', 'auth', 'ui'],
+  whitelist: ['wishlist', 'auth', 'ui', 'cart'],
   blacklist: [apiSlice.reducerPath, 'products'],
 }
 

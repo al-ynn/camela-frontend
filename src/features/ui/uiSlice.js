@@ -3,7 +3,6 @@ import { createSlice } from '@reduxjs/toolkit'
 const uiSlice = createSlice({
   name: 'ui',
   initialState: {
-    cartDrawerOpen: false,
     mobileMenuOpen: false,
     searchOpen: false,
     theme: 'light',
@@ -11,15 +10,6 @@ const uiSlice = createSlice({
     compareList: [],
   },
   reducers: {
-    openCartDrawer: (state) => {
-      state.cartDrawerOpen = true
-    },
-    closeCartDrawer: (state) => {
-      state.cartDrawerOpen = false
-    },
-    toggleCartDrawer: (state) => {
-      state.cartDrawerOpen = !state.cartDrawerOpen
-    },
     openMobileMenu: (state) => {
       state.mobileMenuOpen = true
     },
@@ -74,9 +64,6 @@ const uiSlice = createSlice({
 })
 
 export const {
-  openCartDrawer,
-  closeCartDrawer,
-  toggleCartDrawer,
   openMobileMenu,
   closeMobileMenu,
   openSearch,
@@ -89,7 +76,6 @@ export const {
   removeFromCompare,
 } = uiSlice.actions
 
-export const selectCartDrawerOpen = (state) => state.ui.cartDrawerOpen
 export const selectMobileMenuOpen = (state) => state.ui.mobileMenuOpen
 export const selectSearchOpen = (state) => state.ui.searchOpen
 export const selectTheme = (state) => state.ui.theme

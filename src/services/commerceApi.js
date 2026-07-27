@@ -4,7 +4,7 @@ import { resolveApiAssetUrl } from '../constants/config'
 
 const client = (token) => axios.create({
   baseURL: API_BASE_URL,
-  headers: { Authorization: `Bearer ${token}` },
+  headers: token ? { Authorization: `Bearer ${token}` } : {},
 })
 
 
@@ -68,7 +68,7 @@ export const commerceService = {
     return response.data.data.items.map(cartItem)
   },
 
-   async getStoreSettings(token) {
+  async getStoreSettings(token) {
 
       const response = await client(token).get(
           '/admin/store-settings'
@@ -76,6 +76,10 @@ export const commerceService = {
 
       return response.data.data ?? response.data
 
+  },
+  async getPublicStoreStatus() {
+    const response = await client().get('/store-status')
+    return response.data.data ?? response.data
   },
   
   async addToCart(token, productId, quantity) {
@@ -195,16 +199,6 @@ export const commerceService = {
   },
   async deleteAdminProduct(token, id) {
     await client(token).delete(`/admin/products/${id}`)
-  },
-
-  async getStoreSettings(token) {
-
-      const response =
-          await client(token).get(
-              '/admin/store-settings'
-          )
-
-      return response.data.data
   },
 
   async submitMembershipApplication(payload) {
