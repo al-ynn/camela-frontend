@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '../../utils/helpers'
@@ -13,6 +13,8 @@ const sizes = {
 }
 
 const Modal = ({ isOpen, onClose, title, children, size = 'md', className, hideClose = false }) => {
+  const dialogRef = useRef(null)
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -27,6 +29,47 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md', className, hideC
     if (isOpen) document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const focusableSelector = [
+      'button:not([disabled])',
+      'a[href]',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',')
+
+    const focusFirst = () => {
+      const focusable = dialogRef.current?.querySelectorAll(focusableSelector)
+      focusable?.[0]?.focus()
+    }
+
+    focusFirst()
+
+    const handleTab = (e) => {
+      if (e.key !== 'Tab') return
+
+      const focusable = dialogRef.current?.querySelectorAll(focusableSelector)
+      if (!focusable || focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleTab)
+    return () => document.removeEventListener('keydown', handleTab)
+  }, [isOpen])
 
   return (
     <AnimatePresence>
@@ -45,6 +88,10 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md', className, hideC
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title || 'Modal dialog'}
             className={cn(
               'relative w-full bg-white dark:bg-gray-900 rounded-2xl shadow-premium z-10',
               'border border-gray-100 dark:border-gray-800',
