@@ -4,11 +4,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, UserPlus } from 'lucide-react'
-import { useState } from 'react'
+import { Eye, EyeOff, UserPlus, AlertTriangle } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { ROUTES } from '../../constants/routes'
 import Modal from '../../components/ui/Modal'
+import { commerceService } from '../../services/commerceApi'
 
 const TERMS_AND_CONDITIONS = `Terms and Condition for logging in at Camela Website
 Terms & Conditions
@@ -75,6 +76,7 @@ const Register = () => {
   const { register: registerUser, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [isTermsOpen, setIsTermsOpen] = useState(false)
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
 
   const schema = z.object({
     firstName: z.string().min(2, t('auth.validation.firstNameRequired')),
@@ -100,6 +102,19 @@ const Register = () => {
   })
   const termsAccepted = watch('terms')
 
+  useEffect(() => {
+    let active = true
+    commerceService.getPublicStoreStatus()
+      .then((status) => {
+        if (!active) return
+        setMaintenanceMode(Boolean(Number(status?.maintenance_mode ?? status?.maintenanceMode ?? status?.data?.maintenance_mode ?? 0)))
+      })
+      .catch(() => {
+        if (active) setMaintenanceMode(false)
+      })
+    return () => { active = false }
+  }, [])
+
   const onSubmit = async (data) => {
     await registerUser(data)
   }
@@ -118,6 +133,16 @@ const Register = () => {
           {t('auth.register.subtitle')}
         </p>
       </div>
+
+      {maintenanceMode && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
+          <AlertTriangle size={18} className="mt-0.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">Website under maintenance</p>
+            <p className="text-xs text-amber-700/80 dark:text-amber-300/80">New customer registration is temporarily paused.</p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">

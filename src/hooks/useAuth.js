@@ -28,6 +28,22 @@ export const useAuth = () => {
   const handleLogin = async (credentials) => {
     const result = await dispatch(loginUser(credentials))
     if (loginUser.fulfilled.match(result)) {
+      const status = await commerceService.getPublicStoreStatus().catch(() => ({}))
+      const maintenanceMode = Boolean(
+        Number(
+          status?.maintenance_mode ??
+          status?.maintenanceMode ??
+          status?.data?.maintenance_mode ??
+          status?.data?.maintenanceMode ??
+          0
+        )
+      )
+
+      if (maintenanceMode && result.payload.user?.is_admin !== true) {
+        dispatch(logout())
+        return { success: false, error: 'The website is under maintenance right now.' }
+      }
+
       dispatch(setCartItems(await commerceService.getCart(result.payload.token)))
       navigate(ROUTES.DASHBOARD)
       return { success: true }
@@ -38,6 +54,22 @@ export const useAuth = () => {
   const handleRegister = async (userData) => {
     const result = await dispatch(registerUser(userData))
     if (registerUser.fulfilled.match(result)) {
+      const status = await commerceService.getPublicStoreStatus().catch(() => ({}))
+      const maintenanceMode = Boolean(
+        Number(
+          status?.maintenance_mode ??
+          status?.maintenanceMode ??
+          status?.data?.maintenance_mode ??
+          status?.data?.maintenanceMode ??
+          0
+        )
+      )
+
+      if (maintenanceMode && result.payload.user?.is_admin !== true) {
+        dispatch(logout())
+        return { success: false, error: 'The website is under maintenance right now.' }
+      }
+
       dispatch(setCartItems(await commerceService.getCart(result.payload.token)))
       navigate(ROUTES.DASHBOARD)
       return { success: true }

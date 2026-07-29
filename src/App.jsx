@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -50,6 +50,7 @@ const MaintenanceGate = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const isAdmin = useSelector((state) => state.auth.user?.is_admin === true)
+  const location = useLocation()
 
   const resolveMaintenanceFlag = (status) => {
     const value =
@@ -87,6 +88,16 @@ const MaintenanceGate = ({ children }) => {
   }, [])
 
   if (loading) return <FullPageSpinner />
+
+  const allowAuthPages =
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname === '/email-verified'
+
+  if (allowAuthPages) {
+    return children
+  }
 
   if (maintenanceMode && !isAdmin) {
     return (
