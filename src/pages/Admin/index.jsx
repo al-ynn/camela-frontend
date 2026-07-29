@@ -32,19 +32,46 @@ const normalizeDashboard = (data) => ({
     [],
 })
 
+const normalizeNotifications = (data) => {
+  if (Array.isArray(data)) return data
+  return data?.items?.data ?? data?.data?.items?.data ?? data?.data ?? []
+}
+
+const lowStockFromNotifications = (notifications = []) =>
+  notifications
+    .filter((item) => item?.type === 'low_stock')
+    .map((item, index) => {
+      const message = String(item?.message ?? '')
+      const stockMatch = message.match(/with\s+(\d+)\s+item/i)
+
+      return {
+        id: item?.id ?? `low-stock-${index}`,
+        name: item?.title ?? 'Low Stock Warning',
+        category: message || 'Low stock alert',
+        stock: stockMatch ? Number(stockMatch[1]) : null,
+      }
+    })
+
 const AdminOverview = () => {
   const { t } = useTranslation()
   const [revenueRange, setRevenueRange] = useState('12m')
   const token = useSelector(selectAuth).token
   const [dashboard, setDashboard] = useState({ stats: {}, revenue: [], categories: [], recent_orders: [], low_stock: [] })
+  const [notificationLowStock, setNotificationLowStock] = useState([])
 
   useEffect(() => {
     if (token) {
-      commerceService.getAdminDashboard(token).then((data) => {
-        setDashboard(normalizeDashboard(data))
+      Promise.all([
+        commerceService.getAdminDashboard(token),
+        commerceService.getAdminNotifications(token).catch(() => []),
+      ]).then(([dashboardData, notificationsData]) => {
+        setDashboard(normalizeDashboard(dashboardData))
+        setNotificationLowStock(lowStockFromNotifications(normalizeNotifications(notificationsData)))
       })
     }
   }, [token])
+
+  const lowStockItems = dashboard.low_stock.length ? dashboard.low_stock : notificationLowStock
 
   const chartData =
     revenueRange === '7d'
@@ -198,11 +225,11 @@ const AdminOverview = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white">{t('admin.lowStockAlerts')}</h3>
             <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full">
               <AlertTriangle size={10} />
-              {dashboard.low_stock.length} items
+              {lowStockItems.length} items
             </span>
           </div>
           <div className="space-y-3">
-            {dashboard.low_stock.map((item) => (
+            {lowStockItems.map((item) => (
               <div
                 key={item.id ?? `${item.name}-${item.category}`}
                 className="flex items-center justify-between gap-3 p-3 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30"
@@ -212,12 +239,12 @@ const AdminOverview = () => {
                   <p className="text-[11px] text-gray-400">{item.category}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-bold text-amber-600 dark:text-amber-400">{item.stock}</p>
-                  <p className="text-[10px] text-gray-400">left</p>
+                  <p className="text-sm font-bold text-amber-600 dark:text-amber-400">{item.stock ?? '!'}</p>
+                  <p className="text-[10px] text-gray-400">{item.stock == null ? 'alert' : 'left'}</p>
                 </div>
               </div>
             ))}
-            {!dashboard.low_stock.length && (
+            {!lowStockItems.length && (
               <div className="rounded-xl border border-dashed border-amber-200 dark:border-amber-900/40 px-4 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
                 No low stock items right now.
               </div>
