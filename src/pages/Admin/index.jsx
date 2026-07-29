@@ -18,6 +18,20 @@ const STATS = [
   { key: 'avgOrderValue', icon: TrendingUp, color: 'amber', prefix: '$' },
 ]
 
+const normalizeDashboard = (data) => ({
+  stats: data?.stats ?? {},
+  revenue: data?.revenue ?? [],
+  weekly_revenue: data?.weekly_revenue ?? [],
+  categories: data?.categories ?? [],
+  recent_orders: data?.recent_orders ?? [],
+  low_stock:
+    data?.low_stock ??
+    data?.lowStock ??
+    data?.low_stock_alerts ??
+    data?.lowStockAlerts ??
+    [],
+})
+
 const AdminOverview = () => {
   const { t } = useTranslation()
   const [revenueRange, setRevenueRange] = useState('12m')
@@ -25,18 +39,22 @@ const AdminOverview = () => {
   const [dashboard, setDashboard] = useState({ stats: {}, revenue: [], categories: [], recent_orders: [], low_stock: [] })
 
   useEffect(() => {
-    if (token) commerceService.getAdminDashboard(token).then(setDashboard)
+    if (token) {
+      commerceService.getAdminDashboard(token).then((data) => {
+        setDashboard(normalizeDashboard(data))
+      })
+    }
   }, [token])
 
   const chartData =
     revenueRange === '7d'
-      ? dashboard.weekly_revenue.map(item => ({
+      ? dashboard.weekly_revenue.map((item) => ({
           ...item,
           label: new Date(item.month).toLocaleDateString('en-US', {
             weekday: 'short',
           }),
         }))
-      : dashboard.revenue.map(item => ({
+      : dashboard.revenue.map((item) => ({
           ...item,
           label: item.month,
         }))
@@ -121,7 +139,9 @@ const AdminOverview = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white">{t('admin.salesByCategory')}</h3>
             <p className="text-xs text-gray-400 mt-0.5">Revenue distribution</p>
           </div>
-          <DonutChart data={dashboard.categories} />
+          <div className="min-h-[250px]">
+            <DonutChart data={dashboard.categories} />
+          </div>
         </motion.div>
       </div>
 
@@ -183,7 +203,10 @@ const AdminOverview = () => {
           </div>
           <div className="space-y-3">
             {dashboard.low_stock.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-3 p-3 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
+              <div
+                key={item.id ?? `${item.name}-${item.category}`}
+                className="flex items-center justify-between gap-3 p-3 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30"
+              >
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">{item.name}</p>
                   <p className="text-[11px] text-gray-400">{item.category}</p>
@@ -194,6 +217,11 @@ const AdminOverview = () => {
                 </div>
               </div>
             ))}
+            {!dashboard.low_stock.length && (
+              <div className="rounded-xl border border-dashed border-amber-200 dark:border-amber-900/40 px-4 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                No low stock items right now.
+              </div>
+            )}
           </div>
           <Link to="/admin/inventory" className="mt-4 flex items-center justify-center gap-2 text-xs text-brand-600 dark:text-brand-400 hover:underline">
             Manage Inventory <ArrowRight size={11} />

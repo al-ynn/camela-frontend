@@ -55,7 +55,7 @@ const DonutChart = ({ data = [] }) => {
   let cumulative = 0
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6">
+    <div className="flex flex-col items-center gap-5">
       <div className="flex-shrink-0">
         <svg width="180" height="180" viewBox="0 0 180 180">
           {normalizedData.map((segment, i) => {
@@ -108,15 +108,15 @@ const DonutChart = ({ data = [] }) => {
             <div className="flex items-center gap-2 flex-shrink-0">
               <div className="w-16 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
-                    className="h-full rounded-full"
-                    style={{
-                        width: `${(segment.sales / total) * 100}%`,
-                        background: segment.color
-                    }}
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${(segment.sales / total) * 100}%`,
+                    background: segment.color,
+                  }}
                 />
               </div>
-              <span className="text-xs font-semibold ...">
-                  {((segment.sales / total) * 100).toFixed(0)}%
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                {((segment.sales / total) * 100).toFixed(0)}%
               </span>
             </div>
           </div>
