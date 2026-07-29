@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Store, CreditCard, Truck, Percent, Bell, Shield, Save, RefreshCw } from 'lucide-react'
+import { Store, Truck, Percent, Bell, Shield, Save, RefreshCw } from 'lucide-react'
 import { APP_CONFIG, SHIPPING_METHODS, TAX_RATE } from '../../constants/config'
 import toast from 'react-hot-toast'
-
-import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { commerceService } from '../../services/commerceApi'
 
 const Toggle = ({ checked, onChange }) => (
-  <button onClick={() => onChange(!checked)} className={`relative w-10 h-5.5 h-[22px] rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
+  <button
+    type="button"
+    onClick={() => onChange(!checked)}
+    className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+  >
     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
   </button>
 )
@@ -34,8 +36,6 @@ const AdminSettings = () => {
   const { t } = useTranslation()
   const token = useSelector((state) => state.auth.token)
 
-  console.log("ADMIN TOKEN:", token);
-  
   const [storeInfo, setStoreInfo] = useState({
     name: APP_CONFIG.name,
     tagline: APP_CONFIG.tagline,
@@ -43,139 +43,98 @@ const AdminSettings = () => {
     phone: APP_CONFIG.phone,
     address: APP_CONFIG.address,
   })
-
   const [taxRate, setTaxRate] = useState(TAX_RATE * 100)
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(75)
-
-  const [paymentMethods, setPaymentMethods] = useState({
-    card: true, paypal: true, applePay: true, googlePay: false, bankTransfer: false,
-  })
-
   const [notifications, setNotifications] = useState({
-    newOrder: true, lowStock: true, newCustomer: true, orderDelivered: false, refundRequest: true,
+    newOrder: true, lowStock: true, newCustomer: true, orderDelivered: false,
   })
-
   const [security, setSecurity] = useState({
     twoFactor: false, loginAlerts: true, maintenanceMode: false,
   })
-
   const [shippingRates, setShippingRates] = useState(
     SHIPPING_METHODS.reduce((acc, m) => ({ ...acc, [m.id]: m.price }), {})
   )
 
   useEffect(() => {
-      if (!token) return
+    if (!token) return
 
-      const loadSettings = async () => {
-          try {
+    const loadSettings = async () => {
+      try {
+        const settings = await commerceService.getStoreSettings(token)
 
-              const settings =
-                  await commerceService.getStoreSettings(token)
-
-              setStoreInfo({
-                  name: settings.store_name,
-                  tagline: settings.tagline,
-                  email: settings.support_email,
-                  phone: settings.phone,
-                  address: settings.address,
-              })
-
-              setShippingRates({
-                  standard: Number(settings.standard_shipping),
-                  express: Number(settings.express_shipping),
-                  overnight: Number(settings.overnight_shipping),
-              })
-
-              setFreeShippingThreshold(
-                  Number(settings.free_shipping_threshold)
-              )
-
-              setTaxRate(
-                  Number(settings.tax_rate)
-              )
-
-              setNotifications({
-                  newOrder: settings.notify_new_order,
-                  lowStock: settings.notify_low_stock,
-                  newCustomer: settings.notify_new_customer,
-                  orderDelivered: settings.notify_order_delivered,
-              })
-
-              setSecurity((prev) => ({
-                  ...prev,
-                  maintenanceMode:
-                      settings.maintenance_mode,
-              }))
-
-          } catch (e) {
-
-              console.error(e)
-
-          }
+        setStoreInfo({
+          name: settings.store_name,
+          tagline: settings.tagline,
+          email: settings.support_email,
+          phone: settings.phone,
+          address: settings.address,
+        })
+        setShippingRates({
+          standard: Number(settings.standard_shipping),
+          express: Number(settings.express_shipping),
+          overnight: Number(settings.overnight_shipping),
+        })
+        setFreeShippingThreshold(Number(settings.free_shipping_threshold))
+        setTaxRate(Number(settings.tax_rate))
+        setNotifications({
+          newOrder: Boolean(settings.notify_new_order),
+          lowStock: Boolean(settings.notify_low_stock),
+          newCustomer: Boolean(settings.notify_new_customer),
+          orderDelivered: Boolean(settings.notify_order_delivered),
+        })
+        setSecurity((prev) => ({
+          ...prev,
+          maintenanceMode: Boolean(Number(settings.maintenance_mode ?? 0)),
+        }))
+      } catch (e) {
+        console.error(e)
       }
+    }
 
-      loadSettings()
-
+    loadSettings()
   }, [token])
 
   const handleSave = async (section) => {
+    try {
+      await commerceService.updateStoreSettings(token, {
+        store_name: storeInfo.name,
+        tagline: storeInfo.tagline,
+        support_email: storeInfo.email,
+        phone: storeInfo.phone,
+        address: storeInfo.address,
+        standard_shipping: shippingRates.standard,
+        express_shipping: shippingRates.express,
+        overnight_shipping: shippingRates.overnight,
+        free_shipping_threshold: freeShippingThreshold,
+        tax_rate: taxRate,
+        notify_new_order: notifications.newOrder,
+        notify_low_stock: notifications.lowStock,
+        notify_new_customer: notifications.newCustomer,
+        notify_order_delivered: notifications.orderDelivered,
+        maintenance_mode: security.maintenanceMode,
+      })
 
-      try {
+      toast.success(`${section} settings saved`)
+    } catch (e) {
+      console.error(e)
+      toast.error('Failed to save settings.')
+    }
+  }
 
-          await commerceService.updateStoreSettings(token, {
+  const handleMaintenanceModeChange = async (nextValue) => {
+    const previousValue = security.maintenanceMode
+    setSecurity((p) => ({ ...p, maintenanceMode: nextValue }))
 
-              store_name: storeInfo.name,
-              tagline: storeInfo.tagline,
-              support_email: storeInfo.email,
-              phone: storeInfo.phone,
-              address: storeInfo.address,
-
-              standard_shipping:
-                  shippingRates.standard,
-
-              express_shipping:
-                  shippingRates.express,
-
-              overnight_shipping:
-                  shippingRates.overnight,
-
-              free_shipping_threshold:
-                  freeShippingThreshold,
-
-              tax_rate:
-                  taxRate,
-
-              notify_new_order:
-                  notifications.newOrder,
-
-              notify_low_stock:
-                  notifications.lowStock,
-
-              notify_new_customer:
-                  notifications.newCustomer,
-
-              notify_order_delivered:
-                  notifications.orderDelivered,
-
-              maintenance_mode:
-                  security.maintenanceMode,
-
-          })
-
-          toast.success(
-              `${section} settings saved`
-          )
-
-      } catch (e) {
-
-          console.error(e)
-
-          toast.error(
-              'Failed to save settings.'
-          )
-
-      }
-
+    try {
+      await commerceService.updateStoreSettings(token, {
+        maintenance_mode: nextValue,
+      })
+      toast.success(nextValue ? 'Store is now offline for maintenance.' : 'Store is back online.')
+    } catch (e) {
+      console.error(e)
+      setSecurity((p) => ({ ...p, maintenanceMode: previousValue }))
+      toast.error('Failed to update maintenance mode.')
+    }
   }
 
   return (
@@ -185,7 +144,6 @@ const AdminSettings = () => {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t('adminSettings.subtitle')}</p>
       </div>
 
-      {/* Store Info */}
       <Section icon={Store} title={t('adminSettings.storeInfo.title')} subtitle={t('adminSettings.storeInfo.subtitle')}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -203,15 +161,13 @@ const AdminSettings = () => {
         </div>
       </Section>
 
-
-      {/* Shipping */}
       <Section icon={Truck} title={t('adminSettings.shipping.title')} subtitle={t('adminSettings.shipping.subtitle')}>
         <div className="space-y-4">
           {SHIPPING_METHODS.map((method) => (
             <div key={method.id} className="flex items-center justify-between gap-4">
               <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
-              <p className="text-xs text-gray-400">{method.description}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
+                <p className="text-xs text-gray-400">{method.description}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">$</span>
@@ -241,7 +197,6 @@ const AdminSettings = () => {
         </div>
       </Section>
 
-      {/* Tax */}
       <Section icon={Percent} title={t('adminSettings.tax.title')} subtitle={t('adminSettings.tax.subtitle')}>
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -258,13 +213,7 @@ const AdminSettings = () => {
         </div>
       </Section>
 
-      {/* Notifications */}
-      <Section
-          id="admin-notifications"
-          icon={Bell}
-          title={t('adminSettings.notifications.title')}
-          subtitle={t('adminSettings.notifications.subtitle')}
-        >
+      <Section id="admin-notifications" icon={Bell} title={t('adminSettings.notifications.title')} subtitle={t('adminSettings.notifications.subtitle')}>
         <div className="space-y-3">
           {[
             ['newOrder', 'New Order Placed', 'Alert when a customer places an order'],
@@ -283,24 +232,18 @@ const AdminSettings = () => {
         </div>
       </Section>
 
-      {/* Security */}
       <Section icon={Shield} title={t('adminSettings.security.title')} subtitle={t('adminSettings.security.subtitle')}>
         <div className="space-y-3">
-          {[
-            ['maintenanceMode', 'Maintenance Mode', 'Take store offline for maintenance'],
-          ].map(([key, label, desc]) => (
-            <div key={key} className={`flex items-center justify-between gap-4 py-1.5 ${key === 'maintenanceMode' && security.maintenanceMode ? 'p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-900/30' : ''}`}>
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{label}</p>
-                <p className="text-xs text-gray-400">{desc}</p>
-              </div>
-              <Toggle checked={security[key]} onChange={(v) => { setSecurity((p) => ({ ...p, [key]: v })); if (key === 'maintenanceMode') toast(v ? '⚠ Store is now offline' : '✅ Store is back online', { duration: 4000 }) }} />
+          <div className={`flex items-center justify-between gap-4 py-1.5 ${security.maintenanceMode ? 'p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-900/30' : ''}`}>
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Maintenance Mode</p>
+              <p className="text-xs text-gray-400">Take store offline for maintenance</p>
             </div>
-          ))}
+            <Toggle checked={security.maintenanceMode} onChange={handleMaintenanceModeChange} />
+          </div>
         </div>
       </Section>
 
-      {/* Danger Zone */}
       <div className="card p-6 border-red-100 dark:border-red-900/40">
         <h3 className="font-semibold text-brand-600 dark:text-brand-400 mb-4">{t('adminSettings.dangerZone')}</h3>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-red-50 dark:bg-red-900/10 rounded-xl">

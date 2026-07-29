@@ -51,6 +51,18 @@ const MaintenanceGate = ({ children }) => {
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const isAdmin = useSelector((state) => state.auth.user?.is_admin === true)
 
+  const resolveMaintenanceFlag = (status) => {
+    const value =
+      status?.maintenance_mode ??
+      status?.maintenanceMode ??
+      status?.data?.maintenance_mode ??
+      status?.data?.maintenanceMode ??
+      status?.store_status?.maintenance_mode ??
+      status?.storeStatus?.maintenance_mode
+
+    return Boolean(Number(value ?? 0))
+  }
+
   useEffect(() => {
     let active = true
 
@@ -58,7 +70,7 @@ const MaintenanceGate = ({ children }) => {
       try {
         const status = await commerceService.getPublicStoreStatus()
         if (!active) return
-        setMaintenanceMode(!!status.maintenance_mode)
+        setMaintenanceMode(resolveMaintenanceFlag(status))
       } catch {
         if (!active) return
         setMaintenanceMode(false)
