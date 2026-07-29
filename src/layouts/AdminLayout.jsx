@@ -163,28 +163,7 @@ const AdminLayout = () => {
         transition={{ duration: 0.25, ease: 'easeInOut' }}
         className="relative hidden lg:flex flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 overflow-hidden"
       >
-        <div className={`relative flex items-center ${collapsed ? 'justify-center' : 'justify-start'} h-[73px] px-4 border-b border-gray-100 dark:border-gray-800`}>
-          <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-            {collapsed ? (
-              <img
-                src="/Camela Logo.jpeg"
-                alt="Camela Group"
-                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <Logo size="sm" />
-            )}
-          </div>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="absolute -right-12 top-1/2 -translate-y-1/2 w-6 h-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors z-10 shadow-sm"
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            aria-expanded={!collapsed}
-          >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-          </button>
-        </div>
-        <SidebarContent showHeader={false} />
+        <SidebarContent />
       </motion.aside>
 
       <AnimatePresence>
@@ -211,6 +190,14 @@ const AdminLayout = () => {
           <div className="flex items-center gap-3">
             <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
               <Menu size={18} />
+            </button>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex w-7 h-7 rounded-full items-center justify-center bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors shadow-sm flex-shrink-0"
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-expanded={!collapsed}
+            >
+              {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
             </button>
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl">
               <Store size={13} className="text-gray-400" />

@@ -23,6 +23,9 @@ export const useCart = () => {
   const token = useSelector((state) => state.auth.token)
   const user = useSelector(selectUser)
 
+  const resolveCartItemId = (key) =>
+    items.find((item) => String(item.cartItemId ?? item.key) === String(key))?.cartItemId ?? key
+
   const handleAddToCart = async (product, quantity = 1) => {
     if (!token) return toast.error('Please log in to add items to your cart')
     if (!user?.email_verified_at) {
@@ -47,11 +50,18 @@ export const useCart = () => {
 
   const handleRemoveFromCart = async (key) => {
     if (!token) return
+    const cartItemId = resolveCartItemId(key)
+
     try {
-      const updatedCart = await commerceService.removeCartItem(token, key)
+      const updatedCart = await commerceService.removeCartItem(token, cartItemId)
       dispatch(setCartItems(updatedCart))
       return true
     } catch (error) {
+      if (error.response?.status === 404) {
+        dispatch(setCartItems(items.filter((item) => String(item.key) !== String(key))))
+        return true
+      }
+
       toast.error(error.response?.data?.message || 'Unable to remove cart item')
       return false
     }
@@ -60,11 +70,18 @@ export const useCart = () => {
   const handleUpdateQuantity = async (key, quantity) => {
     if (!token) return
     if (quantity <= 0) return handleRemoveFromCart(key)
+    const cartItemId = resolveCartItemId(key)
+
     try {
-      const updatedCart = await commerceService.updateCartItem(token, key, quantity)
+      const updatedCart = await commerceService.updateCartItem(token, cartItemId, quantity)
       dispatch(setCartItems(updatedCart))
       return true
     } catch (error) {
+      if (error.response?.status === 404) {
+        dispatch(setCartItems(items.filter((item) => String(item.key) !== String(key))))
+        return true
+      }
+
       toast.error(error.response?.data?.message || 'Unable to update cart')
       return false
     }
