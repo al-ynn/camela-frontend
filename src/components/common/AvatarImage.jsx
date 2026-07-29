@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { cn } from '../../utils/helpers'
 import { resolveApiAssetUrl } from '../../constants/config'
 
@@ -21,6 +21,10 @@ const AvatarImage = ({ src, name, alt, className, fallbackClassName }) => {
     if (!src) return ''
     return resolveApiAssetUrl(src)
   }, [src])
+
+  useEffect(() => {
+    setFailed(false)
+  }, [resolvedSrc])
 
   const initials = getInitials(name || alt)
 

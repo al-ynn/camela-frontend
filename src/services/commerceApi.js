@@ -153,6 +153,12 @@ export const commerceService = {
     const response = await client(token).patch('/profile', data)
     return response.data.user?.data || response.data.user
   },
+  async updateProfileAvatar(token, file) {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const response = await client(token).post('/profile/avatar', formData)
+    return response.data.user?.data || response.data.user
+  },
   async getAdminDashboard(token) {
     const response = await client(token).get('/admin/dashboard')
     return response.data

@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Package, ShoppingBag, Users,
   Boxes, Settings, ChevronLeft, ChevronRight, Bell, LogOut,
-  ExternalLink, Menu, X, Store, BellRing, CheckCircle2, CircleSlash2,
-  Check, MailOpen, Mail, Clock3, TriangleAlert, ShoppingCart, UserPlus, PackageCheck,
+  ExternalLink, Menu, X, Store, BellRing,
+  MailOpen, Mail, Clock3, TriangleAlert, ShoppingCart, UserPlus, PackageCheck,
 } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectUser, logout } from '../features/auth/authSlice'
@@ -91,19 +91,21 @@ const AdminLayout = () => {
     navigate(ROUTES.HOME)
   }
 
-  const SidebarContent = ({ isMobile = false }) => (
+  const SidebarContent = ({ isMobile = false, showHeader = true }) => (
     <div className="flex flex-col h-full">
-      <div className={`flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-800 ${collapsed && !isMobile ? 'justify-center' : ''}`}>
-        {collapsed && !isMobile ? (
-          <img
-            src="/Camela Logo.jpeg"
-            alt="Camela Group"
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          />
-        ) : (
-          <Logo size="sm" />
-        )}
-      </div>
+      {showHeader && (
+        <div className={`flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-800 ${collapsed && !isMobile ? 'justify-center' : ''}`}>
+          {collapsed && !isMobile ? (
+            <img
+              src="/Camela Logo.jpeg"
+              alt="Camela Group"
+              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <Logo size="sm" />
+          )}
+        </div>
+      )}
 
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map(({ label, icon: Icon, href }) => (
@@ -120,7 +122,7 @@ const AdminLayout = () => {
               } ${collapsed && !isMobile ? 'justify-center' : ''}`
             }
           >
-            {({ isActive }) => (
+            {() => (
               <>
                 <Icon size={17} className="flex-shrink-0" />
                 {(!collapsed || isMobile) && <span>{label}</span>}
@@ -161,13 +163,28 @@ const AdminLayout = () => {
         transition={{ duration: 0.25, ease: 'easeInOut' }}
         className="relative hidden lg:flex flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 overflow-hidden"
       >
-        <SidebarContent />
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-14 w-6 h-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors z-10 shadow-sm"
-        >
-          {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-        </button>
+        <div className={`relative flex items-center ${collapsed ? 'justify-center' : 'justify-start'} h-[73px] px-4 border-b border-gray-100 dark:border-gray-800`}>
+          <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+            {collapsed ? (
+              <img
+                src="/Camela Logo.jpeg"
+                alt="Camela Group"
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <Logo size="sm" />
+            )}
+          </div>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors z-10 shadow-sm"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+          </button>
+        </div>
+        <SidebarContent showHeader={false} />
       </motion.aside>
 
       <AnimatePresence>

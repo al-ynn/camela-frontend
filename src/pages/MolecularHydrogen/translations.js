@@ -104,9 +104,9 @@ const t = {
     address: 'Address',
     addressValue: 'LTC Building C, 14 Arumugam Road #06-05A, Singapore 409959',
     phone: 'Phone',
-    phoneValue: '+65 8177 5650',
+    phoneValue: '+65 8064 1997',
     email: 'Email',
-    emailValue: 'sales@livepure.com.sg',
+    emailValue: 'info@camela.com.sg',
   },
   zh: {
     badge: 'LivePure 技术',
@@ -213,9 +213,9 @@ const t = {
     address: '地址',
     addressValue: '新加坡 409959，阿鲁穆甘路 14 号 LTC 大厦 C 座 #06-05A',
     phone: '电话',
-    phoneValue: '+65 8177 5650',
+    phoneValue: '+65 8064 1997',
     email: '电子邮件',
-    emailValue: 'sales@livepure.com.sg',
+    emailValue: 'info@camela.com.sg',
   },
   ms: {
     badge: 'Teknologi LivePure',
@@ -322,9 +322,9 @@ const t = {
     address: 'Alamat',
     addressValue: 'LTC Building C, 14 Arumugam Road #06-05A, Singapore 409959',
     phone: 'Telefon',
-    phoneValue: '+65 8177 5650',
+    phoneValue: '+65 8064 1997',
     email: 'E-mel',
-    emailValue: 'sales@livepure.com.sg',
+    emailValue: 'info@camela.com.sg',
   },
 }
 export default t

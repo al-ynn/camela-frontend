@@ -30,7 +30,9 @@ const Profile = () => {
   const user = useSelector(selectUser)
   const token = useSelector(selectAuth).token
   const verificationRef = useRef(null)
+  const avatarInputRef = useRef(null)
   const [verificationSending, setVerificationSending] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isDirty, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
@@ -94,6 +96,28 @@ const Profile = () => {
     }
   }
 
+  const handleAvatarPick = () => {
+    avatarInputRef.current?.click()
+  }
+
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) return
+
+    try {
+      setAvatarUploading(true)
+      const updatedUser = await commerceService.updateProfileAvatar(token, file)
+      dispatch(updateUser(updatedUser))
+      toast.success('Profile photo updated successfully!')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to upload profile photo')
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
@@ -112,8 +136,25 @@ const Profile = () => {
               className="w-20 h-20 rounded-2xl object-cover ring-4 ring-gray-100 dark:ring-gray-800"
               fallbackClassName="w-20 h-20 rounded-2xl text-lg ring-4 ring-gray-100 dark:ring-gray-800"
             />
-            <button className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-brand-600 rounded-full flex items-center justify-center shadow-md hover:bg-brand-700 transition-colors">
-              <Camera size={13} className="text-white" />
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
+            <button
+              type="button"
+              onClick={handleAvatarPick}
+              disabled={avatarUploading}
+              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-brand-600 rounded-full flex items-center justify-center shadow-md hover:bg-brand-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              aria-label="Change profile photo"
+            >
+              {avatarUploading ? (
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+              ) : (
+                <Camera size={13} className="text-white" />
+              )}
             </button>
           </div>
           <div>

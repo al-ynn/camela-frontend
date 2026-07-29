@@ -448,8 +448,8 @@ const MolecularHydrogen = () => {
           <div className="grid sm:grid-cols-3 gap-6">
             {[
               { icon: MapPin, label: tx.address, value: tx.addressValue },
-              { icon: Phone, label: tx.phone, value: tx.phoneValue, href: 'tel:+6581775650' },
-              { icon: Mail, label: tx.email, value: tx.emailValue, href: 'mailto:sales@livepure.com.sg' },
+              { icon: Phone, label: tx.phone, value: tx.phoneValue, href: 'tel:+65 8064 1997' },
+              { icon: Mail, label: tx.email, value: tx.emailValue, href: 'mailto:info@camela.com.sg' },
             ].map(({ icon: Icon, label, value, href }, i) => (
               <motion.div key={label} {...fadeUp(i * 0.1)}>
                 {href ? (
