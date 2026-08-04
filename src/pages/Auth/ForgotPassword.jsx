@@ -45,10 +45,10 @@ const ForgotPassword = () => {
           password: data.password,
           password_confirmation: data.password_confirmation,
         })
-        toast.success('Password updated successfully.')
+        toast.success(t('auth.forgotPassword.passwordUpdated'))
         setTimeout(() => window.location.assign(ROUTES.LOGIN), 800)
       } catch (error) {
-        toast.error(error.response?.data?.message || 'Unable to reset password.')
+        toast.error(error.response?.data?.message || t('auth.forgotPassword.resetFailed'))
       } finally {
         setResetSubmitting(false)
       }
@@ -59,9 +59,9 @@ const ForgotPassword = () => {
       await authService.sendPasswordResetLink(data.email)
       setEmail(data.email)
       setSent(true)
-      toast.success('Reset link sent!')
+      toast.success(t('auth.forgotPassword.resetLinkSentToast'))
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Unable to send reset link.')
+      toast.error(error.response?.data?.message || t('auth.forgotPassword.sendFailed'))
     }
   }
 
@@ -76,21 +76,21 @@ const ForgotPassword = () => {
           <CheckCircle size={32} className="text-green-600 dark:text-green-400" />
         </div>
         <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white mb-2">
-          {t('auth.forgot.checkInbox')}
+          {t('auth.forgotPassword.checkInbox')}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-          {t('auth.forgot.resetLinkSent')}
+          {t('auth.forgotPassword.sentResetLink')}
         </p>
         <p className="font-semibold text-gray-900 dark:text-white mb-8">{email}</p>
         <p className="text-xs text-gray-400 mb-6">
-          {t('auth.forgot.notReceived')}{' '}
+          {t('auth.forgotPassword.didntReceive')}{' '}
           <button onClick={() => setSent(false)} className="text-brand-600 dark:text-brand-400 hover:underline">
-            {t('auth.forgot.tryAgain')}
+            {t('auth.forgotPassword.tryAgain')}
           </button>
         </p>
         <Link to={ROUTES.LOGIN} className="btn-outline btn-md inline-flex gap-2">
           <ArrowLeft size={15} />
-          {t('auth.forgot.backToSignIn')}
+          {t('auth.forgotPassword.backToLogin')}
         </Link>
       </motion.div>
     )
@@ -104,10 +104,10 @@ const ForgotPassword = () => {
     >
       <div className="mb-8">
         <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white">
-          {t('auth.forgot.title')}
+          {t('auth.forgotPassword.title')}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
-          {t('auth.forgot.subtitle')}
+          {t('auth.forgotPassword.subtitle')}
         </p>
       </div>
 
@@ -115,15 +115,16 @@ const ForgotPassword = () => {
         {resetMode ? (
           <>
             <div className="card p-4 bg-brand-50/70 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/30 text-sm text-gray-600 dark:text-gray-300">
-              Resetting password for <span className="font-semibold text-gray-900 dark:text-white">{resetEmail}</span>
+              {t('auth.forgotPassword.resettingFor')}{' '}
+              <span className="font-semibold text-gray-900 dark:text-white">{resetEmail}</span>
             </div>
             <div>
-              <label className="label-base">New password</label>
+              <label className="label-base">{t('auth.forgotPassword.newPassword')}</label>
               <input {...register('password')} type="password" className={`input-base ${errors.password ? 'border-brand-400' : ''}`} />
               {errors.password && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.password.message}</p>}
             </div>
             <div>
-              <label className="label-base">Confirm new password</label>
+              <label className="label-base">{t('auth.forgotPassword.confirmNewPassword')}</label>
               <input {...register('password_confirmation')} type="password" className={`input-base ${errors.password_confirmation ? 'border-brand-400' : ''}`} />
               {errors.password_confirmation && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.password_confirmation.message}</p>}
             </div>
@@ -149,7 +150,7 @@ const ForgotPassword = () => {
           disabled={isSubmitting || resetSubmitting}
           className="btn-brand btn-lg w-full justify-center gap-2"
         >
-          {isSubmitting || resetSubmitting ? t('common.loading') : resetMode ? 'Reset Password' : t('auth.forgot.sendResetLink')}
+          {isSubmitting || resetSubmitting ? t('common.loading') : resetMode ? t('auth.forgotPassword.changePassword') : t('auth.forgotPassword.sendReset')}
         </button>
       </form>
 
@@ -158,7 +159,7 @@ const ForgotPassword = () => {
         className="flex items-center justify-center gap-2 mt-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
       >
         <ArrowLeft size={15} />
-        {t('auth.forgot.backToSignIn')}
+        {t('auth.forgotPassword.backToLogin')}
       </Link>
     </motion.div>
   )

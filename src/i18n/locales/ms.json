@@ -123,7 +123,15 @@
       "checkInbox": "Semak peti masuk anda",
       "sentResetLink": "Kami telah menghantar pautan tetapan semula ke",
       "didntReceive": "Tidak menerimanya? Semak folder spam anda atau",
-      "tryAgain": "cuba lagi"
+      "tryAgain": "cuba lagi",
+      "resettingFor": "Menetapkan semula kata laluan untuk",
+      "newPassword": "Kata Laluan Baharu",
+      "confirmNewPassword": "Sahkan Kata Laluan Baharu",
+      "changePassword": "Tukar Kata Laluan",
+      "passwordUpdated": "Kata laluan berjaya dikemas kini.",
+      "resetLinkSentToast": "Pautan tetapan semula berjaya dihantar.",
+      "resetFailed": "Tidak dapat menetapkan semula kata laluan.",
+      "sendFailed": "Tidak dapat menghantar pautan tetapan semula."
     },
     "validation": {
       "firstNameRequired": "Nama pertama diperlukan",

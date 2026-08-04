@@ -123,7 +123,15 @@
       "checkInbox": "Check your inbox",
       "sentResetLink": "We sent a reset link to",
       "didntReceive": "Didn't receive it? Check your spam folder or",
-      "tryAgain": "try again"
+      "tryAgain": "try again",
+      "resettingFor": "Resetting password for",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "changePassword": "Change Password",
+      "passwordUpdated": "Password updated successfully.",
+      "resetLinkSentToast": "Reset link sent successfully.",
+      "resetFailed": "Unable to reset password.",
+      "sendFailed": "Unable to send reset link."
     },
     "validation": {
       "firstNameRequired": "First name is required",
