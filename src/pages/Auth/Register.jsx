@@ -75,6 +75,7 @@ const Register = () => {
   const { t } = useTranslation()
   const { register: registerUser, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isTermsOpen, setIsTermsOpen] = useState(false)
   const [maintenanceMode, setMaintenanceMode] = useState(false)
 
@@ -201,13 +202,22 @@ const Register = () => {
 
         <div>
           <label className="label-base">{t('auth.register.confirmPassword')}</label>
-          <input
-            {...register('confirmPassword')}
-            type="password"
-            placeholder="Repeat password"
-            autoComplete="new-password"
-            className={`input-base ${errors.confirmPassword ? 'border-brand-400' : ''}`}
-          />
+          <div className="relative">
+            <input
+              {...register('confirmPassword')}
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Repeat password"
+              autoComplete="new-password"
+              className={`input-base ${errors.confirmPassword ? 'border-brand-400' : ''}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            >
+              {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </button>
+          </div>
           {errors.confirmPassword && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.confirmPassword.message}</p>}
         </div>
 

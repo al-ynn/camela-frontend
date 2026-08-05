@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Bell, Shield, Moon, Trash2, AlertTriangle } from 'lucide-react'
+import { Bell, Shield, Moon, Trash2, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { useTheme } from '../../hooks/useTheme'
 import { logout } from '../../features/auth/authSlice'
@@ -57,6 +57,9 @@ const Settings = () => {
     password: '',
     password_confirmation: '',
   })
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [notifications, setNotifications] = useState({
     orderUpdates: true,
   })
@@ -199,33 +202,60 @@ const Settings = () => {
         <div className="space-y-4">
           <div>
             <label className="label-base">Current Password</label>
-            <input
-              type="password"
-              value={passwordForm.current_password}
-              onChange={(e) => setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))}
-              className="input-base"
-              placeholder="Enter current password"
-            />
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={passwordForm.current_password}
+                onChange={(e) => setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))}
+                className="input-base pr-12"
+                placeholder="Enter current password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                {showCurrentPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="label-base">New Password</label>
-            <input
-              type="password"
-              value={passwordForm.password}
-              onChange={(e) => setPasswordForm((prev) => ({ ...prev, password: e.target.value }))}
-              className="input-base"
-              placeholder="At least 8 chars, uppercase, lowercase, special"
-            />
+            <div className="relative">
+              <input
+                type={showNewPassword ? 'text' : 'password'}
+                value={passwordForm.password}
+                onChange={(e) => setPasswordForm((prev) => ({ ...prev, password: e.target.value }))}
+                className="input-base pr-12"
+                placeholder="At least 8 chars, uppercase, lowercase, special"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                {showNewPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="label-base">Confirm New Password</label>
-            <input
-              type="password"
-              value={passwordForm.password_confirmation}
-              onChange={(e) => setPasswordForm((prev) => ({ ...prev, password_confirmation: e.target.value }))}
-              className="input-base"
-              placeholder="Confirm new password"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={passwordForm.password_confirmation}
+                onChange={(e) => setPasswordForm((prev) => ({ ...prev, password_confirmation: e.target.value }))}
+                className="input-base pr-12"
+                placeholder="Confirm new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400">

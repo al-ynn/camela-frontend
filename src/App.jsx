@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Toaster } from 'react-hot-toast'
-import { ShieldAlert, LogIn, ShieldCheck, ArrowRight } from 'lucide-react'
+import { ShieldAlert, LogIn, ShieldCheck, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { store, persistor } from './store'
 import AppRoutes from './routes'
 import ErrorBoundary from './components/common/ErrorBoundary'
@@ -56,6 +56,7 @@ const MaintenanceGate = ({ children }) => {
   const location = useLocation()
   const { login, loading: authLoading } = useAuth()
   const { register, handleSubmit } = useForm()
+  const [showAdminPassword, setShowAdminPassword] = useState(false)
 
   const resolveMaintenanceFlag = (status) => {
     const value =
@@ -182,13 +183,22 @@ const MaintenanceGate = ({ children }) => {
                 </div>
                 <div>
                   <label className="label-base">Password</label>
-                  <input
-                    {...register('password')}
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    className="input-base"
-                  />
+                  <div className="relative">
+                    <input
+                      {...register('password')}
+                      type={showAdminPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      className="input-base pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPassword(!showAdminPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                    >
+                      {showAdminPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
                 </div>
                 <button type="submit" disabled={authLoading} className="btn-brand btn-lg w-full justify-center gap-2">
                   <LogIn size={17} />

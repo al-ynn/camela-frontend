@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Mail, ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ROUTES } from '../../constants/routes'
 import toast from 'react-hot-toast'
@@ -20,6 +20,8 @@ const ForgotPassword = () => {
   const resetEmail = searchParams.get('email') || ''
   const resetMode = Boolean(token && resetEmail)
   const [resetSubmitting, setResetSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const schema = resetMode
     ? z.object({
@@ -120,12 +122,30 @@ const ForgotPassword = () => {
             </div>
             <div>
               <label className="label-base">{t('auth.forgotPassword.newPassword')}</label>
-              <input {...register('password')} type="password" className={`input-base ${errors.password ? 'border-brand-400' : ''}`} />
+              <div className="relative">
+                <input {...register('password')} type={showPassword ? 'text' : 'password'} className={`input-base ${errors.password ? 'border-brand-400' : ''}`} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
               {errors.password && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.password.message}</p>}
             </div>
             <div>
               <label className="label-base">{t('auth.forgotPassword.confirmNewPassword')}</label>
-              <input {...register('password_confirmation')} type="password" className={`input-base ${errors.password_confirmation ? 'border-brand-400' : ''}`} />
+              <div className="relative">
+                <input {...register('password_confirmation')} type={showConfirmPassword ? 'text' : 'password'} className={`input-base ${errors.password_confirmation ? 'border-brand-400' : ''}`} />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
               {errors.password_confirmation && <p className="mt-1.5 text-xs text-brand-600 dark:text-brand-400">⚠ {errors.password_confirmation.message}</p>}
             </div>
           </>
