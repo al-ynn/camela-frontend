@@ -82,6 +82,7 @@ const Apply = () => {
   const onSubmit = async (data) => {
     try {
       await commerceService.submitMembershipApplication({
+        application_type: type,
         full_name: data.fullName,
         email: data.email,
         phone: data.phone,
