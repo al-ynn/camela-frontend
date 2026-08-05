@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { authService } from '../../services/authApi'
 import { selectAuth, updateUser } from '../../features/auth/authSlice'
+import { ROUTES } from '../../constants/routes'
 
 const EmailVerified = () => {
   const dispatch = useDispatch()
@@ -41,6 +43,11 @@ const EmailVerified = () => {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
           {loading ? 'Refreshing your account status...' : 'You can now continue shopping and checkout securely.'}
         </p>
+        <div className="mt-6">
+          <Link to={ROUTES.HOME} className="btn-brand btn-md inline-flex justify-center">
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   )
