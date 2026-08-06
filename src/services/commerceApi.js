@@ -22,7 +22,7 @@ const cartItem = (item) => ({
 const order = (value) => ({
   id: value.order_number,
   orderId: value.id,
-  status: value.order_status,
+  status: String(value.order_status || '').toLowerCase(),
   createdAt: value.created_at,
   items: (value.items || []).map((item) => ({
     key: String(item.id),
@@ -185,7 +185,7 @@ export const commerceService = {
 
           date: order.created_at,
 
-          status: order.order_status.toLowerCase(),
+          status: String(order.order_status || '').toLowerCase(),
 
       }));
 

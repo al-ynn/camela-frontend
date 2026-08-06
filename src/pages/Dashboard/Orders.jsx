@@ -11,22 +11,23 @@ import { AnimatePresence } from 'framer-motion'
 import { selectAuth } from '../../features/auth/authSlice'
 import { commerceService } from '../../services/commerceApi'
 import { resolveApiAssetUrl } from '../../constants/config'
+import { getOrderStatusColor, getOrderStatusLabel } from '../../utils/formatters'
 
 const STATUS_STYLES = {
   confirmed: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-  Processing: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-  Shipped: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-  Delivered: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400',
-  Cancelled: 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400',
+  processing: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+  shipped: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  delivered: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+  cancelled: 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400',
 }
 
 const getStatusLabel = (status, t) => {
   const labels = {
-    confirmed: t('orders.processing'),
-    Processing: t('orders.processing'),
-    Shipped: t('orders.shipped'),
-    Delivered: t('orders.delivered'),
-    Cancelled: t('orders.cancelled'),
+    confirmed: t('orders.confirmed'),
+    processing: t('orders.processing'),
+    shipped: t('orders.shipped'),
+    delivered: t('orders.delivered'),
+    cancelled: t('orders.cancelled'),
   }
   return labels[status] || status
 }
@@ -34,7 +35,7 @@ const getStatusLabel = (status, t) => {
 const OrderRow = ({ order, index }) => {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
-  const status = order.status || 'Processing'
+  const status = String(order.status || 'processing').toLowerCase()
 
   return (
     <motion.div
@@ -55,8 +56,8 @@ const OrderRow = ({ order, index }) => {
             <p className="font-semibold text-gray-900 dark:text-white text-sm">
               {order.id || `Order #${(index + 1).toString().padStart(4, '0')}`}
             </p>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[status]}`}>
-              {getStatusLabel(status, t)}
+            <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold ${getOrderStatusColor(status)}`}>
+              {getOrderStatusLabel(status)}
             </span>
           </div>
           <p className="text-xs text-gray-400">

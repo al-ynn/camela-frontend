@@ -26,6 +26,11 @@ import { resolveApiAssetUrl } from '../../constants/config'
 
 const EMPTY_FORM = { title: '', sku: '', price: '', category_id: '', description: '', image: '', stock: '', imagePreview: '', images: [], files: [] }
 
+const resolveProductPreviewSrc = (src) => {
+  if (!src) return ''
+  return String(src).startsWith('blob:') ? src : resolveApiAssetUrl(src)
+}
+
 const AdminProducts = () => {
   const token = useSelector(selectAuth).token
   const { data: categories = [] } = useGetCategoriesQuery()
@@ -136,6 +141,11 @@ const AdminProducts = () => {
       const newImages = f.images.filter((_, i) => i !== index)
       const removedImage = f.images[index]
       const fileIndex = f.files.findIndex((item) => item.preview === removedImage)
+
+      if (removedImage && String(removedImage).startsWith('blob:')) {
+        URL.revokeObjectURL(removedImage)
+      }
+
       return {
         ...f,
         images: newImages,
@@ -217,6 +227,11 @@ const AdminProducts = () => {
   }
 
   const closeModal = () => {
+    form.files.forEach(({ preview }) => {
+      if (preview && String(preview).startsWith('blob:')) {
+        URL.revokeObjectURL(preview)
+      }
+    })
     setEditProduct(null)
     setShowAdd(false)
     setForm(EMPTY_FORM)
@@ -418,7 +433,7 @@ const AdminProducts = () => {
                   {form.images.map((img, i) => (
                     <div key={i} className="relative group">
                       <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <img src={resolveApiAssetUrl(img)} alt={`Product ${i + 1}`} className="w-full h-full object-contain p-1" />
+                        <img src={resolveProductPreviewSrc(img)} alt={`Product ${i + 1}`} className="w-full h-full object-contain p-1" />
                       </div>
                       <button
                         type="button"
@@ -435,7 +450,7 @@ const AdminProducts = () => {
               <div className="flex gap-3 items-start">
                 <div className="w-20 h-20 flex-shrink-0 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
                   {form.imagePreview
-                    ? <img src={resolveApiAssetUrl(form.imagePreview)} alt="preview" className="w-full h-full object-contain p-1" onError={() => setForm((f) => ({ ...f, imagePreview: '' }))} />
+                    ? <img src={resolveProductPreviewSrc(form.imagePreview)} alt="preview" className="w-full h-full object-contain p-1" onError={() => setForm((f) => ({ ...f, imagePreview: '' }))} />
                     : <ImagePlus size={22} className="text-gray-300 dark:text-gray-600" />
                   }
                 </div>
