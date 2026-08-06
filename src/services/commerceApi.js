@@ -191,6 +191,11 @@ export const commerceService = {
 
   },
 
+  async getAdminOrder(token, orderId) {
+    const response = await client(token).get(`/admin/orders/${orderId}`)
+    return response.data.data ?? response.data
+  },
+
   async getAdminProducts(token) {
     const response = await client(token).get('/admin/products')
     return response.data.data.map(adminProduct)
