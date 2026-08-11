@@ -4,13 +4,12 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag, Trash2, Plus, Minus, Tag, X, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../hooks/useCart'
-import { formatPrice } from '../../utils/formatters'
 import { ROUTES } from '../../constants/routes'
-import { resolveApiAssetUrl } from '../../constants/config'
+import { resolveApiAssetUrl, SUPPORTED_CURRENCIES } from '../../constants/config'
 
 const Cart = () => {
   const { t } = useTranslation()
-  const { items, totals, coupon, removeFromCart, updateQuantity, applyCoupon, removeCoupon, clearCart } = useCart()
+  const { items, totals, coupon, currency, formatCartPrice, setCurrency, removeFromCart, updateQuantity, applyCoupon, removeCoupon, clearCart } = useCart()
   const [couponInput, setCouponInput] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
 
@@ -138,9 +137,9 @@ const Cart = () => {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-gray-900 dark:text-white">
-                            {formatPrice(item.price * item.quantity)}
+                            {formatCartPrice(item.price * item.quantity)}
                           </p>
-                          <p className="text-xs text-gray-400">{formatPrice(item.price)} {t('cart.each')}</p>
+                          <p className="text-xs text-gray-400">{formatCartPrice(item.price)} {t('cart.each')}</p>
                         </div>
                       </div>
                     </div>
@@ -202,36 +201,47 @@ const Cart = () => {
 
             {/* Summary */}
             <div className="card p-5 space-y-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white">{t('cart.orderSummary')}</h3>
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('cart.orderSummary')}</h3>
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="input-base py-1.5 pl-3 pr-8 text-sm"
+                >
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code}</option>
+                  ))}
+                </select>
+              </div>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>{t('cart.subtotal')} ({items.reduce((s, i) => s + i.quantity, 0)} {t('cart.items')})</span>
-                  <span>{formatPrice(totals.subtotal)}</span>
+                  <span>{formatCartPrice(totals.subtotal)}</span>
                 </div>
                 {totals.discount > 0 && (
                   <div className="flex justify-between text-green-600 dark:text-green-400">
                     <span>{t('cart.discount')}</span>
-                    <span>-{formatPrice(totals.discount)}</span>
+                    <span>-{formatCartPrice(totals.discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>{t('cart.shipping')}</span>
-                  <span>{totals.shipping === 0 ? t('cart.free') : formatPrice(totals.shipping)}</span>
+                  <span>{totals.shipping === 0 ? t('cart.free') : formatCartPrice(totals.shipping)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>{t('cart.tax')}</span>
-                  <span>{formatPrice(totals.tax)}</span>
+                  <span>{formatCartPrice(totals.tax)}</span>
                 </div>
                 <div className="divider" />
                 <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
                   <span>{t('cart.total')}</span>
-                  <span>{formatPrice(totals.total)}</span>
+                  <span>{formatCartPrice(totals.total)}</span>
                 </div>
               </div>
 
               {totals.subtotal < 75 && (
                 <p className="text-xs text-center text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  {t('cart.addMore')} <span className="font-semibold text-brand-600">{formatPrice(75 - totals.subtotal)}</span> {t('cart.forFreeShipping')}
+                  {t('cart.addMore')} <span className="font-semibold text-brand-600">{formatCartPrice(75 - totals.subtotal)}</span> {t('cart.forFreeShipping')}
                 </p>
               )}
 

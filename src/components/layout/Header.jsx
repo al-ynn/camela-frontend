@@ -33,6 +33,7 @@ import { ROUTES } from '../../constants/routes'
 import { clearCartState } from '../../features/cart/cartSlice'
 import { clearWishlist } from '../../features/wishlist/wishlistSlice'
 import { useGetCategoriesQuery } from '../../services/productsApi'
+import { CATEGORIES } from '../../data/brands'
 import { authService } from '../../services/authApi'
 
 const Header = () => {
@@ -48,13 +49,19 @@ const Header = () => {
   const theme = useSelector(selectTheme)
   const { data: categories = [] } = useGetCategoriesQuery()
 
+  const staticCategoryNames = new Set(CATEGORIES.map((c) => c.name))
+  const categoryLinks = [
+    ...CATEGORIES.map((category) => ({ label: category.name, href: category.landing_page })),
+    ...categories.filter((c) => !staticCategoryNames.has(c.name)).map((category) => ({ label: category.name, href: category.landing_page })),
+  ]
+
   const NAV_LINKS = [
     { label: t('nav.home'), href: ROUTES.HOME },
     { label: t('nav.shop'), href: ROUTES.SHOP },
     { label: t('nav.about'), href: ROUTES.ABOUT },
     {
       label: t('nav.categories'),
-      children: categories.map((category) => ({ label: category.name, href: category.landing_page })),
+      children: categoryLinks,
     },
   ]
 

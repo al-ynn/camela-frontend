@@ -5,7 +5,6 @@ import JoinFamilySection from '../../components/home/JoinFamilySection'
 import FeaturedProducts from '../../components/home/FeaturedProducts'
 import FlashSale from '../../components/home/FlashSale'
 import BrandsSection from '../../components/home/BrandsSection'
-import Testimonials from '../../components/home/Testimonials'
 import Newsletter from '../../components/home/Newsletter'
 import InstagramGallery from '../../components/home/InstagramGallery'
 
@@ -23,7 +22,6 @@ const Home = () => {
         limit={8}
       />
       <BrandsSection />
-      <Testimonials />
       <Newsletter />
       <InstagramGallery />
     </>

@@ -1,6 +1,6 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import toast from 'react-hot-toast'
-import { TAX_RATE } from '../../constants/config'
+import { TAX_RATE, DEFAULT_CURRENCY, SUPPORTED_CURRENCIES } from '../../constants/config'
 
 const initialState = {
   items: [],
@@ -8,6 +8,7 @@ const initialState = {
   couponDiscount: 0,
   couponType: null,
   couponDescription: '',
+  currency: DEFAULT_CURRENCY,
 }
 
 const cartSlice = createSlice({
@@ -31,11 +32,20 @@ const cartSlice = createSlice({
       state.couponDescription = ''
       toast.success('Coupon removed')
     },
+
+    setCurrency: (state, action) => {
+      state.currency = action.payload
+    },
   },
 })
 
-export const { setCartItems, clearCartState, removeCoupon } =
+export const { setCartItems, clearCartState, removeCoupon, setCurrency } =
   cartSlice.actions
+
+export const selectCurrency = (state) => state.cart.currency
+
+export const getCurrencyRate = (code) =>
+  SUPPORTED_CURRENCIES.find((c) => c.code === code)?.rate ?? 1
 
 export const selectCartItems = (state) => state.cart.items
 export const selectCartCount = (state) =>

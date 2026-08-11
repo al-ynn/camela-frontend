@@ -6,6 +6,7 @@ import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
 import { useProducts } from '../../hooks/useProducts'
 import { useGetCategoriesQuery } from '../../services/productsApi'
 import { resolveApiAssetUrl } from '../../constants/config'
+import { CATEGORIES } from '../../data/brands'
 
 const CategoryCard = ({ category, index, count }) => {
   const { t } = useTranslation()
@@ -52,7 +53,10 @@ const CategorySection = () => {
   const { t } = useTranslation()
   const { ref, hasIntersected } = useIntersectionObserver({ once: true })
   const { data: products = [] } = useProducts()
-  const { data: categories = [] } = useGetCategoriesQuery()
+  const { data: apiCategories = [] } = useGetCategoriesQuery()
+
+  // Fallback to static categories if API returns none
+  const categories = apiCategories.length >= 2 ? apiCategories : CATEGORIES
 
   // Count products per category
   const categoryCounts = categories.reduce((acc, category) => {

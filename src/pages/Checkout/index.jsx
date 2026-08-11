@@ -14,8 +14,7 @@ import { selectUser, selectAuth } from '../../features/auth/authSlice'
 import { setCurrentOrder } from '../../features/orders/ordersSlice'
 import { setCartItems } from '../../features/cart/cartSlice'
 import { commerceService } from '../../services/commerceApi'
-import { formatPrice } from '../../utils/formatters'
-import { resolveApiAssetUrl } from '../../constants/config'
+import { resolveApiAssetUrl, SUPPORTED_CURRENCIES } from '../../constants/config'
 
 const COUNTRIES = [
   'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia',
@@ -66,7 +65,7 @@ const Checkout = () => {
   })
 
   const dispatch = useDispatch()
-  const { items, totals } = useCart()
+  const { items, totals, currency, formatCartPrice, setCurrency } = useCart()
   const user = useSelector(selectUser)
   const token = useSelector(selectAuth).token
   const verified = !!user?.email_verified_at
@@ -366,7 +365,18 @@ const Checkout = () => {
 
   const OrderSummary = () => (
     <div className="card p-5 space-y-4 lg:sticky lg:top-24">
-      <h3 className="font-semibold text-gray-900 dark:text-white">{t('checkout.orderSummary')}</h3>
+      <div className="flex items-center justify-between gap-4">
+        <h3 className="font-semibold text-gray-900 dark:text-white">{t('checkout.orderSummary')}</h3>
+        <select
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value)}
+          className="input-base py-1.5 pl-3 pr-8 text-sm"
+        >
+          {SUPPORTED_CURRENCIES.map((c) => (
+            <option key={c.code} value={c.code}>{c.code}</option>
+          ))}
+        </select>
+      </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {items.map((item) => (
           <div key={item.key} className="flex gap-3 py-3 first:pt-0 last:pb-0">
@@ -382,7 +392,7 @@ const Checkout = () => {
               <p className="text-xs font-medium text-gray-800 dark:text-gray-200 line-clamp-2">{item.title}</p>
             </div>
             <span className="text-sm font-semibold text-gray-900 dark:text-white flex-shrink-0">
-              {formatPrice(item.price * item.quantity)}
+              {formatCartPrice(item.price * item.quantity)}
             </span>
           </div>
         ))}
@@ -390,27 +400,27 @@ const Checkout = () => {
       <div className="space-y-2 text-sm pt-2 border-t border-gray-100 dark:border-gray-800">
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('cart.subtotal')}</span>
-          <span>{formatPrice(totals.subtotal)}</span>
+          <span>{formatCartPrice(totals.subtotal)}</span>
         </div>
         {totals.discount > 0 && (
           <div className="flex justify-between text-green-600">
             <span>{t('cart.discount')}</span>
-            <span>-{formatPrice(totals.discount)}</span>
+            <span>-{formatCartPrice(totals.discount)}</span>
           </div>
         )}
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('cart.shipping')}</span>
           {shippingCost === 0
             ? t('checkout.free')
-            : formatPrice(shippingCost)}
+            : formatCartPrice(shippingCost)}
         </div>
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('checkout.tax')}</span>
-          <span>{formatPrice(taxAmount)}</span>
+          <span>{formatCartPrice(taxAmount)}</span>
         </div>
         <div className="flex justify-between font-bold text-base text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-800">
           <span>{t('checkout.grandTotal')}</span>
-          <span>{formatPrice(grandTotal)}</span>
+          <span>{formatCartPrice(grandTotal)}</span>
         </div>
       </div>
     </div>
@@ -602,7 +612,7 @@ const Checkout = () => {
                               <p className="text-sm text-gray-400">{method.description}</p>
                             </div>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                              {method.price === 0 ? t('checkout.free') : formatPrice(method.price)}
+                              {method.price === 0 ? t('checkout.free') : formatCartPrice(method.price)}
                             </span>
                           </label>
                         ))}
@@ -633,9 +643,9 @@ const Checkout = () => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">{item.title}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} × {formatPrice(item.price)}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} × {formatCartPrice(item.price)}</p>
                               </div>
-                              <span className="text-sm font-semibold text-gray-900 dark:text-white">{formatPrice(item.price * item.quantity)}</span>
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white">{formatCartPrice(item.price * item.quantity)}</span>
                             </div>
                           ))}
                         </div>
@@ -663,7 +673,7 @@ const Checkout = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">{selectedShipping.description}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{t('checkout.estimatedDelivery')}: </p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                          {t('checkout.shippingFee')}: {selectedShipping.price === 0 ? t('checkout.free') : formatPrice(selectedShipping.price)}
+                          {t('checkout.shippingFee')}: {selectedShipping.price === 0 ? t('checkout.free') : formatCartPrice(selectedShipping.price)}
                         </p>
                       </ReviewSection>
 
@@ -671,24 +681,24 @@ const Checkout = () => {
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('checkout.orderSummary')}</p>
                         <div className="space-y-1 text-sm">
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                            <span>{t('cart.subtotal')}</span><span>{formatPrice(totals.subtotal)}</span>
+                            <span>{t('cart.subtotal')}</span><span>{formatCartPrice(totals.subtotal)}</span>
                           </div>
                           {totals.discount > 0 && (
                             <div className="flex justify-between text-green-600">
-                              <span>{t('cart.discount')}</span><span>-{formatPrice(totals.discount)}</span>
+                              <span>{t('cart.discount')}</span><span>-{formatCartPrice(totals.discount)}</span>
                             </div>
                           )}
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
                             <span>{t('cart.shipping')}</span>
                             <span>{shippingCost === 0
                                 ? t('checkout.free')
-                                : formatPrice(shippingCost)}</span>
+                                : formatCartPrice(shippingCost)}</span>
                           </div>
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                            <span>{t('checkout.tax')}</span><span>{formatPrice(taxAmount)}</span>
+                            <span>{t('checkout.tax')}</span><span>{formatCartPrice(taxAmount)}</span>
                           </div>
                           <div className="flex justify-between font-bold text-base text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-800">
-                            <span>{t('checkout.grandTotal')}</span><span>{formatPrice(grandTotal)}</span>
+                            <span>{t('checkout.grandTotal')}</span><span>{formatCartPrice(grandTotal)}</span>
                           </div>
                         </div>
                       </div>

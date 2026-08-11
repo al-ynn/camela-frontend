@@ -3,15 +3,19 @@ import {
   setCartItems,
   clearCartState,
   removeCoupon,
+  setCurrency,
   selectCartItems,
   selectCartCount,
   selectCartSubtotal,
   selectCartTotals,
   selectCoupon,
+  selectCurrency,
+  getCurrencyRate,
 } from '../features/cart/cartSlice'
 import { commerceService } from '../services/commerceApi'
 import toast from 'react-hot-toast'
 import { selectUser } from '../features/auth/authSlice'
+import { formatPrice } from '../utils/formatters'
 
 export const useCart = () => {
   const dispatch = useDispatch()
@@ -20,8 +24,12 @@ export const useCart = () => {
   const subtotal = useSelector(selectCartSubtotal)
   const totals = useSelector(selectCartTotals)
   const coupon = useSelector(selectCoupon)
+  const currency = useSelector(selectCurrency)
   const token = useSelector((state) => state.auth.token)
   const user = useSelector(selectUser)
+
+  const rate = getCurrencyRate(currency)
+  const formatCartPrice = (price) => formatPrice(price * rate, currency)
 
   const resolveCartItemId = (key) =>
     items.find((item) => String(item.cartItemId ?? item.key) === String(key))?.cartItemId ?? key
@@ -110,6 +118,10 @@ export const useCart = () => {
     subtotal,
     totals,
     coupon,
+    currency,
+    rate,
+    formatCartPrice,
+    setCurrency: (code) => dispatch(setCurrency(code)),
     addToCart: handleAddToCart,
     removeFromCart: handleRemoveFromCart,
     updateQuantity: handleUpdateQuantity,

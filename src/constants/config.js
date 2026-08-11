@@ -76,6 +76,15 @@ export const PAYMENT_METHODS = [
   { id: 'google-pay', name: 'Google Pay', icon: 'Smartphone' },
 ]
 
+export const SUPPORTED_CURRENCIES = [
+  { code: 'USD', symbol: '$', rate: 1, label: 'USD' },
+  { code: 'SGD', symbol: 'S$', rate: 1.35, label: 'SGD' },
+  { code: 'MYR', symbol: 'RM', rate: 4.65, label: 'MYR' },
+  { code: 'CNY', symbol: '¥', rate: 7.25, label: 'CNY' },
+]
+
+export const DEFAULT_CURRENCY = 'USD'
+
 export const IMAGE_SIZES = {
   thumbnail: '64px',
   small: '200px',

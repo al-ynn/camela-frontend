@@ -22,6 +22,8 @@ const AdminCustomers = () => {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
   const [sortField, setSortField] = useState('spent')
   const [sortDir, setSortDir] = useState('desc')
   const [viewCustomer, setViewCustomer] = useState(null)
@@ -53,9 +55,14 @@ const AdminCustomers = () => {
   const filtered = customers
     .filter((c) => {
       const q = search.toLowerCase()
+      const joined = new Date(c.joined)
+      const from = fromDate ? new Date(fromDate) : null
+      const to = toDate ? new Date(toDate) : null
+      const withinDate = (!from || joined >= from) && (!to || joined <= to)
       return (
         (statusFilter === 'all' || c.status === statusFilter) &&
-        (!q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || o.orderNumber.toLowerCase().includes(q) || (c.phone && c.phone.includes(q)))
+        (!q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || (c.phone && c.phone.includes(q))) &&
+        withinDate
       )
     })
     .sort((a, b) => {
@@ -144,6 +151,21 @@ const AdminCustomers = () => {
               {s}
             </button>
           ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => { setFromDate(e.target.value); setPage(1) }}
+            className="input-base h-9 text-xs"
+          />
+          <span className="text-gray-400 text-xs">to</span>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => { setToDate(e.target.value); setPage(1) }}
+            className="input-base h-9 text-xs"
+          />
         </div>
       </div>
 

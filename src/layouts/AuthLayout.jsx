@@ -38,12 +38,6 @@ const AuthLayout = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            {/* Pill badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/15 border border-brand-500/30 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
-              <span className="text-brand-300 text-xs font-semibold uppercase tracking-widest">Scientifically Proven</span>
-            </div>
-
             <h2 className="text-4xl font-serif font-bold text-white mb-4 leading-tight">
               Health for Life,<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-amber-200">
@@ -53,42 +47,6 @@ const AuthLayout = () => {
             <p className="text-gray-400 text-sm leading-relaxed">
               Natural health products grounded in science — safe, effective nutritional solutions for every family.
             </p>
-          </motion.div>
-
-          {/* Trust badges */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid grid-cols-3 gap-4 mt-12"
-          >
-            {[
-              { label: '50K+', desc: 'Customers' },
-              { label: '100%', desc: 'All Natural' },
-              { label: '99%', desc: 'Satisfaction' },
-            ].map(({ label, desc }) => (
-              <div key={desc} className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-brand-500/30 transition-colors">
-                <p className="text-2xl font-display font-bold text-brand-400">{label}</p>
-                <p className="text-xs text-gray-400 mt-1">{desc}</p>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Certifications strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex items-center justify-center gap-4 mt-10"
-          >
-            {['No Additives', 'Lab Tested', 'Family Safe'].map((badge) => (
-              <span key={badge} className="flex items-center gap-1.5 text-xs text-gray-500">
-                <svg className="w-3 h-3 text-brand-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-5.121-5.121a1 1 0 111.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                {badge}
-              </span>
-            ))}
           </motion.div>
         </div>
       </div>

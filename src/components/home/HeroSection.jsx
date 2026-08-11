@@ -68,7 +68,7 @@ const HeroSection = () => {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-emerald-300">
               {t('home.hero.title2')}
             </span>
-            {t('home.hero.title3')}
+            {' '}{t('home.hero.title3')}
           </motion.h1>
 
           {/* Subtitle */}
