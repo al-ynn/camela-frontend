@@ -204,7 +204,7 @@ const Header = () => {
             {/* Language Switcher */}
             <LanguageSwitcher />
 
-            <CurrencySelector className="hidden sm:block max-w-[92px]" />
+            <CurrencySelector compact className="hidden sm:block w-[92px]" />
 
             {/* Wishlist */}
             <Link
