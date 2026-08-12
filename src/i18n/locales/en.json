@@ -30,7 +30,6 @@
       "title1": "Nourish Your Cells for",
       "title2": "Body & Mind",
       "title3": "Naturally",
-      "trustedBy": "trusted by 10,000+ customers",
       "stat1": "Certified Quality",
       "stat2": "Certified Products",
       "stat3": "Global Presence",
@@ -63,7 +62,7 @@
       "perk1Title": "Exclusive Offers",
       "perk1Desc": "Members-only discounts and early access",
       "perk2Title": "Free Shipping",
-      "perk2Desc": "On all orders over $75",
+      "perk2Desc": "On all orders over {{amount}}",
       "perk3Title": "Easy Returns",
       "perk3Desc": "30-day hassle-free returns"
     },
@@ -197,7 +196,7 @@
     "linkCopied": "Link copied to clipboard!",
     "faq": "Frequently Asked Questions",
     "faqShipping": "Shipping & Delivery",
-    "faqShippingContent": "Free shipping on orders over $75. Orders are processed within 1–2 business days and delivered within 3–5 business days across Singapore, Malaysia, and Southeast Asia. Tracking information will be sent via email.",
+    "faqShippingContent": "Free shipping on orders over {{amount}}. Orders are processed within 1–2 business days and delivered within 3–5 business days across Singapore, Malaysia, and Southeast Asia. Tracking information will be sent via email.",
     "faqReturns": "Returns & Refunds",
     "faqReturnsContent": "Due to the nature of health supplements, returns are only accepted for damaged or defective products. Please contact us within 7 days of delivery with photos of the issue. We will arrange a replacement or full refund.",
     "faqStorage": "Storage Instructions",
@@ -220,7 +219,7 @@
     "securePay": "Secure Pay",
     "securePayDesc": "256-bit SSL",
     "30days": "30 days",
-    "over75": "Over $75",
+    "over75": "Over {{amount}}",
     "relatedProducts": "Related Products",
     "ssl": "256-bit SSL",
     "verifiedReviews": "Verified reviews"
@@ -287,11 +286,11 @@
     "priceRange": "Price Range",
     "minRating": "Minimum Rating",
     "andUp": "& up",
-    "under25": "Under $25",
-    "range25to50": "$25 – $50",
-    "range50to100": "$50 – $100",
-    "range100to200": "$100 – $200",
-    "over200": "Over $200"
+    "under25": "Under {{amount}}",
+    "range25to50": "{{min}} – {{max}}",
+    "range50to100": "{{min}} – {{max}}",
+    "range100to200": "{{min}} – {{max}}",
+    "over200": "Over {{amount}}"
   },
   "search": {
     "placeholder": "Search vitamins, supplements, skincare...",

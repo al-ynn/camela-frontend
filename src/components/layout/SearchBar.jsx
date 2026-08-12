@@ -7,10 +7,11 @@ import { Search, X, Clock, TrendingUp, ArrowRight } from 'lucide-react'
 import { closeSearch, selectSearchOpen, addRecentSearch, selectRecentSearches } from '../../features/ui/uiSlice'
 import { useSearchProductsQuery } from '../../services/productsApi'
 import { useDebounce } from '../../hooks/useDebounce'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 
 const SearchBar = () => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isOpen = useSelector(selectSearchOpen)

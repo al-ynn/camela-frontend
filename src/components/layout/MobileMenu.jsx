@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Logo from '../common/Logo'
 import AvatarImage from '../common/AvatarImage'
+import CurrencySelector from '../common/CurrencySelector'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, Heart, ShoppingBag, LogIn } from 'lucide-react'
@@ -131,6 +132,10 @@ const MobileMenu = () => {
                   </span>
                 )}
               </button>
+            </div>
+
+            <div className="px-5 pb-3">
+              <CurrencySelector className="w-full" />
             </div>
 
             {/* Navigation */}

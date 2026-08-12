@@ -41,6 +41,8 @@ const order = (value) => ({
     total: value.grand_total,
   },
   payment: { method: value.payment_method, status: value.payment_status },
+  address: value.shipping_address,
+  billingAddress: value.billing_address,
 })
 
 const adminProduct = (product) => ({
@@ -80,6 +82,11 @@ export const commerceService = {
   async getPublicStoreStatus() {
     const response = await client().get('/store-status')
     return response.data.data ?? response.data
+  },
+
+  async getCurrencies() {
+    const response = await client().get('/currencies')
+    return response.data
   },
   
   async addToCart(token, productId, quantity) {
@@ -149,6 +156,10 @@ export const commerceService = {
     const response = await client(token).get('/orders')
     return response.data.data.map(order)
   },
+  async getOrder(token, orderId) {
+    const response = await client(token).get(`/orders/${orderId}`)
+    return order(response.data.data ?? response.data)
+  },
   async updateProfile(token, data) {
     const response = await client(token).patch('/profile', data)
     return response.data.user?.data || response.data.user
@@ -210,6 +221,26 @@ export const commerceService = {
   },
   async deleteAdminProduct(token, id) {
     await client(token).delete(`/admin/products/${id}`)
+  },
+
+  async duplicateAdminProduct(token, id) {
+    const response = await client(token).post(`/admin/products/${id}/duplicate`)
+    return adminProduct(response.data.data)
+  },
+
+  async bulkDuplicateAdminProducts(token, productIds) {
+    const response = await client(token).post('/admin/products/bulk-duplicate', {
+      product_ids: productIds,
+    })
+    return response.data.data.map(adminProduct)
+  },
+
+  async bulkUpdateAdminProductStatus(token, productIds, status) {
+    const response = await client(token).patch('/admin/products/bulk-status', {
+      product_ids: productIds,
+      status,
+    })
+    return response.data.data.map(adminProduct)
   },
 
   async submitMembershipApplication(payload) {

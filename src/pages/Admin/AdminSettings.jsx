@@ -166,7 +166,7 @@ const AdminSettings = () => {
           {SHIPPING_METHODS.map((method) => (
             <div key={method.id} className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name} Rate (per item)</p>
                 <p className="text-xs text-gray-400">{method.description}</p>
               </div>
               <div className="flex items-center gap-2">

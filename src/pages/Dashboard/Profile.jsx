@@ -181,7 +181,7 @@ const Profile = () => {
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
                 <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">Email not verified</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Please verify your email address to unlock shopping and checkout features.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Verify your email address as an optional account-security measure.</p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <button

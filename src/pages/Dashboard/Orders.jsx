@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Package, ShoppingBag, ArrowRight, ChevronDown } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectOrders, setOrders } from '../../features/orders/ordersSlice'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 import { ROUTES } from '../../constants/routes'
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
@@ -34,6 +34,7 @@ const getStatusLabel = (status, t) => {
 
 const OrderRow = ({ order, index }) => {
   const { t } = useTranslation()
+  const { formatPrice, formatSGD, isConverted } = useCurrency()
   const [expanded, setExpanded] = useState(false)
   const status = String(order.status || 'processing').toLowerCase()
 
@@ -134,6 +135,11 @@ const OrderRow = ({ order, index }) => {
                   <span>Total</span>
                   <span>{formatPrice(order.totals?.total || 0)}</span>
                 </div>
+                {isConverted && (
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Converted value for reference. Charged as {formatSGD(order.totals?.total || 0)}.
+                  </p>
+                )}
               </div>
 
               {/* Shipping Address */}

@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag, Trash2, Plus, Minus, Tag, X, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../hooks/useCart'
 import { ROUTES } from '../../constants/routes'
-import { resolveApiAssetUrl, SUPPORTED_CURRENCIES } from '../../constants/config'
+import { resolveApiAssetUrl } from '../../constants/config'
 
 const Cart = () => {
   const { t } = useTranslation()
-  const { items, totals, coupon, currency, formatCartPrice, setCurrency, removeFromCart, updateQuantity, applyCoupon, removeCoupon, clearCart } = useCart()
+  const { items, totals, coupon, shippingSettings, formatCartPrice, removeFromCart, updateQuantity, applyCoupon, removeCoupon, clearCart } = useCart()
   const [couponInput, setCouponInput] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
 
@@ -201,18 +201,7 @@ const Cart = () => {
 
             {/* Summary */}
             <div className="card p-5 space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="font-semibold text-gray-900 dark:text-white">{t('cart.orderSummary')}</h3>
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="input-base py-1.5 pl-3 pr-8 text-sm"
-                >
-                  {SUPPORTED_CURRENCIES.map((c) => (
-                    <option key={c.code} value={c.code}>{c.code}</option>
-                  ))}
-                </select>
-              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">{t('cart.orderSummary')}</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>{t('cart.subtotal')} ({items.reduce((s, i) => s + i.quantity, 0)} {t('cart.items')})</span>
@@ -239,9 +228,9 @@ const Cart = () => {
                 </div>
               </div>
 
-              {totals.subtotal < 75 && (
+              {shippingSettings && totals.subtotal < Number(shippingSettings.free_shipping_threshold) && (
                 <p className="text-xs text-center text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  {t('cart.addMore')} <span className="font-semibold text-brand-600">{formatCartPrice(75 - totals.subtotal)}</span> {t('cart.forFreeShipping')}
+                  {t('cart.addMore')} <span className="font-semibold text-brand-600">{formatCartPrice(Number(shippingSettings.free_shipping_threshold) - totals.subtotal)}</span> {t('cart.forFreeShipping')}
                 </p>
               )}
 

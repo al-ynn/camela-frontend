@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
@@ -14,7 +14,9 @@ import { selectUser, selectAuth } from '../../features/auth/authSlice'
 import { setCurrentOrder } from '../../features/orders/ordersSlice'
 import { setCartItems } from '../../features/cart/cartSlice'
 import { commerceService } from '../../services/commerceApi'
-import { resolveApiAssetUrl, SUPPORTED_CURRENCIES } from '../../constants/config'
+import { resolveApiAssetUrl } from '../../constants/config'
+import { useCurrency } from '../../contexts/CurrencyContext'
+import { calculateShipping } from '../../hooks/useShippingSettings'
 
 const COUNTRIES = [
   'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia',
@@ -65,10 +67,10 @@ const Checkout = () => {
   })
 
   const dispatch = useDispatch()
-  const { items, totals, currency, formatCartPrice, setCurrency } = useCart()
+  const { items, totals, shippingSettings, formatCartPrice } = useCart()
+  const { formatSGD, isConverted } = useCurrency()
   const user = useSelector(selectUser)
   const token = useSelector(selectAuth).token
-  const verified = !!user?.email_verified_at
 
   const [step, setStep] = useState(1)
   const [contactData, setContactData] = useState(null)
@@ -78,26 +80,18 @@ const Checkout = () => {
   const [addresses, setAddresses] = useState([])
   const [shippingAddressId, setShippingAddressId] = useState(null)
 
-  const [settings, setSettings] = useState(null)
-
-  const [shippingMethods, setShippingMethods] = useState([])
-
-  const [selectedShipping, setSelectedShipping] = useState(null)
-
-  const shippingCost =
-    selectedShipping
-        ? Number(selectedShipping.price)
-        : 0;
-
-  const taxRate =
-
-      Number(settings?.tax_rate ?? 0)
-
-  const taxAmount = Number(
-
-      ((totals.subtotal * taxRate) / 100).toFixed(2)
-
-  )
+  const [selectedShippingId, setSelectedShippingId] = useState('standard')
+  const shippingMethods = useMemo(() => [
+    { id: 'standard', name: 'Standard Shipping', price: Number(shippingSettings?.standard_shipping ?? 0) },
+    { id: 'express', name: 'Express Shipping', price: Number(shippingSettings?.express_shipping ?? 0) },
+    { id: 'overnight', name: 'Next Business Day', price: Number(shippingSettings?.overnight_shipping ?? 0) },
+  ].map((method) => ({
+    ...method,
+    total: calculateShipping(shippingSettings, items, method.id),
+  })), [items, shippingSettings])
+  const selectedShipping = shippingMethods.find((method) => method.id === selectedShippingId) ?? shippingMethods[0]
+  const shippingCost = selectedShipping.total
+  const taxAmount = totals.tax
 
   const grandTotal = Number(
 
@@ -118,26 +112,6 @@ const Checkout = () => {
   const [placing, setPlacing] = useState(false)
   const [couponCode, setCouponCode] = useState('')
   const hydratedCartRef = useRef(false)
-
-  const handleVerifyNow = () => {
-    window.location.href = '/dashboard/profile'
-  }
-
-  if (!verified) {
-    return (
-      <div className="min-h-screen bg-surface-secondary dark:bg-surface-dark flex items-center justify-center px-4">
-        <div className="max-w-xl w-full card p-8 text-center space-y-4">
-          <p className="text-xl font-display font-bold text-gray-900 dark:text-white">Email Verification Required</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Before placing your first order, please verify your email address.
-          </p>
-          <button onClick={handleVerifyNow} className="btn-brand btn-md inline-flex mx-auto">
-            Verify Now
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   const contactForm = useForm({
     resolver: zodResolver(contactSchema),
@@ -198,49 +172,6 @@ const Checkout = () => {
         dispatch(setCartItems([]))
       })
   }, [token, items.length, dispatch])
-
-  useEffect(() => {
-
-      if (!token) return;
-
-      commerceService
-          .getStoreSettings(token)
-          .then((store) => {
-
-              setSettings(store);
-
-              console.log(store);
-
-              const methods = [
-
-                  {
-                      id: 'standard',
-                      name: 'Standard Shipping',
-                      price: Number(store.standard_shipping ?? 0),
-                  },
-
-                  {
-                      id: "express",
-                      name: "Express Shipping",
-                      price: Number(store.express_shipping ?? 0),
-                  },
-
-                  {
-                      id: "overnight",
-                      name: "Next Business Day",
-                      price: Number(store.overnight_shipping ?? 0),
-                  },
-
-              ];
-
-              setShippingMethods(methods);
-
-              setSelectedShipping(methods[0]);
-
-          })
-          .catch(console.error);
-
-  }, [token]);
 
   const handleInformationSubmit = async () => {
     const contact = contactForm.getValues()
@@ -365,18 +296,7 @@ const Checkout = () => {
 
   const OrderSummary = () => (
     <div className="card p-5 space-y-4 lg:sticky lg:top-24">
-      <div className="flex items-center justify-between gap-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white">{t('checkout.orderSummary')}</h3>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-          className="input-base py-1.5 pl-3 pr-8 text-sm"
-        >
-          {SUPPORTED_CURRENCIES.map((c) => (
-            <option key={c.code} value={c.code}>{c.code}</option>
-          ))}
-        </select>
-      </div>
+      <h3 className="font-semibold text-gray-900 dark:text-white">{t('checkout.orderSummary')}</h3>
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {items.map((item) => (
           <div key={item.key} className="flex gap-3 py-3 first:pt-0 last:pb-0">
@@ -422,6 +342,11 @@ const Checkout = () => {
           <span>{t('checkout.grandTotal')}</span>
           <span>{formatCartPrice(grandTotal)}</span>
         </div>
+        {isConverted && (
+          <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
+            Converted prices are shown for reference. Payment is processed in SGD. Charged as {formatSGD(grandTotal)}.
+          </p>
+        )}
       </div>
     </div>
   )
@@ -604,7 +529,7 @@ const Checkout = () => {
                               type="radio"
                               name="shipping"
                               checked={selectedShipping.id === method.id}
-                              onChange={() => setSelectedShipping(method)}
+                              onChange={() => setSelectedShippingId(method.id)}
                               className="accent-gray-900 dark:accent-white"
                             />
                             <div className="flex-1">
@@ -612,7 +537,7 @@ const Checkout = () => {
                               <p className="text-sm text-gray-400">{method.description}</p>
                             </div>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                              {method.price === 0 ? t('checkout.free') : formatCartPrice(method.price)}
+                              {method.total === 0 ? t('checkout.free') : formatCartPrice(method.total)}
                             </span>
                           </label>
                         ))}
@@ -673,7 +598,7 @@ const Checkout = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">{selectedShipping.description}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{t('checkout.estimatedDelivery')}: </p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                          {t('checkout.shippingFee')}: {selectedShipping.price === 0 ? t('checkout.free') : formatCartPrice(selectedShipping.price)}
+                          {t('checkout.shippingFee')}: {selectedShipping.total === 0 ? t('checkout.free') : formatCartPrice(selectedShipping.total)}
                         </p>
                       </ReviewSection>
 
@@ -700,6 +625,11 @@ const Checkout = () => {
                           <div className="flex justify-between font-bold text-base text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-800">
                             <span>{t('checkout.grandTotal')}</span><span>{formatCartPrice(grandTotal)}</span>
                           </div>
+                          {isConverted && (
+                            <p className="pt-2 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                              Converted prices are shown for reference. Payment is processed in SGD. Charged as {formatSGD(grandTotal)}.
+                            </p>
+                          )}
                         </div>
                       </div>
 

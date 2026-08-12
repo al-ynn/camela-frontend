@@ -6,19 +6,21 @@ import { setFilter, resetFilters, selectFilters } from '../../features/products/
 import { useGetCategoriesQuery } from '../../services/productsApi'
 import { useState } from 'react'
 import { cn } from '../../utils/helpers'
+import { useCurrency } from '../../contexts/CurrencyContext'
 
 const ProductFilters = ({ onClose, activeCategory }) => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const dispatch = useDispatch()
   const filters = useSelector(selectFilters)
   const { data: categories = [] } = useGetCategoriesQuery()
 
   const PRICE_RANGES = [
-    { label: t('filter.under25'), min: 0, max: 25 },
-    { label: t('filter.range25to50'), min: 25, max: 50 },
-    { label: t('filter.range50to100'), min: 50, max: 100 },
-    { label: t('filter.range100to200'), min: 100, max: 200 },
-    { label: t('filter.over200'), min: 200, max: 10000 },
+    { label: t('filter.under25', { amount: formatPrice(25) }), min: 0, max: 25 },
+    { label: t('filter.range25to50', { min: formatPrice(25), max: formatPrice(50) }), min: 25, max: 50 },
+    { label: t('filter.range50to100', { min: formatPrice(50), max: formatPrice(100) }), min: 50, max: 100 },
+    { label: t('filter.range100to200', { min: formatPrice(100), max: formatPrice(200) }), min: 100, max: 200 },
+    { label: t('filter.over200', { amount: formatPrice(200) }), min: 200, max: 10000 },
   ]
 
   const FilterSection = ({ title, children, defaultOpen = true }) => {

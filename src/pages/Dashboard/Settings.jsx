@@ -2,14 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Bell, Shield, Moon, Trash2, AlertTriangle, Eye, EyeOff } from 'lucide-react'
-import { useDispatch } from 'react-redux'
 import { useTheme } from '../../hooks/useTheme'
-import { logout } from '../../features/auth/authSlice'
-import { clearCartState } from '../../features/cart/cartSlice'
-import { clearWishlist } from '../../features/wishlist/wishlistSlice'
 import toast from 'react-hot-toast'
 import Modal from '../../components/ui/Modal'
-import { useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authApi'
 import { useSelector } from 'react-redux'
 
@@ -43,8 +38,6 @@ const SettingRow = ({ label, description, children }) => (
 
 const Settings = () => {
   const { t } = useTranslation()
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const token = useSelector((state) => state.auth.token)
 
@@ -67,11 +60,8 @@ const Settings = () => {
   const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/
 
   const handleDeleteAccount = () => {
-    dispatch(logout())
-    dispatch(clearCartState())
-    dispatch(clearWishlist())
-    toast.success('Account deleted successfully')
-    navigate('/')
+    setDeleteModal(false)
+    toast.error('Account deletion is not currently available. Please contact support.')
   }
 
   const handlePasswordChange = async () => {

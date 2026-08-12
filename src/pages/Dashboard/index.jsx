@@ -7,7 +7,7 @@ import { selectUser } from '../../features/auth/authSlice'
 import { selectWishlistCount } from '../../features/wishlist/wishlistSlice'
 import { selectOrders } from '../../features/orders/ordersSlice'
 import { ROUTES } from '../../constants/routes'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 
 const StatCard = ({ icon: Icon, label, value, href, color, delay }) => (
   <motion.div
@@ -30,6 +30,7 @@ const StatCard = ({ icon: Icon, label, value, href, color, delay }) => (
 
 const DashboardHome = () => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const user = useSelector(selectUser)
   const wishlistCount = useSelector(selectWishlistCount)
   const orders = useSelector(selectOrders)

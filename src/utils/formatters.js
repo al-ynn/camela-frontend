@@ -1,9 +1,11 @@
-export const formatPrice = (price, currency = 'USD') => {
-  return new Intl.NumberFormat('en-US', {
+export const formatPrice = (price, currency = 'SGD') => {
+  const amount = Number(price)
+
+  return new Intl.NumberFormat('en-SG', {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-  }).format(price)
+    currencyDisplay: 'code',
+  }).format(Number.isFinite(amount) ? amount : 0)
 }
 
 export const formatDate = (dateString) => {

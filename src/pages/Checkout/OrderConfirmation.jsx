@@ -1,16 +1,29 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle, Package, ArrowRight, Home, ShoppingBag } from 'lucide-react'
 import { selectCurrentOrder } from '../../features/orders/ordersSlice'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 import { ROUTES } from '../../constants/routes'
 import { resolveApiAssetUrl } from '../../constants/config'
+import { selectAuth } from '../../features/auth/authSlice'
+import { commerceService } from '../../services/commerceApi'
 
 const OrderConfirmation = () => {
   const { t } = useTranslation()
-  const order = useSelector(selectCurrentOrder)
+  const { formatPrice, formatSGD, isConverted } = useCurrency()
+  const currentOrder = useSelector(selectCurrentOrder)
+  const token = useSelector(selectAuth).token
+  const { id } = useParams()
+  const [order, setOrder] = useState(currentOrder)
+
+  useEffect(() => {
+    if (!token || !id || String(currentOrder?.orderId) === String(id)) return
+
+    commerceService.getOrder(token, id).then(setOrder).catch(() => setOrder(null))
+  }, [currentOrder, id, token])
 
   return (
     <div className="min-h-screen bg-surface-secondary dark:bg-surface-dark flex items-center justify-center px-4 py-16">
@@ -109,9 +122,16 @@ const OrderConfirmation = () => {
                 <p className="text-xs text-gray-400 mt-1">+{order.items.length - 3} {t('orderConfirmation.moreItems')}</p>
               )}
               {order?.totals && (
-                <div className="flex justify-between font-bold text-gray-900 dark:text-white mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <span>{t('cart.total')}</span>
-                  <span>{formatPrice(order.totals.total)}</span>
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex justify-between font-bold text-gray-900 dark:text-white">
+                    <span>{t('cart.total')}</span>
+                    <span>{formatPrice(order.totals.total)}</span>
+                  </div>
+                  {isConverted && (
+                    <p className="mt-2 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                      Converted value for reference. This order was charged as {formatSGD(order.totals.total)}.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

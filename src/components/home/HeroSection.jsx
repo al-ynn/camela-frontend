@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, ShoppingBag, Star, Award } from 'lucide-react'
+import { ArrowRight, ShoppingBag, Award } from 'lucide-react'
 import { ROUTES } from '../../constants/routes'
 import { useState } from 'react'
 
@@ -80,7 +80,7 @@ const HeroSection = () => {
           </motion.p>
 
           {/* CTAs */}
-          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-3 mb-12">
+          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-3">
             <Link
               to={ROUTES.SHOP}
               className="btn-brand btn-xl gap-3 shadow-glow"
@@ -91,34 +91,6 @@ const HeroSection = () => {
             </Link>
           </motion.div>
 
-          {/* Social proof */}
-          <motion.div {...fadeUp(0.4)} className="flex flex-wrap items-center gap-6">
-            <div className="flex -space-x-3">
-              {[
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face',
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
-                'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face',
-                'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
-              ].map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="w-9 h-9 rounded-full border-2 border-gray-950 object-cover"
-                />
-              ))}
-            </div>
-            <div>
-              <div className="flex items-center gap-1 text-amber-400 mb-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={13} fill="currentColor" />
-                ))}
-              </div>
-              <p className="text-sm text-gray-400">
-                <span className="font-semibold text-white">4.9/5</span> {t('home.hero.trustedBy')}
-              </p>
-            </div>
-          </motion.div>
         </div>
       </div>
 

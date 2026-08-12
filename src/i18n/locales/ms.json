@@ -30,7 +30,6 @@
       "title1": "Pelihara Sel Anda untuk",
       "title2": "Tubuh & Minda",
       "title3": "Secara Semulajadi",
-      "trustedBy": "dipercayai oleh 10,000+ pelanggan",
       "stat1": "Kualiti Bertauliah",
       "stat2": "Produk Bertauliah",
       "stat3": "Kehadiran Global",
@@ -63,7 +62,7 @@
       "perk1Title": "Tawaran Eksklusif",
       "perk1Desc": "Diskaun ahli sahaja dan akses awal",
       "perk2Title": "Penghantaran Percuma",
-      "perk2Desc": "Untuk pesanan melebihi $75",
+      "perk2Desc": "Untuk pesanan melebihi {{amount}}",
       "perk3Title": "Pemulangan Mudah",
       "perk3Desc": "30 hari pemulangan tanpa kerumitan"
     },
@@ -188,7 +187,7 @@
     "linkCopied": "Pautan disalin ke papan klip!",
     "faq": "Soalan Lazim",
     "faqShipping": "Penghantaran & Penghantaran",
-    "faqShippingContent": "Penghantaran percuma untuk pesanan melebihi $75. Pesanan diproses dalam masa 1–2 hari bekerja dan dihantar dalam masa 3–5 hari bekerja di seluruh Singapura, Malaysia, dan Asia Tenggara. Maklumat penjejakan akan dihantar melalui e-mel.",
+    "faqShippingContent": "Penghantaran percuma untuk pesanan melebihi {{amount}}. Pesanan diproses dalam masa 1–2 hari bekerja dan dihantar dalam masa 3–5 hari bekerja di seluruh Singapura, Malaysia, dan Asia Tenggara. Maklumat penjejakan akan dihantar melalui e-mel.",
     "faqReturns": "Pemulangan & Refund",
     "faqReturnsContent": "Oleh kerana sifat suplemen kesihatan, pemulangan hanya diterima untuk produk yang rosak atau cacat. Sila hubungi kami dalam masa 7 hari selepas penghantaran dengan gambar masalah tersebut. Kami akan mengatur penggantian atau refund penuh.",
     "faqStorage": "Arahan Penyimpanan",
@@ -273,11 +272,11 @@
     "priceRange": "Julat Harga",
     "minRating": "Penilaian Minimum",
     "andUp": "& ke atas",
-    "under25": "Bawah $25",
-    "range25to50": "$25 – $50",
-    "range50to100": "$50 – $100",
-    "range100to200": "$100 – $200",
-    "over200": "Melebihi $200"
+    "under25": "Bawah {{amount}}",
+    "range25to50": "{{min}} – {{max}}",
+    "range50to100": "{{min}} – {{max}}",
+    "range100to200": "{{min}} – {{max}}",
+    "over200": "Melebihi {{amount}}"
   },
   "search": {
     "placeholder": "Cari vitamin, suplemen, penjagaan kulit...",

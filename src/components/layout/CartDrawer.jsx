@@ -5,9 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ShoppingBag, Trash2, X } from 'lucide-react'
 import { closeCartDrawer, selectCartDrawerOpen } from '../../features/ui/uiSlice'
-import { clearCartState, selectCartItems, selectCartTotals } from '../../features/cart/cartSlice'
 import { useCart } from '../../hooks/useCart'
-import { formatPrice } from '../../utils/formatters'
 import { ROUTES } from '../../constants/routes'
 import { resolveApiAssetUrl } from '../../constants/config'
 
@@ -16,9 +14,7 @@ const CartDrawer = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const isOpen = useSelector(selectCartDrawerOpen)
-  const items = useSelector(selectCartItems)
-  const totals = useSelector(selectCartTotals)
-  const { removeFromCart, updateQuantity } = useCart()
+  const { items, totals, removeFromCart, updateQuantity, clearCart, formatCartPrice: formatPrice } = useCart()
 
   const close = () => dispatch(closeCartDrawer())
 
@@ -30,11 +26,8 @@ const CartDrawer = () => {
   }, [isOpen])
 
   useEffect(() => {
-    if (isOpen) {
-      close()
-    }
-    // Close any open drawer on navigation so overlays never stick around.
-  }, [location.pathname, isOpen])
+    dispatch(closeCartDrawer())
+  }, [dispatch, location.pathname])
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -213,9 +206,9 @@ const CartDrawer = () => {
 
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   close()
-                  dispatch(clearCartState())
+                  await clearCart()
                 }}
                 className="w-full text-sm text-gray-500 hover:text-brand-600 transition-colors"
               >

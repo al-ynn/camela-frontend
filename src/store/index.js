@@ -8,6 +8,7 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
+  createMigrate,
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import { apiSlice } from '../services/api'
@@ -28,10 +29,20 @@ const rootReducer = combineReducers({
   orders: ordersReducer,
 })
 
+const migrations = {
+  2: (state) => {
+    if (!state?.cart) return state
+    const cart = { ...state.cart }
+    delete cart.currency
+    return { ...state, cart }
+  },
+}
+
 const persistConfig = {
   key: 'camela-root',
-  version: 1,
+  version: 2,
   storage,
+  migrate: createMigrate(migrations, { debug: false }),
   whitelist: ['wishlist', 'auth', 'ui', 'cart'],
   blacklist: [apiSlice.reducerPath, 'products'],
 }

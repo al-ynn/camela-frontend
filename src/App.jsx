@@ -16,6 +16,7 @@ import { clearAuthSession, updateUser } from './features/auth/authSlice'
 import { useAuth } from './hooks/useAuth'
 import { useForm } from 'react-hook-form'
 import Logo from './components/common/Logo'
+import { CurrencyProvider } from './contexts/CurrencyContext'
 
 const AuthSessionValidator = () => {
   const dispatch = useDispatch()
@@ -224,8 +225,9 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={<FullPageSpinner />} persistor={persistor}>
         <BrowserRouter>
-          <ThemeProvider>
-            <ErrorBoundary>
+          <CurrencyProvider>
+            <ThemeProvider>
+              <ErrorBoundary>
               <AuthSessionValidator />
               <MaintenanceGate>
                 <AppRoutes />
@@ -249,8 +251,9 @@ const App = () => {
                   },
                 }}
               />
-            </ErrorBoundary>
-          </ThemeProvider>
+              </ErrorBoundary>
+            </ThemeProvider>
+          </CurrencyProvider>
         </BrowserRouter>
       </PersistGate>
     </Provider>

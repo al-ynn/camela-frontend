@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Logo from '../common/Logo'
 import AvatarImage from '../common/AvatarImage'
 import LanguageSwitcher from '../common/LanguageSwitcher'
+import CurrencySelector from '../common/CurrencySelector'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -202,6 +203,8 @@ const Header = () => {
 
             {/* Language Switcher */}
             <LanguageSwitcher />
+
+            <CurrencySelector className="hidden sm:block max-w-[92px]" />
 
             {/* Wishlist */}
             <Link

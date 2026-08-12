@@ -26,18 +26,19 @@ import Tabs from '../../components/ui/Tabs'
 import Accordion from '../../components/ui/Accordion'
 import ProductCard from '../../components/product/ProductCard'
 import Breadcrumb from '../../components/layout/Breadcrumb'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 import { getRelatedProducts, cn, resolveProductImageUrl } from '../../utils/helpers'
 import toast from 'react-hot-toast'
 
 const ProductDetail = () => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const { id } = useParams()
   const { data: product, isLoading, error } = useProduct(id)
   const { data: allProducts = [] } = useProducts()
 
   const PRODUCT_FAQS = [
-    { id: 'shipping', title: t('product.faqShipping'), content: t('product.faqShippingContent') },
+    { id: 'shipping', title: t('product.faqShipping'), content: t('product.faqShippingContent', { amount: formatPrice(75) }) },
     { id: 'returns', title: t('product.faqReturns'), content: t('product.faqReturnsContent') },
     { id: 'storage', title: t('product.faqStorage'), content: t('product.faqStorageContent') },
     { id: 'dosage', title: t('product.faqDosage'), content: t('product.faqDosageContent') },
@@ -84,6 +85,10 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
+    if (product.stock < 1) {
+      toast.error(t('product.outOfStock'))
+      return
+    }
     if (sizes.length > 0 && !selectedSize) {
       toast.error(t('product.selectSize'))
       return
@@ -231,7 +236,9 @@ const ProductDetail = () => {
                   {product.category}
                 </span>
                 <span className="text-gray-200 dark:text-gray-700">·</span>
-                <span className="text-xs text-green-600 dark:text-green-400 font-medium">{t('product.inStock')}</span>
+                <span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-brand-600 dark:text-brand-400'}`}>
+                  {product.stock > 0 ? t('product.inStock') : t('product.outOfStock')}
+                </span>
               </div>
               <h1 className="text-2xl md:text-3xl font-display font-bold text-gray-900 dark:text-white leading-tight">
                 {product.title}
@@ -328,7 +335,8 @@ const ProductDetail = () => {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    disabled={quantity >= product.stock}
                     className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 transition-colors"
                   >
                     <Plus size={15} />
@@ -341,7 +349,8 @@ const ProductDetail = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
-                className="btn-primary btn-lg flex-1 gap-2"
+                disabled={product.stock < 1}
+                className="btn-primary btn-lg flex-1 gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart size={18} />
                 {t('product.addToCart')}
@@ -368,7 +377,7 @@ const ProductDetail = () => {
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-3 pt-2">
               {[
-                { icon: Truck, label: t('product.freeShipping'), desc: t('product.over75') },
+            { icon: Truck, label: t('product.freeShipping'), desc: t('product.over75', { amount: formatPrice(75) }) },
                 { icon: RotateCcw, label: t('product.easyReturns'), desc: t('product.30days') },
                 { icon: Shield, label: t('product.securePay'), desc: t('product.ssl') },
               ].map(({ icon: Icon, label, desc }) => (

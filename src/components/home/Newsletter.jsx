@@ -4,16 +4,18 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Mail, Gift, Truck, RotateCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
+import { useCurrency } from '../../contexts/CurrencyContext'
 
 const Newsletter = () => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const { ref, hasIntersected } = useIntersectionObserver({ once: true })
 
   const PERKS = [
     { icon: Gift, title: t('home.newsletter.perk1Title'), desc: t('home.newsletter.perk1Desc') },
-    { icon: Truck, title: t('home.newsletter.perk2Title'), desc: t('home.newsletter.perk2Desc') },
+    { icon: Truck, title: t('home.newsletter.perk2Title'), desc: t('home.newsletter.perk2Desc', { amount: formatPrice(75) }) },
     { icon: RotateCcw, title: t('home.newsletter.perk3Title'), desc: t('home.newsletter.perk3Desc') },
   ]
 

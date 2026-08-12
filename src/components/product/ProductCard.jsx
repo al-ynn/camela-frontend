@@ -9,18 +9,21 @@ import { useSelector } from 'react-redux'
 import { selectIsInWishlist } from '../../features/wishlist/wishlistSlice'
 import Rating from '../ui/Rating'
 import Badge from '../ui/Badge'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 import { cn, resolveProductImageUrl } from '../../utils/helpers'
 import { ROUTES } from '../../constants/routes'
 
 const ProductCard = ({ product, view = 'grid' }) => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const navigate = useNavigate()
   const [imageLoaded, setImageLoaded] = useState(false)
   const [hovered, setHovered] = useState(false)
   const { addToCart } = useCart()
   const { toggleWishlist } = useWishlist()
   const isInWishlist = useSelector(selectIsInWishlist(product.id))
+  const originalPrice = product.compare_price
+  const isSale = Number(originalPrice) > Number(product.price)
 
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image]
   const currentImage =

@@ -9,9 +9,11 @@ import {
   Check,
   ChevronUp,
   ChevronDown,
-  ToggleLeft,
-  ToggleRight,
+  CircleCheck,
+  CircleX,
+  Copy,
   ImagePlus,
+  Loader2,
   Upload,
   Trash2,
 } from 'lucide-react'
@@ -43,6 +45,9 @@ const AdminProducts = () => {
   const [editProduct, setEditProduct] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [selectedIds, setSelectedIds] = useState([])
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const [actionProductId, setActionProductId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const fileRef = useRef(null)
 
@@ -65,6 +70,7 @@ const AdminProducts = () => {
           })
 
           setProducts(products)
+          setSelectedIds((ids) => ids.filter((id) => products.some((product) => product.id === id)))
 
       } catch {
           toast.error('Unable to load products')
@@ -90,6 +96,49 @@ const AdminProducts = () => {
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  const selectedProducts = products.filter((product) => selectedIds.includes(product.id))
+  const selectedStatus = selectedProducts[0]?.status || null
+  const selectableVisibleProducts = selectedStatus
+    ? paginated.filter((product) => product.status === selectedStatus)
+    : paginated
+  const allVisibleSelected = selectableVisibleProducts.length > 0
+    && selectableVisibleProducts.every((product) => selectedIds.includes(product.id))
+
+  const clearSelection = () => setSelectedIds([])
+
+  const handleSelectProduct = (product, checked) => {
+    if (!checked) {
+      setSelectedIds((ids) => ids.filter((id) => id !== product.id))
+      return
+    }
+
+    if (selectedStatus && product.status !== selectedStatus) {
+      toast.error('Only products with the same status can be selected together.')
+      return
+    }
+
+    setSelectedIds((ids) => ids.includes(product.id) ? ids : [...ids, product.id])
+  }
+
+  const handleSelectVisible = () => {
+    if (allVisibleSelected) {
+      const visibleIds = new Set(selectableVisibleProducts.map((product) => product.id))
+      setSelectedIds((ids) => ids.filter((id) => !visibleIds.has(id)))
+      return
+    }
+
+    if (!selectedStatus && new Set(paginated.map((product) => product.status)).size > 1) {
+      toast.error('Only products with the same status can be selected together.')
+      return
+    }
+
+    setSelectedIds((ids) => [
+      ...ids,
+      ...selectableVisibleProducts
+        .map((product) => product.id)
+        .filter((id) => !ids.includes(id)),
+    ])
+  }
 
   const handleSort = (field) => {
     if (sortField === field) setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
@@ -197,13 +246,17 @@ const AdminProducts = () => {
   }
 
   const handleToggleActive = async (product) => {
+    if (actionProductId) return
+
     try {
+      setActionProductId(product.id)
       await commerceService.updateAdminProduct(token, product.id, {
         category_id: product.category_id,
         status: product.active ? 'INACTIVE' : 'ACTIVE',
       })
 
       await loadProducts()
+      clearSelection()
 
       toast.success(
         product.active
@@ -214,6 +267,60 @@ const AdminProducts = () => {
     } catch (error) {
       console.error(error)
       toast.error('Unable to update product status.')
+    } finally {
+      setActionProductId(null)
+    }
+  }
+
+  const handleDuplicateProduct = async (product) => {
+    if (actionProductId) return
+
+    try {
+      setActionProductId(product.id)
+      await commerceService.duplicateAdminProduct(token, product.id)
+      await loadProducts()
+      toast.success('Product duplicated successfully.')
+    } catch {
+      toast.error('Unable to duplicate product.')
+    } finally {
+      setActionProductId(null)
+    }
+  }
+
+  const handleBulkDuplicate = async () => {
+    if (!selectedIds.length || bulkLoading) return
+
+    try {
+      setBulkLoading(true)
+      const count = selectedIds.length
+      await commerceService.bulkDuplicateAdminProducts(token, selectedIds)
+      await loadProducts()
+      clearSelection()
+      toast.success(count === 1 ? 'Product duplicated successfully.' : `${count} products duplicated successfully.`)
+    } catch {
+      toast.error('Unable to duplicate products.')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkStatus = async () => {
+    if (!selectedIds.length || !selectedStatus || bulkLoading) return
+
+    const status = selectedStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+    const action = status === 'ACTIVE' ? 'activated' : 'deactivated'
+
+    try {
+      setBulkLoading(true)
+      const count = selectedIds.length
+      await commerceService.bulkUpdateAdminProductStatus(token, selectedIds, status)
+      await loadProducts()
+      clearSelection()
+      toast.success(`${count} ${count === 1 ? 'product' : 'products'} ${action} successfully.`)
+    } catch {
+      toast.error('Unable to update product status.')
+    } finally {
+      setBulkLoading(false)
     }
   }
 
@@ -268,19 +375,32 @@ const AdminProducts = () => {
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); clearSelection() }}
             placeholder="Search products..."
             className="input-base pl-10 h-9"
           />
         </div>
         <select
           value={categoryFilter}
-          onChange={(e) => { setCategoryFilter(e.target.value); setPage(1) }}
+          onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); clearSelection() }}
           className="input-base h w-full sm:w-52"
         >
           <option value="">All Categories</option>
           {allCategories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={handleBulkDuplicate} disabled={!selectedIds.length || bulkLoading} className="btn-outline btn-sm gap-2 disabled:opacity-40">
+            {bulkLoading ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
+            Duplicate Selected
+          </button>
+          <button onClick={handleBulkStatus} disabled={!selectedIds.length || bulkLoading} className="btn-outline btn-sm disabled:opacity-40">
+            {selectedStatus === 'ACTIVE' ? 'Deactivate Selected' : selectedStatus === 'INACTIVE' ? 'Activate Selected' : 'Change Status'}
+          </button>
+          <button onClick={clearSelection} disabled={!selectedIds.length || bulkLoading} className="btn-outline btn-sm disabled:opacity-40">
+            Clear Selection
+          </button>
+          {selectedIds.length > 0 && <span className="text-xs text-gray-400">{selectedIds.length} selected</span>}
+        </div>
       </div>
 
       {/* Empty state */}
@@ -306,6 +426,15 @@ const AdminProducts = () => {
             <table className="w-full text-sm">
               <thead className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
                 <tr>
+                  <th className="pl-5 pr-2 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={handleSelectVisible}
+                      aria-label="Select visible products"
+                      className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                    />
+                  </th>
                   <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       <ThBtn field="id">#</ThBtn>
                   </th>
@@ -344,6 +473,15 @@ const AdminProducts = () => {
                     animate={{ opacity: 1 }}
                     className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors"
                   >
+                    <td className="pl-5 pr-2 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(product.id)}
+                        onChange={(event) => handleSelectProduct(product, event.target.checked)}
+                        aria-label={`Select ${product.title}`}
+                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                      />
+                    </td>
                     <td className="px-5 py-3 text-xs text-gray-400">
                         #{product.id}
                     </td>
@@ -393,11 +531,17 @@ const AdminProducts = () => {
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleToggleActive(product)} title={product.active === false ? 'Activate' : 'Deactivate'} className="p-1.5 rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
-                          {product.active === false ? <ToggleLeft size={15} /> : <ToggleRight size={15} />}
+                        <button onClick={() => handleDuplicateProduct(product)} disabled={actionProductId === product.id} title="Duplicate Product" aria-label="Duplicate Product" className="p-1.5 rounded-lg text-gray-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 disabled:opacity-40 transition-colors">
+                          <Copy size={14} />
                         </button>
-                        <button onClick={() => openEdit(product)} title="Edit" className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <button onClick={() => handleToggleActive(product)} disabled={actionProductId === product.id} title={product.active === false ? 'Activate Product' : 'Deactivate Product'} aria-label={product.active === false ? 'Activate Product' : 'Deactivate Product'} className="p-1.5 rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-40 transition-colors">
+                          {product.active === false ? <CircleCheck size={15} /> : <CircleX size={15} />}
+                        </button>
+                        <button onClick={() => openEdit(product)} title="Edit Product" aria-label="Edit Product" className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                           <Pencil size={13} />
+                        </button>
+                        <button onClick={() => setDeleteId(product.id)} title="Delete" className="p-1.5 rounded-lg text-gray-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>
@@ -411,8 +555,8 @@ const AdminProducts = () => {
             <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-800">
               <p className="text-xs text-gray-400">Showing {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, filtered.length)} of {filtered.length}</p>
               <div className="flex gap-1">
-                <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">Prev</button>
-                <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">Next</button>
+                <button disabled={page === 1} onClick={() => { setPage(page - 1); clearSelection() }} className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">Prev</button>
+                <button disabled={page === totalPages} onClick={() => { setPage(page + 1); clearSelection() }} className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">Next</button>
               </div>
             </div>
           )}
@@ -559,6 +703,16 @@ const AdminProducts = () => {
               <Check size={14} /> {editProduct ? 'Save Changes' : 'Add Product'}
             </button>
           </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Delete Product" size="sm">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Are you sure you want to delete this product? This action cannot be undone.
+        </p>
+        <div className="flex gap-3 pt-5">
+          <button onClick={() => setDeleteId(null)} className="btn-outline btn-md flex-1 justify-center">Cancel</button>
+          <button onClick={handleDelete} className="btn bg-brand-600 text-white hover:bg-brand-700 btn-md flex-1 justify-center">Delete</button>
         </div>
       </Modal>
     </div>

@@ -30,7 +30,6 @@
       "title1": "滋养您的细胞",
       "title2": "身心健康",
       "title3": "---自然之选",
-      "trustedBy": "超过10,000位客户信赖",
       "stat1": "认证品质",
       "stat2": "认证产品",
       "stat3": "全球覆盖",
@@ -63,7 +62,7 @@
       "perk1Title": "独家优惠",
       "perk1Desc": "会员专属折扣和优先体验",
       "perk2Title": "免费配送",
-      "perk2Desc": "满$75订单免运费",
+      "perk2Desc": "满{{amount}}订单免运费",
       "perk3Title": "轻松退换",
       "perk3Desc": "30天无忧退换"
     },
@@ -189,7 +188,7 @@
     "linkCopied": "链接已复制到剪贴板！",
     "faq": "常见问题",
     "faqShipping": "配送与交付",
-    "faqShippingContent": "订单满$75免运费。订单在1-2个工作日内处理，新加坡、马来西亚和东南亚地区3-5个工作日内送达。追踪信息将通过电子邮件发送。",
+    "faqShippingContent": "订单满{{amount}}免运费。订单在1-2个工作日内处理，新加坡、马来西亚和东南亚地区3-5个工作日内送达。追踪信息将通过电子邮件发送。",
     "faqReturns": "退货与退款",
     "faqReturnsContent": "由于健康补充品的特性，仅接受损坏或有缺陷产品的退货。请在收货后7天内联系我们并提供问题照片。我们将安排更换或全额退款。",
     "faqStorage": "储存说明",
@@ -212,7 +211,7 @@
     "securePay": "安全支付",
     "securePayDesc": "256位SSL",
     "30days": "30天",
-    "over75": "满75美元",
+    "over75": "满{{amount}}",
     "relatedProducts": "相关产品",
     "ssl": "256位SSL",
     "verifiedReviews": "已验证评论"
@@ -279,11 +278,11 @@
     "priceRange": "价格范围",
     "minRating": "最低评分",
     "andUp": "及以上",
-    "under25": "$25以下",
-    "range25to50": "$25 – $50",
-    "range50to100": "$50 – $100",
-    "range100to200": "$100 – $200",
-    "over200": "$200以上"
+    "under25": "{{amount}}以下",
+    "range25to50": "{{min}} – {{max}}",
+    "range50to100": "{{min}} – {{max}}",
+    "range100to200": "{{min}} – {{max}}",
+    "over200": "{{amount}}以上"
   },
   "search": {
     "placeholder": "搜索维生素、补充剂、护肤品...",

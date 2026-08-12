@@ -77,13 +77,21 @@ export const PAYMENT_METHODS = [
 ]
 
 export const SUPPORTED_CURRENCIES = [
-  { code: 'USD', symbol: '$', rate: 1, label: 'USD' },
-  { code: 'SGD', symbol: 'S$', rate: 1.35, label: 'SGD' },
-  { code: 'MYR', symbol: 'RM', rate: 4.65, label: 'MYR' },
-  { code: 'CNY', symbol: '¥', rate: 7.25, label: 'CNY' },
+  { code: 'SGD', name: 'Singapore Dollar' },
+  { code: 'BND', name: 'Brunei Dollar' },
+  { code: 'MYR', name: 'Malaysian Ringgit' },
+  { code: 'IDR', name: 'Indonesian Rupiah' },
+  { code: 'THB', name: 'Thai Baht' },
+  { code: 'PHP', name: 'Philippine Peso' },
+  { code: 'VND', name: 'Vietnamese Dong' },
+  { code: 'KHR', name: 'Cambodian Riel' },
+  { code: 'LAK', name: 'Lao Kip' },
+  { code: 'MMK', name: 'Myanmar Kyat' },
+  { code: 'USD', name: 'United States Dollar' },
+  { code: 'CNY', name: 'Chinese Yuan' },
 ]
 
-export const DEFAULT_CURRENCY = 'USD'
+export const DEFAULT_CURRENCY = 'SGD'
 
 export const IMAGE_SIZES = {
   thumbnail: '64px',

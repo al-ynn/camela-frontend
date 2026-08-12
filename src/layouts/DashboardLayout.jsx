@@ -54,7 +54,7 @@ const DashboardLayout = () => {
               <div>
                 <h3 className="font-semibold">Verify your email address</h3>
                 <p className="mt-1 text-sm text-amber-800/90 dark:text-amber-100/80">
-                  To protect your account and enable secure purchasing, please verify your email address before placing an order.
+                  Verify your email address as an optional account-security measure.
                 </p>
               </div>
               <div className="flex items-center gap-2">

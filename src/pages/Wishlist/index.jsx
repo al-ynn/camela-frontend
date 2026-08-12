@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
 import { useWishlist } from '../../hooks/useWishlist'
 import { useCart } from '../../hooks/useCart'
-import { formatPrice } from '../../utils/formatters'
+import { useCurrency } from '../../contexts/CurrencyContext'
 import Rating from '../../components/ui/Rating'
 import { ROUTES } from '../../constants/routes'
 import { resolveApiAssetUrl } from '../../constants/config'
 
 const Wishlist = () => {
   const { t } = useTranslation()
+  const { formatPrice } = useCurrency()
   const { items, removeFromWishlist, clearWishlist } = useWishlist()
   const { addToCart } = useCart()
 

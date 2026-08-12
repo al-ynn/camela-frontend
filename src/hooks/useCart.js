@@ -1,45 +1,48 @@
+import { useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   setCartItems,
   clearCartState,
   removeCoupon,
-  setCurrency,
   selectCartItems,
   selectCartCount,
   selectCartSubtotal,
-  selectCartTotals,
   selectCoupon,
-  selectCurrency,
-  getCurrencyRate,
 } from '../features/cart/cartSlice'
 import { commerceService } from '../services/commerceApi'
 import toast from 'react-hot-toast'
-import { selectUser } from '../features/auth/authSlice'
-import { formatPrice } from '../utils/formatters'
+import { useCurrency } from '../contexts/CurrencyContext'
+import { calculateShipping, useShippingSettings } from './useShippingSettings'
 
 export const useCart = () => {
   const dispatch = useDispatch()
   const items = useSelector(selectCartItems)
   const count = useSelector(selectCartCount)
   const subtotal = useSelector(selectCartSubtotal)
-  const totals = useSelector(selectCartTotals)
   const coupon = useSelector(selectCoupon)
-  const currency = useSelector(selectCurrency)
+  const shippingSettings = useShippingSettings()
+  const { selectedCurrency: currency, rate, formatPrice: formatCartPrice, setCurrency } = useCurrency()
   const token = useSelector((state) => state.auth.token)
-  const user = useSelector(selectUser)
+  const totals = useMemo(() => {
+    let discount = 0
+    if (coupon.type === 'percent') {
+      discount = subtotal * coupon.discount
+    } else if (coupon.type === 'fixed') {
+      discount = Math.min(coupon.discount, subtotal)
+    }
 
-  const rate = getCurrencyRate(currency)
-  const formatCartPrice = (price) => formatPrice(price * rate, currency)
+    const shipping = calculateShipping(shippingSettings, items)
+    const tax = subtotal * (Number(shippingSettings?.tax_rate) || 0) / 100
+    const total = subtotal - discount + shipping + tax
+
+    return { subtotal, discount, shipping, tax, total }
+  }, [coupon, items, shippingSettings, subtotal])
 
   const resolveCartItemId = (key) =>
     items.find((item) => String(item.cartItemId ?? item.key) === String(key))?.cartItemId ?? key
 
   const handleAddToCart = async (product, quantity = 1) => {
     if (!token) return toast.error('Please log in to add items to your cart')
-    if (!user?.email_verified_at) {
-      toast.error('Please verify your email before purchasing products.')
-      return
-    }
     const safeQuantity = Number(quantity) || 1
     if (safeQuantity <= 0) {
       toast.error('Please choose a valid quantity')
@@ -117,11 +120,12 @@ export const useCart = () => {
     count,
     subtotal,
     totals,
+    shippingSettings,
     coupon,
     currency,
     rate,
     formatCartPrice,
-    setCurrency: (code) => dispatch(setCurrency(code)),
+    setCurrency,
     addToCart: handleAddToCart,
     removeFromCart: handleRemoveFromCart,
     updateQuantity: handleUpdateQuantity,
