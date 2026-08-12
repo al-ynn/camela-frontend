@@ -4,7 +4,7 @@ export const formatPrice = (price, currency = 'SGD') => {
   return new Intl.NumberFormat('en-SG', {
     style: 'currency',
     currency,
-    currencyDisplay: 'code',
+    currencyDisplay: 'narrowSymbol',
   }).format(Number.isFinite(amount) ? amount : 0)
 }
 
