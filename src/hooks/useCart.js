@@ -33,7 +33,7 @@ export const useCart = () => {
 
     const shipping = calculateShipping(shippingSettings, items)
     const tax = subtotal * (Number(shippingSettings?.tax_rate) || 0) / 100
-    const total = subtotal - discount + shipping + tax
+    const total = subtotal - discount + (shipping ?? 0) + tax
 
     return { subtotal, discount, shipping, tax, total }
   }, [coupon, items, shippingSettings, subtotal])

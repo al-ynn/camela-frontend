@@ -99,7 +99,7 @@ const Checkout = () => {
 
           totals.subtotal +
 
-          shippingCost +
+          (shippingCost ?? 0) +
 
           taxAmount -
 
@@ -330,9 +330,7 @@ const Checkout = () => {
         )}
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('cart.shipping')}</span>
-          {shippingCost === 0
-            ? t('checkout.free')
-            : formatCartPrice(shippingCost)}
+          {shippingCost === null ? '...' : formatCartPrice(shippingCost)}
         </div>
         <div className="flex justify-between text-gray-500 dark:text-gray-400">
           <span>{t('checkout.tax')}</span>
@@ -537,7 +535,7 @@ const Checkout = () => {
                               <p className="text-sm text-gray-400">{method.description}</p>
                             </div>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                              {method.total === 0 ? t('checkout.free') : formatCartPrice(method.total)}
+                              {method.total === null ? '...' : formatCartPrice(method.total)}
                             </span>
                           </label>
                         ))}
@@ -598,7 +596,7 @@ const Checkout = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">{selectedShipping.description}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{t('checkout.estimatedDelivery')}: </p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                          {t('checkout.shippingFee')}: {selectedShipping.total === 0 ? t('checkout.free') : formatCartPrice(selectedShipping.total)}
+                          {t('checkout.shippingFee')}: {selectedShipping.total === null ? '...' : formatCartPrice(selectedShipping.total)}
                         </p>
                       </ReviewSection>
 
@@ -615,9 +613,7 @@ const Checkout = () => {
                           )}
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
                             <span>{t('cart.shipping')}</span>
-                            <span>{shippingCost === 0
-                                ? t('checkout.free')
-                                : formatCartPrice(shippingCost)}</span>
+                            <span>{shippingCost === null ? '...' : formatCartPrice(shippingCost)}</span>
                           </div>
                           <div className="flex justify-between text-gray-500 dark:text-gray-400">
                             <span>{t('checkout.tax')}</span><span>{formatCartPrice(taxAmount)}</span>

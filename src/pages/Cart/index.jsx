@@ -9,7 +9,7 @@ import { resolveApiAssetUrl } from '../../constants/config'
 
 const Cart = () => {
   const { t } = useTranslation()
-  const { items, totals, coupon, shippingSettings, formatCartPrice, removeFromCart, updateQuantity, applyCoupon, removeCoupon, clearCart } = useCart()
+  const { items, totals, formatCartPrice, coupon, removeFromCart, updateQuantity, applyCoupon, removeCoupon, clearCart } = useCart()
   const [couponInput, setCouponInput] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
 
@@ -215,7 +215,7 @@ const Cart = () => {
                 )}
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>{t('cart.shipping')}</span>
-                  <span>{totals.shipping === 0 ? t('cart.free') : formatCartPrice(totals.shipping)}</span>
+                  <span>{totals.shipping === null ? '...' : formatCartPrice(totals.shipping)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>{t('cart.tax')}</span>
@@ -227,12 +227,6 @@ const Cart = () => {
                   <span>{formatCartPrice(totals.total)}</span>
                 </div>
               </div>
-
-              {shippingSettings && totals.subtotal < Number(shippingSettings.free_shipping_threshold) && (
-                <p className="text-xs text-center text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  {t('cart.addMore')} <span className="font-semibold text-brand-600">{formatCartPrice(Number(shippingSettings.free_shipping_threshold) - totals.subtotal)}</span> {t('cart.forFreeShipping')}
-                </p>
-              )}
 
               <Link
                 to={ROUTES.CHECKOUT}

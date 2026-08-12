@@ -178,7 +178,7 @@ const CartDrawer = () => {
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Shipping</span>
-                  <span>{totals.shipping === 0 ? 'Free' : formatPrice(totals.shipping)}</span>
+                  <span>{totals.shipping === null ? '...' : formatPrice(totals.shipping)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-1">
                   <span>Total</span>
